@@ -41,8 +41,6 @@ public class AmfCallStateTest {
         normalTest();
     }
 
-    // TODO: 특정 이벤트가 발생되면 상태가 바뀌고 콜백 함수가 호출되는 방향으로 수정해야함
-
     public void callStart () {
         logger.debug("@ Call is started!");
         stateManager.fire(CALL_START_EVENT);
