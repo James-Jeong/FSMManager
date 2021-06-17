@@ -6,6 +6,6 @@ package event;
  */
 public interface StateEventCallBack {
 
-    void onEvent (String event, String fromState);
+    void onEvent (String handlerName, String event, String fromState);
 
 }

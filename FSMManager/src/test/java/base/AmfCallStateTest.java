@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.CallBack;
+import state.StateHandler;
 import state.StateManager;
 
 /**
@@ -34,81 +35,87 @@ public class AmfCallStateTest {
     private static final String EARLY_NEGO_INACTIVE_START_EVENT = "early_nego_inactive_start";
     private static final String NEGO_INACTIVE_START_EVENT = "nego_inactive_start";
 
+    private static final String CALL_STATE_NAME = "call_state";
+
     private final StateManager stateManager = StateManager.getInstance();
+    private StateHandler callStateHandler = null;
 
     @Test
     public void testStart () {
+        stateManager.addStateHandler(CALL_STATE_NAME);
+        callStateHandler = stateManager.getStateHandler(CALL_STATE_NAME);
+
         normalTest();
     }
 
     public void callStart () {
         logger.debug("@ Call is started!");
-        stateManager.fire(CALL_START_EVENT);
+        callStateHandler.fire(CALL_START_EVENT);
 
-        if (stateManager.getCallBackResult() == null) {
+        if (callStateHandler.getCallBackResult() == null) {
             logger.debug("@ Call is failed!");
-            stateManager.fire(CALL_FAIL_EVENT);
+            callStateHandler.fire(CALL_FAIL_EVENT);
         }
     }
 
     public void earlyNegoStart () {
         logger.debug("@ Early Nego is started by offer!");
-        stateManager.fire(OFFER_EARLY_NEGO_START_EVENT);
+        callStateHandler.fire(OFFER_EARLY_NEGO_START_EVENT);
     }
 
     public void earlyMediaStart () {
         logger.debug("@ Early Media is started!");
-        stateManager.fire(EARLY_MEDIA_START_EVENT);
+        callStateHandler.fire(EARLY_MEDIA_START_EVENT);
     }
 
     public void activeStart () {
         logger.debug("@ Active is started!");
-        stateManager.fire(ACTIVE_START_EVENT);
+        callStateHandler.fire(ACTIVE_START_EVENT);
     }
 
     public void earlyNegoInActiveStart () {
         logger.debug("@ InActive is started by early_nego!");
-        stateManager.fire(EARLY_NEGO_INACTIVE_START_EVENT);
+        callStateHandler.fire(EARLY_NEGO_INACTIVE_START_EVENT);
     }
 
     public void negoInActiveStart () {
         logger.debug("@ InActive is started by nego!");
-        stateManager.fire(NEGO_INACTIVE_START_EVENT);
+        callStateHandler.fire(NEGO_INACTIVE_START_EVENT);
     }
 
     public void offerNegoStart () {
         logger.debug("@ Nego is started by offer!");
-        stateManager.fire(OFFER_NEGO_START_EVENT);
+        callStateHandler.fire(OFFER_NEGO_START_EVENT);
     }
 
     public void earlyNegoNegoStart () {
         logger.debug("@ Nego is started by early_nego!");
-        stateManager.fire(EARLY_NEGO_NEGO_START_EVENT);
+        callStateHandler.fire(EARLY_NEGO_NEGO_START_EVENT);
     }
 
     public void offerHangupStart () {
         logger.debug("@ Hangup is started by offer!");
-        stateManager.fire(OFFER_STOP_EVENT);
+        callStateHandler.fire(OFFER_STOP_EVENT);
     }
 
     public void earlyNegoHangupStart () {
         logger.debug("@ Hangup is started by early_nego!");
-        stateManager.fire(EARLY_NEGO_STOP_EVENT);
+        callStateHandler.fire(EARLY_NEGO_STOP_EVENT);
     }
 
     public void activeHangupStart() {
         logger.debug("@ Hangup is started by nego!");
-        stateManager.fire(ACTIVE_STOP_EVENT);
+        callStateHandler.fire(ACTIVE_STOP_EVENT);
     }
 
     public void callStopSuccess () {
         logger.debug("@ Success to stop the call!");
-        stateManager.fire(CALL_STOP_DONE_SUCCESS_EVENT);
+        callStateHandler.fire(CALL_STOP_DONE_SUCCESS_EVENT);
     }
 
     public void callStopFail () {
         logger.debug("@ Fail to stop the call!");
-        stateManager.fire(CALL_STOP_DONE_FAIL_EVENT);
+        callStateHandler.fire(CALL_STOP_DONE_FAIL_EVENT);
     }
 
     public void normalTest () {
@@ -126,31 +133,31 @@ public class AmfCallStateTest {
 
         ////////////////////////////////////////////////////////////////////////////////
         // 2. 상태 정의
-        Assert.assertTrue(stateManager.addState(CALL_START_EVENT, CallState.INIT.name(), CallState.OFFER.name(), callBack));
+        Assert.assertTrue(callStateHandler.addState(CALL_START_EVENT, CallState.INIT.name(), CallState.OFFER.name(), callBack));
 
-        Assert.assertTrue(stateManager.addState(CALL_FAIL_EVENT, CallState.OFFER.name(), CallState.INIT.name(), callBack));
-        Assert.assertTrue(stateManager.addState(OFFER_EARLY_NEGO_START_EVENT, CallState.OFFER.name(), CallState.EARLY_NEGO_REQ.name(), callBack));
-        Assert.assertTrue(stateManager.addState(OFFER_NEGO_START_EVENT, CallState.OFFER.name(), CallState.NEGO_REQ.name(), callBack));
-        Assert.assertTrue(stateManager.addState(OFFER_STOP_EVENT, CallState.OFFER.name(), CallState.HANGUP_REQ.name(), callBack));
+        Assert.assertTrue(callStateHandler.addState(CALL_FAIL_EVENT, CallState.OFFER.name(), CallState.INIT.name(), callBack));
+        Assert.assertTrue(callStateHandler.addState(OFFER_EARLY_NEGO_START_EVENT, CallState.OFFER.name(), CallState.EARLY_NEGO_REQ.name(), callBack));
+        Assert.assertTrue(callStateHandler.addState(OFFER_NEGO_START_EVENT, CallState.OFFER.name(), CallState.NEGO_REQ.name(), callBack));
+        Assert.assertTrue(callStateHandler.addState(OFFER_STOP_EVENT, CallState.OFFER.name(), CallState.HANGUP_REQ.name(), callBack));
 
-        Assert.assertTrue(stateManager.addState(EARLY_MEDIA_START_EVENT, CallState.EARLY_NEGO_REQ.name(), CallState.EARLY_MEDIA.name(), callBack));
-        Assert.assertTrue(stateManager.addState(EARLY_NEGO_INACTIVE_START_EVENT, CallState.EARLY_NEGO_REQ.name(), CallState.INACTIVE.name(), callBack));
+        Assert.assertTrue(callStateHandler.addState(EARLY_MEDIA_START_EVENT, CallState.EARLY_NEGO_REQ.name(), CallState.EARLY_MEDIA.name(), callBack));
+        Assert.assertTrue(callStateHandler.addState(EARLY_NEGO_INACTIVE_START_EVENT, CallState.EARLY_NEGO_REQ.name(), CallState.INACTIVE.name(), callBack));
 
-        Assert.assertTrue(stateManager.addState(EARLY_NEGO_NEGO_START_EVENT, CallState.EARLY_MEDIA.name(), CallState.NEGO_REQ.name(), callBack));
-        Assert.assertTrue(stateManager.addState(EARLY_NEGO_STOP_EVENT, CallState.EARLY_MEDIA.name(), CallState.HANGUP_REQ.name(), callBack));
+        Assert.assertTrue(callStateHandler.addState(EARLY_NEGO_NEGO_START_EVENT, CallState.EARLY_MEDIA.name(), CallState.NEGO_REQ.name(), callBack));
+        Assert.assertTrue(callStateHandler.addState(EARLY_NEGO_STOP_EVENT, CallState.EARLY_MEDIA.name(), CallState.HANGUP_REQ.name(), callBack));
 
-        Assert.assertTrue(stateManager.addState(ACTIVE_START_EVENT, CallState.NEGO_REQ.name(), CallState.ACTIVE.name(), callBack));
-        Assert.assertTrue(stateManager.addState(NEGO_INACTIVE_START_EVENT, CallState.NEGO_REQ.name(), CallState.INACTIVE.name(), callBack));
-        Assert.assertTrue(stateManager.addState(NEGO_STOP_EVENT, CallState.NEGO_REQ.name(), CallState.HANGUP_REQ.name(), callBack));
+        Assert.assertTrue(callStateHandler.addState(ACTIVE_START_EVENT, CallState.NEGO_REQ.name(), CallState.ACTIVE.name(), callBack));
+        Assert.assertTrue(callStateHandler.addState(NEGO_INACTIVE_START_EVENT, CallState.NEGO_REQ.name(), CallState.INACTIVE.name(), callBack));
+        Assert.assertTrue(callStateHandler.addState(NEGO_STOP_EVENT, CallState.NEGO_REQ.name(), CallState.HANGUP_REQ.name(), callBack));
 
-        Assert.assertTrue(stateManager.addState(ACTIVE_STOP_EVENT, CallState.ACTIVE.name(), CallState.HANGUP_REQ.name(), callBack));
+        Assert.assertTrue(callStateHandler.addState(ACTIVE_STOP_EVENT, CallState.ACTIVE.name(), CallState.HANGUP_REQ.name(), callBack));
 
-        Assert.assertTrue(stateManager.addState(INACTIVE_STOP_EVENT, CallState.INACTIVE.name(), CallState.HANGUP_REQ.name(), callBack));
+        Assert.assertTrue(callStateHandler.addState(INACTIVE_STOP_EVENT, CallState.INACTIVE.name(), CallState.HANGUP_REQ.name(), callBack));
 
-        Assert.assertTrue(stateManager.addState(CALL_STOP_DONE_SUCCESS_EVENT, CallState.HANGUP_REQ.name(), CallState.INIT.name(), callBack));
-        Assert.assertTrue(stateManager.addState(CALL_STOP_DONE_FAIL_EVENT, CallState.HANGUP_REQ.name(), CallState.IDLE.name(), callBack));
+        Assert.assertTrue(callStateHandler.addState(CALL_STOP_DONE_SUCCESS_EVENT, CallState.HANGUP_REQ.name(), CallState.INIT.name(), callBack));
+        Assert.assertTrue(callStateHandler.addState(CALL_STOP_DONE_FAIL_EVENT, CallState.HANGUP_REQ.name(), CallState.IDLE.name(), callBack));
 
-        Assert.assertNotNull(stateManager.getStateList());
+        Assert.assertNotNull(callStateHandler.getStateList());
         ////////////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -159,73 +166,73 @@ public class AmfCallStateTest {
         /*Assert.assertNull(stateManager.nextState(CallState.INACTIVE.name())); // 비정상 천이 > 아직 처음 상태가 정의되지 않음
         Assert.assertNull(stateManager.getCallBackResult());*/
 
-        stateManager.setCurState(CallState.INIT.name());
+        callStateHandler.setCurState(CallState.INIT.name());
 
         callStart();
-        Assert.assertEquals(stateManager.getCallBackResult(), CallState.OFFER.name());
+        Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.OFFER.name());
 
         earlyNegoStart();
-        Assert.assertEquals(stateManager.getCallBackResult(), CallState.EARLY_NEGO_REQ.name());
+        Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.EARLY_NEGO_REQ.name());
 
         earlyMediaStart();
-        Assert.assertEquals(stateManager.getCallBackResult(), CallState.EARLY_MEDIA.name());
+        Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.EARLY_MEDIA.name());
 
         earlyNegoNegoStart();
-        Assert.assertEquals(stateManager.getCallBackResult(), CallState.NEGO_REQ.name());
+        Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.NEGO_REQ.name());
 
         activeStart();
-        Assert.assertEquals(stateManager.getCallBackResult(), CallState.ACTIVE.name());
+        Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.ACTIVE.name());
 
         activeHangupStart();
-        Assert.assertEquals(stateManager.getCallBackResult(), CallState.HANGUP_REQ.name());
+        Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.HANGUP_REQ.name());
 
         callStopSuccess();
-        Assert.assertEquals(stateManager.getCallBackResult(), CallState.INIT.name());
+        Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.INIT.name());
 
 
-/*        Assert.assertNotNull(stateManager.nextState(CallState.OFFER.name()));
-        Assert.assertEquals(stateManager.getCallBackResult(), CallState.OFFER.name());
+/*        Assert.assertNotNull(callStateHandler.nextState(CallState.OFFER.name()));
+        Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.OFFER.name());
 
-        Assert.assertNull(stateManager.nextState(CallState.INACTIVE.name())); // 비정상 천이 > 정의되지 않은 상태로 천이
-        Assert.assertNull(stateManager.getCallBackResult());
+        Assert.assertNull(callStateHandler.nextState(CallState.INACTIVE.name())); // 비정상 천이 > 정의되지 않은 상태로 천이
+        Assert.assertNull(callStateHandler.getCallBackResult());
 
-        Assert.assertNotNull(stateManager.nextState(CallState.EARLY_NEGO_REQ.name()));
-        Assert.assertEquals(stateManager.getCallBackResult(), CallState.EARLY_NEGO_REQ.name());
+        Assert.assertNotNull(callStateHandler.nextState(CallState.EARLY_NEGO_REQ.name()));
+        Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.EARLY_NEGO_REQ.name());
 
-        Assert.assertNotNull(stateManager.nextState(CallState.EARLY_MEDIA.name()));
-        Assert.assertEquals(stateManager.getCallBackResult(), CallState.EARLY_MEDIA.name());
+        Assert.assertNotNull(callStateHandler.nextState(CallState.EARLY_MEDIA.name()));
+        Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.EARLY_MEDIA.name());
 
-        Assert.assertNotNull(stateManager.nextState(CallState.NEGO_REQ.name()));
-        Assert.assertEquals(stateManager.getCallBackResult(), CallState.NEGO_REQ.name());
+        Assert.assertNotNull(callStateHandler.nextState(CallState.NEGO_REQ.name()));
+        Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.NEGO_REQ.name());
 
-        Assert.assertNotNull(stateManager.nextState(CallState.ACTIVE.name()));
-        Assert.assertEquals(stateManager.getCallBackResult(), CallState.ACTIVE.name());
+        Assert.assertNotNull(callStateHandler.nextState(CallState.ACTIVE.name()));
+        Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.ACTIVE.name());
 
-        Assert.assertNull(stateManager.nextState(CallState.ACTIVE.name())); // 비정상 천이 > 동일 상태로 천이
-        Assert.assertNull(stateManager.getCallBackResult());
+        Assert.assertNull(callStateHandler.nextState(CallState.ACTIVE.name())); // 비정상 천이 > 동일 상태로 천이
+        Assert.assertNull(callStateHandler.getCallBackResult());
 
-        Assert.assertNotNull(stateManager.nextState(CallState.HANGUP_REQ.name()));
-        Assert.assertEquals(stateManager.getCallBackResult(), CallState.HANGUP_REQ.name());
+        Assert.assertNotNull(callStateHandler.nextState(CallState.HANGUP_REQ.name()));
+        Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.HANGUP_REQ.name());
 
-        Assert.assertNotNull(stateManager.nextState(CallState.INIT.name()));
-        Assert.assertEquals(stateManager.getCallBackResult(), CallState.INIT.name());*/
+        Assert.assertNotNull(callStateHandler.nextState(CallState.INIT.name()));
+        Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.INIT.name());*/
         ////////////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////////////
         // 4. 상태 삭제
 
-/*        Assert.assertTrue(stateManager.removeFromState(CallState.HANGUP_REQ.name()));
-        Assert.assertFalse(stateManager.removeFromState(CallState.HANGUP_REQ.name()));
+/*        Assert.assertTrue(callStateHandler.removeFromState(CallState.HANGUP_REQ.name()));
+        Assert.assertFalse(callStateHandler.removeFromState(CallState.HANGUP_REQ.name()));
 
-        Assert.assertTrue(stateManager.removeToStateByFromState(CallState.EARLY_MEDIA.name(), CallState.NEGO_REQ.name()));
-        Assert.assertFalse(stateManager.removeToStateByFromState(CallState.EARLY_MEDIA.name(), CallState.NEGO_REQ.name()));
+        Assert.assertTrue(callStateHandler.removeToStateByFromState(CallState.EARLY_MEDIA.name(), CallState.NEGO_REQ.name()));
+        Assert.assertFalse(callStateHandler.removeToStateByFromState(CallState.EARLY_MEDIA.name(), CallState.NEGO_REQ.name()));
 
-        Assert.assertNotNull(stateManager.nextState(CallState.OFFER.name()));
-        Assert.assertNotNull(stateManager.nextState(CallState.EARLY_NEGO_REQ.name()));
-        Assert.assertNotNull(stateManager.nextState(CallState.EARLY_MEDIA.name()));
-        Assert.assertNull(stateManager.nextState(CallState.NEGO_REQ.name()));
+        Assert.assertNotNull(callStateHandler.nextState(CallState.OFFER.name()));
+        Assert.assertNotNull(callStateHandler.nextState(CallState.EARLY_NEGO_REQ.name()));
+        Assert.assertNotNull(callStateHandler.nextState(CallState.EARLY_MEDIA.name()));
+        Assert.assertNull(callStateHandler.nextState(CallState.NEGO_REQ.name()));
 
-        Assert.assertNull(stateManager.nextState(CallState.HANGUP_REQ.name()));*/
+        Assert.assertNull(callStateHandler.nextState(CallState.HANGUP_REQ.name()));*/
 
         ////////////////////////////////////////////////////////////////////////////////
     }

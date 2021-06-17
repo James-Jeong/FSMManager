@@ -5,8 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * @class public class EventManager
- * @brief EventManager class
+ * @class public class StateEventManager
+ * @brief StateEventManager class
  */
 public class StateEventManager {
 
@@ -16,7 +16,7 @@ public class StateEventManager {
     ////////////////////////////////////////////////////////////////////////////////
 
     public StateEventManager() {
-        // Nothing
+        setListener(new StateEventListener());
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -41,9 +41,9 @@ public class StateEventManager {
         return eventMap.get(event);
     }
 
-    public synchronized void callEvent(String event, String fromState) {
+    public synchronized void callEvent(String handlerName, String event, String fromState) {
         if (listener == null) { return; }
-        listener.onEvent(event, fromState);
+        listener.onEvent(handlerName, event, fromState);
     }
 
 }

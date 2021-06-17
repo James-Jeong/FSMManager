@@ -1,9 +1,6 @@
 package state;
 
-import event.StateEventManager;
-import event.StateEventListener;
-
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -12,18 +9,14 @@ import java.util.Map;
  */
 public class StateManager {
 
-    private static StateManager stateManager;
+    private final Map<String, StateHandler> stateHandlerMap = new HashMap<>();
 
-    private final StateContainer stateContainer;
-    private final StateEventManager eventHandler;
+    private static StateManager stateManager;
 
     ////////////////////////////////////////////////////////////////////////////////
 
     public StateManager() {
-        stateContainer = new StateContainer();
-        eventHandler = new StateEventManager();
-
-        eventHandler.setListener(new StateEventListener());
+        // Nothing
     }
 
     public static StateManager getInstance() {
@@ -36,45 +29,19 @@ public class StateManager {
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    public boolean addState (String event, String fromState, String toState, CallBack callBack) {
-        eventHandler.addEvent(event, fromState, toState);
-        return stateContainer.addToStateByFromState(fromState, toState, callBack);
+    public void addStateHandler (String name) {
+        if (stateHandlerMap.get(name) != null) { return; }
+        stateHandlerMap.putIfAbsent(name, new StateHandler(name));
     }
 
-    public boolean removeFromState (String fromState) {
-        return  stateContainer.removeFromState(fromState);
+    public void removeStateHandler (String name) {
+        if (stateHandlerMap.get(name) == null) { return; }
+        stateHandlerMap.remove(name);
     }
 
-    public boolean removeToStateByFromState (String fromState, String toState) {
-        return stateContainer.removeToStateByFromState(fromState, toState);
-    }
-
-    public void setCurState (String state) {
-        stateContainer.setCurState(state);
-    }
-
-    public String getCurState () {
-        return stateContainer.getCurState();
-    }
-
-    public String nextState (String toState) {
-        return stateContainer.nextState(toState);
-    }
-
-    public List<String> getStateList () {
-        return stateContainer.getAllStates();
-    }
-
-    public Object getCallBackResult () {
-        return stateContainer.getCallBackResult();
-    }
-
-    public void fire (String event) {
-        eventHandler.callEvent(event, getCurState());
-    }
-
-    public Map<String, String> findEvent (String event) {
-        return eventHandler.getEventKeyMap(event);
+    public StateHandler getStateHandler (String name) {
+        if (stateHandlerMap.get(name) == null) { return null; }
+        return stateHandlerMap.get(name);
     }
 
 }

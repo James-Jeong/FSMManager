@@ -1,5 +1,6 @@
 package event;
 
+import state.StateHandler;
 import state.StateManager;
 
 import java.util.Map;
@@ -15,12 +16,17 @@ public class StateEventListener implements StateEventCallBack {
     }
 
     @Override
-    public void onEvent(String event, String fromState) {
+    public void onEvent(String handlerName, String event, String fromState) {
+        if (handlerName == null) { return; }
+
         StateManager stateManager = StateManager.getInstance();
-        Map<String, String> stateMap = stateManager.findEvent(event);
+        StateHandler stateHandler = stateManager.getStateHandler(handlerName);
+        if (stateHandler == null) { return; }
+
+        Map<String, String> stateMap = stateHandler.findEvent(event);
         if (stateMap != null) {
             String toState = stateMap.get(fromState);
-            stateManager.nextState(toState);
+            stateHandler.nextState(toState);
         }
     }
 }
