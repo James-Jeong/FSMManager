@@ -6,8 +6,8 @@ import state.CallBack;
 import state.StateManager;
 
 /**
- * @class
- * @brief
+ * @class public class AmfCallStateTest
+ * @brief Amf Call State Test class
  */
 public class AmfCallStateTest {
 
