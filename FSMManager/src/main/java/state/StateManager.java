@@ -1,15 +1,10 @@
 package state;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * @class public class StateManager
  * @brief StateManager class
  */
 public class StateManager {
-
-    private static final Logger logger = LoggerFactory.getLogger(StateManager.class);
 
     private static StateManager stateManager;
 

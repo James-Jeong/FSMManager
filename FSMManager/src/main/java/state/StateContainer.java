@@ -71,6 +71,8 @@ public class StateContainer {
         if (nextStateCallBack == null) { return null; }
 
         nextStateCallBack.callBackFunc(nextState);
+
+        logger.debug("State is changed. ([{}] > [{}])", curState, nextState);
         curState = nextState;
         return nextState;
     }
