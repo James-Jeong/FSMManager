@@ -91,6 +91,24 @@ public class TestMain {
         Assert.assertNotNull(stateManager.nextState(CallState.INIT.name()));
         Assert.assertEquals(stateManager.getCallBackResult(), CallState.INIT.name());
         ////////////////////////////////////////////////////////////////////////////////
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // 4. 상태 삭제
+
+        Assert.assertTrue(stateManager.removeFromState(CallState.HANGUP_REQ.name()));
+        Assert.assertFalse(stateManager.removeFromState(CallState.HANGUP_REQ.name()));
+
+        Assert.assertTrue(stateManager.removeToStateByFromState(CallState.EARLY_MEDIA.name(), CallState.NEGO_REQ.name()));
+        Assert.assertFalse(stateManager.removeToStateByFromState(CallState.EARLY_MEDIA.name(), CallState.NEGO_REQ.name()));
+
+        Assert.assertNotNull(stateManager.nextState(CallState.OFFER.name()));
+        Assert.assertNotNull(stateManager.nextState(CallState.EARLY_NEGO_REQ.name()));
+        Assert.assertNotNull(stateManager.nextState(CallState.EARLY_MEDIA.name()));
+        Assert.assertNull(stateManager.nextState(CallState.NEGO_REQ.name()));
+
+        Assert.assertNull(stateManager.nextState(CallState.HANGUP_REQ.name()));
+
+        ////////////////////////////////////////////////////////////////////////////////
     }
 
 }

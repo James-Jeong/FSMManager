@@ -25,11 +25,15 @@ public class StateManager {
     }
 
     public boolean addState (String fromState, String toState, CallBack callBack) {
-        return stateContainer.addCallBackFromMapByState(fromState, toState, callBack);
+        return stateContainer.addToStateByFromState(fromState, toState, callBack);
     }
 
-    public boolean removeState (String state) {
-        return  stateContainer.removeCallBackFromMapByState(state);
+    public boolean removeFromState (String fromState) {
+        return  stateContainer.removeFromState(fromState);
+    }
+
+    public boolean removeToStateByFromState (String fromState, String toState) {
+        return stateContainer.removeToStateByFromState(fromState, toState);
     }
 
     public void setCurState (String state) {
@@ -40,8 +44,8 @@ public class StateManager {
         return stateContainer.getCurState();
     }
 
-    public String nextState (String state) {
-        return stateContainer.nextState(state);
+    public String nextState (String toState) {
+        return stateContainer.nextState(toState);
     }
 
     public List<String> getStateList () {
