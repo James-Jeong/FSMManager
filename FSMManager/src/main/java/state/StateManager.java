@@ -1,6 +1,10 @@
 package state;
 
+import event.StateEventManager;
+import event.StateEventListener;
+
 import java.util.List;
+import java.util.Map;
 
 /**
  * @class public class StateManager
@@ -11,9 +15,15 @@ public class StateManager {
     private static StateManager stateManager;
 
     private final StateContainer stateContainer;
+    private final StateEventManager eventHandler;
+
+    ////////////////////////////////////////////////////////////////////////////////
 
     public StateManager() {
         stateContainer = new StateContainer();
+        eventHandler = new StateEventManager();
+
+        eventHandler.setListener(new StateEventListener());
     }
 
     public static StateManager getInstance() {
@@ -24,7 +34,10 @@ public class StateManager {
         return stateManager;
     }
 
-    public boolean addState (String fromState, String toState, CallBack callBack) {
+    ////////////////////////////////////////////////////////////////////////////////
+
+    public boolean addState (String event, String fromState, String toState, CallBack callBack) {
+        eventHandler.addEvent(event, fromState, toState);
         return stateContainer.addToStateByFromState(fromState, toState, callBack);
     }
 
@@ -54,6 +67,14 @@ public class StateManager {
 
     public Object getCallBackResult () {
         return stateContainer.getCallBackResult();
+    }
+
+    public void fire (String event) {
+        eventHandler.callEvent(event, getCurState());
+    }
+
+    public Map<String, String> findEvent (String event) {
+        return eventHandler.getEventKeyMap(event);
     }
 
 }

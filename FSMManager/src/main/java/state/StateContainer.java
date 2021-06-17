@@ -18,9 +18,13 @@ public class StateContainer {
     private String curState = null;
     private Object callBackResult = null;
 
+    ////////////////////////////////////////////////////////////////////////////////
+
     public StateContainer() {
         // Nothing
     }
+
+    ////////////////////////////////////////////////////////////////////////////////
 
     /**
      * @fn public boolean addToStateByFromState(String fromState, String toState, CallBack callBack)
@@ -130,15 +134,6 @@ public class StateContainer {
     public CallBack getCallBackByFromState(String fromState, String toState) {
         if (getToStateByFromState(fromState) == null) { return null; }
         return getToStateByFromState(fromState).get(toState);
-    }
-
-    /**
-     * @fn public int getSizeOfStateMap ()
-     * @brief State Map 의 전체 크기를 반환하는 함수
-     * @return Map 전체 크기를 반환
-     */
-    public int getSizeOfStateMap () {
-        return stateMap.size();
     }
 
     public String getCurState() {
