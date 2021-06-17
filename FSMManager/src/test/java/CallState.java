@@ -1,5 +1,4 @@
 public enum CallState {
-    NONE,
     INIT,
     OFFER,
     EARLY_NEGO_REQ, NEGO_REQ,

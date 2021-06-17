@@ -1,5 +1,7 @@
 package state;
 
+import java.util.List;
+
 /**
  * @class public class StateManager
  * @brief StateManager class
@@ -22,8 +24,8 @@ public class StateManager {
         return stateManager;
     }
 
-    public boolean addState (String state, CallBack callBack) {
-        return stateContainer.addCallBackFromMapByState(state, callBack);
+    public boolean addState (String fromState, String toState, CallBack callBack) {
+        return stateContainer.addCallBackFromMapByState(fromState, toState, callBack);
     }
 
     public boolean removeState (String state) {
@@ -40,6 +42,14 @@ public class StateManager {
 
     public String nextState (String state) {
         return stateContainer.nextState(state);
+    }
+
+    public List<String> getStateList () {
+        return stateContainer.getAllStates();
+    }
+
+    public Object getCallBackResult () {
+        return stateContainer.getCallBackResult();
     }
 
 }

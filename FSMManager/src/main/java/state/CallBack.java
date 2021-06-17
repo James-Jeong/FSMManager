@@ -6,6 +6,6 @@ package state;
  */
 public interface CallBack {
 
-    void callBackFunc (Object ...object);
+    Object callBackFunc (Object ...object);
 
 }
