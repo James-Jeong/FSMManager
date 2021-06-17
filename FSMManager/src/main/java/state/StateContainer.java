@@ -108,6 +108,15 @@ public class StateContainer {
         this.curState = curState;
     }
 
+    public Object getCallBackResult() {
+        return callBackResult;
+    }
+
+    public List<String> getAllStates () {
+        if (stateMap.isEmpty()) { return null; }
+        return new ArrayList<>(stateMap.keySet());
+    }
+
     public String nextState (String nextState) {
         if (curState == null) {
             logger.warn("Fail to transit. Current state is null. (curState=null, nextState={})", nextState);
@@ -136,15 +145,6 @@ public class StateContainer {
         logger.debug("State is changed. ([{}] > [{}])", curState, nextState);
         curState = nextState;
         return nextState;
-    }
-
-    public Object getCallBackResult() {
-        return callBackResult;
-    }
-
-    public List<String> getAllStates () {
-        if (stateMap.isEmpty()) { return null; }
-        return new ArrayList<>(stateMap.keySet());
     }
 
 }
