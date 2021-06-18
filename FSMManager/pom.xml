@@ -20,6 +20,12 @@
     <dependencies>
 
         <dependency>
+            <groupId>org.squirrelframework</groupId>
+            <artifactId>squirrel-foundation</artifactId>
+            <version>0.3.8</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.ini4j</groupId>
             <artifactId>ini4j</artifactId>
             <version>0.5.4</version>

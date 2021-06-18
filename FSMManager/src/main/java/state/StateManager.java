@@ -1,5 +1,10 @@
 package state;
 
+import org.squirrelframework.foundation.fsm.StateMachineBuilder;
+import org.squirrelframework.foundation.fsm.StateMachineBuilderFactory;
+import state.base.AbstractFsm;
+import state.module.StateHandler;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,6 +13,8 @@ import java.util.Map;
  * @brief StateManager class
  */
 public class StateManager {
+
+    private final Map<String, StateMachineBuilder<?, ?, ?, ?>> fsmMap = new HashMap<>();
 
     // StateHandler Map
     private final Map<String, StateHandler> stateHandlerMap = new HashMap<>();
@@ -36,6 +43,34 @@ public class StateManager {
         }
 
         return stateManager;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+
+    public synchronized void addFsm (String name,
+                                     AbstractFsm abstractFsm,
+                                     Object abstractState,
+                                     Object abstractEvent,
+                                     Object transitionContext,
+                                     Object ...extraConstParamTypes) {
+        if (fsmMap.get(name) != null) { return; }
+        fsmMap.putIfAbsent(name, StateMachineBuilderFactory.create(
+                abstractFsm.getClass(),
+                abstractState.getClass(),
+                abstractEvent.getClass(),
+                transitionContext.getClass(),
+                extraConstParamTypes.getClass()
+            )
+        );
+    }
+
+    public synchronized void removeFsm (String name) {
+        if (fsmMap.get(name) == null) { return; }
+        fsmMap.remove(name);
+    }
+
+    public StateMachineBuilder<?, ?, ?, ?> getFsm (String name) {
+        return fsmMap.get(name);
     }
 
     ////////////////////////////////////////////////////////////////////////////////
