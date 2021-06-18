@@ -9,12 +9,12 @@ import state.StateHandler;
 import state.StateManager;
 
 /**
- * @class public class AmfCallStateTest
- * @brief Amf Call State Test class
+ * @class
+ * @brief
  */
-public class AmfCallStateTest {
+public class AmfCallAndMediaStateTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(AmfCallStateTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(AmfCallAndMediaStateTest.class);
 
     private static final String CALL_START_EVENT = "call_start";
     private static final String CALL_FAIL_EVENT = "call_fail";
@@ -35,11 +35,21 @@ public class AmfCallStateTest {
     private static final String EARLY_NEGO_INACTIVE_START_EVENT = "early_nego_inactive_start";
     private static final String NEGO_INACTIVE_START_EVENT = "nego_inactive_start";
 
+    private static final String MEDIA_START_EVENT = "media_start_success";
+    private static final String MEDIA_STOP_EVENT = "media_stop_success";
+    private static final String MEDIA_CREATE_SUCCESS_EVENT = "media_create_success";
+    private static final String MEDIA_CREATE_FAIL_EVENT = "media_create_fail";
+    private static final String MEDIA_DELETE_SUCCESS_EVENT = "media_delete_success";
+    private static final String MEDIA_DELETE_FAIL_EVENT = "media_delete_fail";
+
     ////////////////////////////////////////////////////////////////////////////////
 
     private static final String CALL_STATE_NAME = "call_state";
     private final StateManager stateManager = StateManager.getInstance();
     private StateHandler callStateHandler = null;
+
+    private static final String MEDIA_STATE_NAME = "media_state";
+    private StateHandler mediaStateHandler = null;
 
     ////////////////////////////////////////////////////////////////////////////////
 
@@ -48,9 +58,13 @@ public class AmfCallStateTest {
         stateManager.addStateHandler(CALL_STATE_NAME);
         callStateHandler = stateManager.getStateHandler(CALL_STATE_NAME);
 
+        stateManager.addStateHandler(MEDIA_STATE_NAME);
+        mediaStateHandler = stateManager.getStateHandler(MEDIA_STATE_NAME);
+
         normalTest();
 
         stateManager.removeStateHandler(CALL_STATE_NAME);
+        stateManager.removeStateHandler(MEDIA_STATE_NAME);
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -68,11 +82,13 @@ public class AmfCallStateTest {
     public void earlyNegoStart () {
         logger.debug("@ Early Nego is started by offer!");
         callStateHandler.fire(OFFER_EARLY_NEGO_START_EVENT);
+        mediaStart();
     }
 
     public void earlyMediaStart () {
         logger.debug("@ Early Media is started!");
         callStateHandler.fire(EARLY_MEDIA_START_EVENT);
+        mediaCreateSuccess();
     }
 
     public void activeStart () {
@@ -103,26 +119,60 @@ public class AmfCallStateTest {
     public void offerHangupStart () {
         logger.debug("@ Hangup is started by offer!");
         callStateHandler.fire(OFFER_STOP_EVENT);
+        mediaStop();
     }
 
     public void earlyNegoHangupStart () {
         logger.debug("@ Hangup is started by early_nego!");
         callStateHandler.fire(EARLY_NEGO_STOP_EVENT);
+        mediaStop();
     }
 
     public void activeHangupStart() {
         logger.debug("@ Hangup is started by nego!");
         callStateHandler.fire(ACTIVE_STOP_EVENT);
+        mediaStop();
     }
 
     public void callStopSuccess () {
         logger.debug("@ Success to stop the call!");
         callStateHandler.fire(CALL_STOP_DONE_SUCCESS_EVENT);
+        mediaDeleteSuccess();
     }
 
     public void callStopFail () {
         logger.debug("@ Fail to stop the call!");
         callStateHandler.fire(CALL_STOP_DONE_FAIL_EVENT);
+    }
+
+    public void mediaStart () {
+        logger.debug("@ Media is started!");
+        mediaStateHandler.fire(MEDIA_START_EVENT);
+    }
+
+    public void mediaStop () {
+        logger.debug("@ Media is stopped!");
+        mediaStateHandler.fire(MEDIA_STOP_EVENT);
+    }
+
+    public void mediaCreateSuccess () {
+        logger.debug("@ Success to create media!");
+        mediaStateHandler.fire(MEDIA_CREATE_SUCCESS_EVENT);
+    }
+
+    public void mediaCreateFail () {
+        logger.debug("@ Fail to create media!");
+        mediaStateHandler.fire(MEDIA_CREATE_FAIL_EVENT);
+    }
+
+    public void mediaDeleteSuccess () {
+        logger.debug("@ Success to delete media!");
+        mediaStateHandler.fire(MEDIA_DELETE_SUCCESS_EVENT);
+    }
+
+    public void mediaDeleteFail () {
+        logger.debug("@ Fail to delete media!");
+        mediaStateHandler.fire(MEDIA_DELETE_FAIL_EVENT);
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -166,25 +216,33 @@ public class AmfCallStateTest {
         Assert.assertTrue(callStateHandler.addState(CALL_STOP_DONE_SUCCESS_EVENT, CallState.HANGUP_REQ.name(), CallState.INIT.name(), callBack));
         Assert.assertTrue(callStateHandler.addState(CALL_STOP_DONE_FAIL_EVENT, CallState.HANGUP_REQ.name(), CallState.IDLE.name(), callBack));
 
-        Assert.assertNotNull(callStateHandler.getStateList());
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_START_EVENT, MediaState.IDLE_STATE.name(), MediaState.ACTIVE_REQUEST.name(), callBack));
+
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_CREATE_SUCCESS_EVENT, MediaState.ACTIVE_REQUEST.name(), MediaState.ACTIVE_STATE.name(), callBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_CREATE_FAIL_EVENT, MediaState.ACTIVE_REQUEST.name(), MediaState.IDLE_STATE.name(), callBack));
+
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_STOP_EVENT, MediaState.ACTIVE_STATE.name(), MediaState.IDLE_REQUEST.name(), callBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_SUCCESS_EVENT, MediaState.IDLE_REQUEST.name(), MediaState.IDLE_STATE.name(), callBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_FAIL_EVENT, MediaState.IDLE_REQUEST.name(), MediaState.ACTIVE_STATE.name(), callBack));
+
+        Assert.assertNotNull(mediaStateHandler.getStateList());
         ////////////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////////////
         // 3. 상태 천이
-        callStart();
-        /*Assert.assertNull(stateManager.nextState(CallState.INACTIVE.name())); // 비정상 천이 > 아직 처음 상태가 정의되지 않음
-        Assert.assertNull(stateManager.getCallBackResult());*/
-
         callStateHandler.setCurState(CallState.INIT.name());
+        mediaStateHandler.setCurState(MediaState.IDLE_STATE.name());
 
         callStart();
         Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.OFFER.name());
 
         earlyNegoStart();
         Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.EARLY_NEGO_REQ.name());
+        Assert.assertEquals(mediaStateHandler.getCallBackResult(), MediaState.ACTIVE_REQUEST.name());
 
         earlyMediaStart();
         Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.EARLY_MEDIA.name());
+        Assert.assertEquals(mediaStateHandler.getCallBackResult(), MediaState.ACTIVE_STATE.name());
 
         earlyNegoNegoStart();
         Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.NEGO_REQ.name());
@@ -194,56 +252,11 @@ public class AmfCallStateTest {
 
         activeHangupStart();
         Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.HANGUP_REQ.name());
+        Assert.assertEquals(mediaStateHandler.getCallBackResult(), MediaState.IDLE_REQUEST.name());
 
         callStopSuccess();
         Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.INIT.name());
-
-
-/*        Assert.assertNotNull(callStateHandler.nextState(CallState.OFFER.name()));
-        Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.OFFER.name());
-
-        Assert.assertNull(callStateHandler.nextState(CallState.INACTIVE.name())); // 비정상 천이 > 정의되지 않은 상태로 천이
-        Assert.assertNull(callStateHandler.getCallBackResult());
-
-        Assert.assertNotNull(callStateHandler.nextState(CallState.EARLY_NEGO_REQ.name()));
-        Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.EARLY_NEGO_REQ.name());
-
-        Assert.assertNotNull(callStateHandler.nextState(CallState.EARLY_MEDIA.name()));
-        Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.EARLY_MEDIA.name());
-
-        Assert.assertNotNull(callStateHandler.nextState(CallState.NEGO_REQ.name()));
-        Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.NEGO_REQ.name());
-
-        Assert.assertNotNull(callStateHandler.nextState(CallState.ACTIVE.name()));
-        Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.ACTIVE.name());
-
-        Assert.assertNull(callStateHandler.nextState(CallState.ACTIVE.name())); // 비정상 천이 > 동일 상태로 천이
-        Assert.assertNull(callStateHandler.getCallBackResult());
-
-        Assert.assertNotNull(callStateHandler.nextState(CallState.HANGUP_REQ.name()));
-        Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.HANGUP_REQ.name());
-
-        Assert.assertNotNull(callStateHandler.nextState(CallState.INIT.name()));
-        Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.INIT.name());*/
-        ////////////////////////////////////////////////////////////////////////////////
-
-        ////////////////////////////////////////////////////////////////////////////////
-        // 4. 상태 삭제
-
-/*        Assert.assertTrue(callStateHandler.removeFromState(CallState.HANGUP_REQ.name()));
-        Assert.assertFalse(callStateHandler.removeFromState(CallState.HANGUP_REQ.name()));
-
-        Assert.assertTrue(callStateHandler.removeToStateByFromState(CallState.EARLY_MEDIA.name(), CallState.NEGO_REQ.name()));
-        Assert.assertFalse(callStateHandler.removeToStateByFromState(CallState.EARLY_MEDIA.name(), CallState.NEGO_REQ.name()));
-
-        Assert.assertNotNull(callStateHandler.nextState(CallState.OFFER.name()));
-        Assert.assertNotNull(callStateHandler.nextState(CallState.EARLY_NEGO_REQ.name()));
-        Assert.assertNotNull(callStateHandler.nextState(CallState.EARLY_MEDIA.name()));
-        Assert.assertNull(callStateHandler.nextState(CallState.NEGO_REQ.name()));
-
-        Assert.assertNull(callStateHandler.nextState(CallState.HANGUP_REQ.name()));*/
-
+        Assert.assertEquals(mediaStateHandler.getCallBackResult(), MediaState.IDLE_STATE.name());
         ////////////////////////////////////////////////////////////////////////////////
     }
-
 }

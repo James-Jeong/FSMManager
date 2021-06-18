@@ -13,15 +13,25 @@ public class StateContainer {
 
     private static final Logger logger = LoggerFactory.getLogger(StateContainer.class);
 
+    // State Map
     private final Map<String, Map<String, CallBack>> stateMap = new LinkedHashMap<>();
 
+    // 현재 State 이름
     private String curState = null;
+    // CallBack 결과값
     private Object callBackResult = null;
+    // StateContainer 이름
+    private final String name;
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    public StateContainer() {
-        // Nothing
+    /**
+     * @fn public StateContainer()
+     * @brief StateContainer 생성자 함수
+     * @param name StateContainer 이름
+     */
+    public StateContainer(String name) {
+        this.name = name;
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -48,13 +58,13 @@ public class StateContainer {
 
             boolean result = stateMap.putIfAbsent(fromState, toStateMap) == null;
             if (result) {
-                logger.debug("Success to add state. (fromState={}, toState={})", fromState, toState);
+                logger.debug("({}) Success to add state. (fromState={}, toState={})", name, fromState, toState);
             } else {
                 result = toStateMap.putIfAbsent(toState, callBack) == null;
                 if (result) {
-                    logger.debug("Success to add state. (fromState={}, toState={})", fromState, toState);
+                    logger.debug("({}) Success to add state. (fromState={}, toState={})", name, fromState, toState);
                 } else {
-                    logger.debug("Fail to add state. (fromState={}, toState={})", fromState, toState);
+                    logger.debug("({}) Fail to add state. (fromState={}, toState={})", name, fromState, toState);
                 }
             }
             return result;
@@ -82,9 +92,9 @@ public class StateContainer {
                     }
                 }
 
-                logger.debug("Success to remove the from state. (fromState={})", fromState);
+                logger.debug("({}) Success to remove the from state. (fromState={})", name, fromState);
             } else {
-                logger.debug("Fail to remove the from state. (fromState={})", fromState);
+                logger.debug("({}) Fail to remove the from state. (fromState={})", name, fromState);
             }
             return result;
         }
@@ -106,9 +116,9 @@ public class StateContainer {
 
             boolean result = getToStateByFromState(fromState).remove(toState) != null;
             if (result) {
-                logger.debug("Success to remove the to state. (fromState={}, toState={})", fromState, toState);
+                logger.debug("({}) Success to remove the to state. (fromState={}, toState={})", name, fromState, toState);
             } else {
-                logger.debug("Fail to remove the to state. (fromState={}, toState={})", fromState, toState);
+                logger.debug("({}) Fail to remove the to state. (fromState={}, toState={})", name, fromState, toState);
             }
             return result;
         }
@@ -136,14 +146,30 @@ public class StateContainer {
         return getToStateByFromState(fromState).get(toState);
     }
 
-    public String getCurState() {
+    /**
+     * @fn public synchronized String getCurState ()
+     * @brief 현재 State 이름을 반환하는 함수
+     * @return 현재 State 이름
+     */
+    public synchronized String getCurState() {
         return curState;
     }
 
-    public void setCurState(String curState) {
+    /**
+     * @fn public synchronized void setCurState (String state)
+     * @brief 현재 State 를 설정하는 함수
+     * @param curState 현재 State 이름
+     */
+    public synchronized void setCurState(String curState) {
+        logger.debug("({}) State is changed. ([{}] > [{}])", name, this.curState, curState);
         this.curState = curState;
     }
 
+    /**
+     * @fn public Object getCallBackResult()
+     * @brief CallBack 실행 후 발생한 결과값을 반환하는 함수
+     * @return 성공 시 결과갑, 실패 시 null 반환
+     */
     public Object getCallBackResult() {
         return callBackResult;
     }
@@ -167,13 +193,13 @@ public class StateContainer {
      */
     public String nextState (String toState) {
         if (curState == null) {
-            logger.warn("Fail to transit. Current state is null. (curState=null, nextState={})", toState);
+            logger.warn("({}) Fail to transit. Current state is null. (curState=null, nextState={})", name, toState);
             callBackResult = null;
             return null;
         }
 
         if (curState.equals(toState)) {
-            logger.warn("Fail to transit. State is same. (curState={}, nextState={})", curState, toState);
+            logger.warn("({}) Fail to transit. State is same. (curState={}, nextState={})", name, curState, toState);
             callBackResult = null;
             return null;
         }
@@ -183,15 +209,14 @@ public class StateContainer {
 
         CallBack nextStateCallBack = nextStateCallBackMap.get(toState);
         if (nextStateCallBack == null) {
-            logger.warn("Fail to get the next state's call back. Not defined. (curState={}, nextState={})", curState, toState);
+            logger.warn("({}) Fail to get the next state's call back. Not defined. (curState={}, nextState={})", name, curState, toState);
             callBackResult = null;
             return null;
         }
 
         callBackResult = nextStateCallBack.callBackFunc(toState);
+        setCurState(toState);
 
-        logger.debug("State is changed. ([{}] > [{}])", curState, toState);
-        curState = toState;
         return toState;
     }
 
