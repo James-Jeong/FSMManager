@@ -3,12 +3,12 @@ FSMManager
 
 ## 구성도
 ### 상태 추가
-![스크린샷 2021-06-17 오후 1 52 24](https://user-images.githubusercontent.com/37236920/122334080-1cb96480-cf74-11eb-820d-a102f8aab5a9.png)
+![스크린샷 2021-06-18 오전 9 14 06](https://user-images.githubusercontent.com/37236920/122487505-665a8b80-d016-11eb-9e32-21edc122fa7d.png)
   
 ### 상태 삭제
-![스크린샷 2021-06-17 오후 1 52 41](https://user-images.githubusercontent.com/37236920/122334111-25aa3600-cf74-11eb-8304-9a29a1b3a9f0.png)
+![스크린샷 2021-06-18 오전 9 14 38](https://user-images.githubusercontent.com/37236920/122487536-796d5b80-d016-11eb-856f-caf3c86c6718.png)
   
 ### 상태 천이
-![스크린샷 2021-06-17 오후 1 53 02](https://user-images.githubusercontent.com/37236920/122334142-322e8e80-cf74-11eb-8251-b83e829a5ba5.png)
+![스크린샷 2021-06-18 오전 9 16 39](https://user-images.githubusercontent.com/37236920/122487670-c18c7e00-d016-11eb-9ee7-449bfa547fa0.png)
   
   
