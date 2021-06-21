@@ -101,8 +101,10 @@ public class StateManager {
     }
 
     public void buildFsm (String name, String initState, boolean isDebugMode, Object context) {
-        getFsmContainer(name).setUntypedStateMachine(getFsmContainer(name).getUntypedStateMachineBuilder().newStateMachine(initState, StateMachineConfiguration.getInstance().enableDebugMode(isDebugMode), context));
-        getFsmContainer(name).getUntypedStateMachine().start();
+        synchronized (fsmMap) {
+            getFsmContainer(name).setUntypedStateMachine(getFsmContainer(name).getUntypedStateMachineBuilder().newStateMachine(initState, StateMachineConfiguration.getInstance().enableDebugMode(isDebugMode), context));
+            getFsmContainer(name).getUntypedStateMachine().start();
+        }
     }
 
     public void fireFsm (String name, String event, FutureCallback<Object> callback) {
@@ -113,7 +115,9 @@ public class StateManager {
             transitionContext = null;
         }
 
-        getFsmContainer(name).getUntypedStateMachine().fire(event, transitionContext);
+        synchronized (fsmMap) {
+            getFsmContainer(name).getUntypedStateMachine().fire(event, transitionContext);
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////

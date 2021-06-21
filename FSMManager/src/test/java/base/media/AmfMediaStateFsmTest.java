@@ -5,6 +5,7 @@ import base.media.base.MediaFsm;
 import base.media.base.MediaGlobalContext;
 import base.media.base.MediaState;
 import com.google.common.util.concurrent.FutureCallback;
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,18 +84,23 @@ public class AmfMediaStateFsmTest {
         };
 
         logger.info("Current State: {}", stateManager.getFsmCurState(MEDIA_STATE_NAME));
+        Assert.assertEquals(MediaState.IDLE_STATE, stateManager.getFsmCurState(MEDIA_STATE_NAME));
 
         stateManager.fireFsm(MEDIA_STATE_NAME, MediaEvent.MEDIA_START_EVENT, futureCallback);
         logger.info("Current State: {}", stateManager.getFsmCurState(MEDIA_STATE_NAME));
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, stateManager.getFsmCurState(MEDIA_STATE_NAME));
 
         stateManager.fireFsm(MEDIA_STATE_NAME, MediaEvent.MEDIA_CREATE_SUCCESS_EVENT, futureCallback);
         logger.info("Current State: {}", stateManager.getFsmCurState(MEDIA_STATE_NAME));
+        Assert.assertEquals(MediaState.ACTIVE_STATE, stateManager.getFsmCurState(MEDIA_STATE_NAME));
 
         stateManager.fireFsm(MEDIA_STATE_NAME, MediaEvent.MEDIA_STOP_EVENT, futureCallback);
         logger.info("Current State: {}", stateManager.getFsmCurState(MEDIA_STATE_NAME));
+        Assert.assertEquals(MediaState.IDLE_REQUEST, stateManager.getFsmCurState(MEDIA_STATE_NAME));
 
         stateManager.fireFsm(MEDIA_STATE_NAME, MediaEvent.MEDIA_DELETE_SUCCESS_EVENT, futureCallback);
         logger.info("Current State: {}", stateManager.getFsmCurState(MEDIA_STATE_NAME));
+        Assert.assertEquals(MediaState.IDLE_STATE, stateManager.getFsmCurState(MEDIA_STATE_NAME));
 
         ////////////////////////////////////////////////////////////////////////////////
     }
