@@ -76,16 +76,16 @@ public class AmfMediaStateFsmTest {
         // 3. 상태 천이
         Assert.assertEquals(MediaState.IDLE_STATE, stateManager.getFsmCurState(MediaFsm.MEDIA_STATE_NAME));
 
-        stateManager.fireFsm(MediaFsm.MEDIA_STATE_NAME, MediaEvent.MEDIA_START_EVENT, futureCallback);
+        Assert.assertTrue(stateManager.fireFsm(MediaFsm.MEDIA_STATE_NAME, MediaEvent.MEDIA_START_EVENT, futureCallback));
         Assert.assertEquals(MediaState.ACTIVE_REQUEST, stateManager.getFsmCurState(MediaFsm.MEDIA_STATE_NAME));
 
-        stateManager.fireFsm(MediaFsm.MEDIA_STATE_NAME, MediaEvent.MEDIA_CREATE_SUCCESS_EVENT, futureCallback);
+        Assert.assertTrue(stateManager.fireFsm(MediaFsm.MEDIA_STATE_NAME, MediaEvent.MEDIA_CREATE_SUCCESS_EVENT, futureCallback));
         Assert.assertEquals(MediaState.ACTIVE_STATE, stateManager.getFsmCurState(MediaFsm.MEDIA_STATE_NAME));
 
-        stateManager.fireFsm(MediaFsm.MEDIA_STATE_NAME, MediaEvent.MEDIA_STOP_EVENT, futureCallback);
+        Assert.assertTrue(stateManager.fireFsm(MediaFsm.MEDIA_STATE_NAME, MediaEvent.MEDIA_STOP_EVENT, futureCallback));
         Assert.assertEquals(MediaState.IDLE_REQUEST, stateManager.getFsmCurState(MediaFsm.MEDIA_STATE_NAME));
 
-        stateManager.fireFsm(MediaFsm.MEDIA_STATE_NAME, MediaEvent.MEDIA_DELETE_SUCCESS_EVENT, futureCallback);
+        Assert.assertTrue(stateManager.fireFsm(MediaFsm.MEDIA_STATE_NAME, MediaEvent.MEDIA_DELETE_SUCCESS_EVENT, futureCallback));
         Assert.assertEquals(MediaState.IDLE_STATE, stateManager.getFsmCurState(MediaFsm.MEDIA_STATE_NAME));
         ////////////////////////////////////////////////////////////////////////////////
     }

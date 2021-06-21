@@ -15,7 +15,7 @@ public class StateContainer {
     private static final Logger logger = LoggerFactory.getLogger(StateContainer.class);
 
     // State Map
-    private final Map<String, Map<String, CallBack>> stateMap = new LinkedHashMap<>();
+    private final Map<String, Map<String, CallBack>> stateMap = new HashMap<>();
 
     // 현재 State 이름
     private String curState = null;
@@ -53,7 +53,7 @@ public class StateContainer {
 
             Map<String, CallBack> toStateMap = getToStateByFromState(fromState);
             if (toStateMap == null) {
-                toStateMap = new LinkedHashMap<>();
+                toStateMap = new HashMap<>();
                 toStateMap.putIfAbsent(toState, callBack);
             }
 

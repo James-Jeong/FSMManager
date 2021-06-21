@@ -26,19 +26,19 @@ public class TestMain {
         //AmfMediaStateTest amfMediaStateTest = new AmfMediaStateTest();
         //amfMediaStateTest.testStart();
 
-        AmfCallAndMediaStateTest amfCallAndMediaStateTest = new AmfCallAndMediaStateTest();
-        amfCallAndMediaStateTest.testStart();
+        //AmfCallAndMediaStateTest amfCallAndMediaStateTest = new AmfCallAndMediaStateTest();
+        //amfCallAndMediaStateTest.testStart();
 
         ////////////////////////////////////////////////////////////////////////////////
 
-/*        AmfMediaStateFsmTest amfMediaStateFsmTest = new AmfMediaStateFsmTest();
-        amfMediaStateFsmTest.testStart();
+        //AmfMediaStateFsmTest amfMediaStateFsmTest = new AmfMediaStateFsmTest();
+        //amfMediaStateFsmTest.testStart();
 
         AmfCallStateFsmTest amfCallStateFsmTest = new AmfCallStateFsmTest();
-        amfCallStateFsmTest.testStart();*/
+        amfCallStateFsmTest.testStart();
 
-/*        AmfCallAndMediaStateFsmTest amfCallAndMediaStateFsmTest = new AmfCallAndMediaStateFsmTest();
-        amfCallAndMediaStateFsmTest.testStart();*/
+        //AmfCallAndMediaStateFsmTest amfCallAndMediaStateFsmTest = new AmfCallAndMediaStateFsmTest();
+        //amfCallAndMediaStateFsmTest.testStart();
     }
 
 }

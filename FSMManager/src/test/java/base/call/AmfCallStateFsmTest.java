@@ -94,29 +94,29 @@ public class AmfCallStateFsmTest {
 
         ////////////////////////////////////////////////////////////////////////////////
         // 3. 상태 천이
-        stateManager.fireFsm(CallFsm.CALL_STATE_NAME, CallEvent.CALL_INIT_EVENT, futureCallback);
+        Assert.assertTrue(stateManager.fireFsm(CallFsm.CALL_STATE_NAME, CallEvent.CALL_INIT_EVENT, futureCallback));
 
         Assert.assertEquals(CallState.INIT, stateManager.getFsmCurState(CallFsm.CALL_STATE_NAME));
 
-        stateManager.fireFsm(CallFsm.CALL_STATE_NAME, CallEvent.CALL_START_EVENT, futureCallback);
+        Assert.assertTrue(stateManager.fireFsm(CallFsm.CALL_STATE_NAME, CallEvent.CALL_START_EVENT, futureCallback));
         Assert.assertEquals(CallState.OFFER, stateManager.getFsmCurState(CallFsm.CALL_STATE_NAME));
 
-        stateManager.fireFsm(CallFsm.CALL_STATE_NAME, CallEvent.OFFER_EARLY_NEGO_START_EVENT, futureCallback);
+        Assert.assertTrue(stateManager.fireFsm(CallFsm.CALL_STATE_NAME, CallEvent.OFFER_EARLY_NEGO_START_EVENT, futureCallback));
         Assert.assertEquals(CallState.EARLY_NEGO_REQ, stateManager.getFsmCurState(CallFsm.CALL_STATE_NAME));
 
-        stateManager.fireFsm(CallFsm.CALL_STATE_NAME, CallEvent.EARLY_MEDIA_START_EVENT, futureCallback);
+        Assert.assertTrue(stateManager.fireFsm(CallFsm.CALL_STATE_NAME, CallEvent.EARLY_MEDIA_START_EVENT, futureCallback));
         Assert.assertEquals(CallState.EARLY_MEDIA, stateManager.getFsmCurState(CallFsm.CALL_STATE_NAME));
 
-        stateManager.fireFsm(CallFsm.CALL_STATE_NAME, CallEvent.EARLY_NEGO_NEGO_START_EVENT, futureCallback);
+        Assert.assertTrue(stateManager.fireFsm(CallFsm.CALL_STATE_NAME, CallEvent.EARLY_NEGO_NEGO_START_EVENT, futureCallback));
         Assert.assertEquals(CallState.NEGO_REQ, stateManager.getFsmCurState(CallFsm.CALL_STATE_NAME));
 
-        stateManager.fireFsm(CallFsm.CALL_STATE_NAME, CallEvent.ACTIVE_START_EVENT, futureCallback);
+        Assert.assertTrue(stateManager.fireFsm(CallFsm.CALL_STATE_NAME, CallEvent.ACTIVE_START_EVENT, futureCallback));
         Assert.assertEquals(CallState.ACTIVE, stateManager.getFsmCurState(CallFsm.CALL_STATE_NAME));
 
-        stateManager.fireFsm(CallFsm.CALL_STATE_NAME, CallEvent.ACTIVE_STOP_EVENT, futureCallback);
+        Assert.assertTrue(stateManager.fireFsm(CallFsm.CALL_STATE_NAME, CallEvent.ACTIVE_STOP_EVENT, futureCallback));
         Assert.assertEquals(CallState.HANGUP_REQ, stateManager.getFsmCurState(CallFsm.CALL_STATE_NAME));
 
-        stateManager.fireFsm(CallFsm.CALL_STATE_NAME, CallEvent.CALL_STOP_DONE_SUCCESS_EVENT, futureCallback);
+        Assert.assertTrue(stateManager.fireFsm(CallFsm.CALL_STATE_NAME, CallEvent.CALL_STOP_DONE_SUCCESS_EVENT, futureCallback));
         Assert.assertEquals(CallState.INIT, stateManager.getFsmCurState(CallFsm.CALL_STATE_NAME));
 
         ////////////////////////////////////////////////////////////////////////////////
