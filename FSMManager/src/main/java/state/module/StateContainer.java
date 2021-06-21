@@ -208,15 +208,18 @@ public class StateContainer {
         Map<String, CallBack> nextStateCallBackMap = getToStateByFromState(curState);
         if (nextStateCallBackMap == null) { return null; }
 
+        // 1) 상태 천이 먼저 수행
+        setCurState(toState);
+
+        // 2) CallBack 함수 나중에 수행
         CallBack nextStateCallBack = nextStateCallBackMap.get(toState);
         if (nextStateCallBack == null) {
             logger.warn("({}) Fail to get the next state's call back. Not defined. (curState={}, nextState={})", name, curState, toState);
             callBackResult = null;
             return null;
+        } else {
+            callBackResult = nextStateCallBack.callBackFunc(toState);
         }
-
-        callBackResult = nextStateCallBack.callBackFunc(toState);
-        setCurState(toState);
 
         return toState;
     }

@@ -93,12 +93,8 @@ public class CallFsm extends AbstractFsm {
 
         StateManager stateManager = StateManager.getInstance();
         String curState = stateManager.getFsmCurState(CALL_STATE_NAME);
-        if (curState == null) {
-            logger.info("@ Success to init the call!");
-            return;
-        }
 
-        if (curState.equals(CallState.HANGUP_REQ)) {
+        if (curState.equals(CallState.IDLE) || curState.equals(CallState.HANGUP_REQ)) {
             logger.info("@ Success to init the call by {}!", curState);
         } else {
             logger.warn("@ Unknown flow for CallStop.");
