@@ -18,6 +18,8 @@ public class MediaFsm extends AbstractFsm {
     }
 
     public void mediaStart (Object from, Object to, Object event, Object transitionContext) {
+        TransitionContext context = (TransitionContext) transitionContext;
+        context.getCallback().onSuccess(null);
         logger.info("@ Media is started! ({} > {}) (event={})", from, to, event);
     }
 

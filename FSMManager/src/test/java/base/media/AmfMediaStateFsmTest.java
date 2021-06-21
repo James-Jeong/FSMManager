@@ -2,6 +2,7 @@ package base.media;
 
 import base.media.base.MediaEvent;
 import base.media.base.MediaFsm;
+import base.media.base.MediaGlobalContext;
 import base.media.base.MediaState;
 import com.google.common.util.concurrent.FutureCallback;
 import org.junit.Test;
@@ -35,7 +36,8 @@ public class AmfMediaStateFsmTest {
                 new MediaFsm(),
                 new MediaState(),
                 new MediaEvent(),
-                new TransitionContext()
+                new TransitionContext(),
+                MediaGlobalContext.class
         );
 
         normalTest();
@@ -61,13 +63,14 @@ public class AmfMediaStateFsmTest {
         stateManager.setFsmOnEntry(MEDIA_STATE_NAME, MediaState.ACTIVE_STATE, "mediaDeleteSuccess");
 
         //stateManager.setFsmFinalState(MEDIA_STATE_NAME, MediaState.IDLE_STATE);
-        stateManager.buildFsm(MEDIA_STATE_NAME, MediaState.IDLE_STATE, true, null);
+        MediaGlobalContext mediaGlobalContext = new MediaGlobalContext("127.0.0.1", 5000);
+        stateManager.buildFsm(MEDIA_STATE_NAME, MediaState.IDLE_STATE, true, mediaGlobalContext);
         ////////////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////////////
         // 2. 상태 천이
 
-/*        FutureCallback<Void> futureCallback = new FutureCallback<Void>() {
+        FutureCallback<Void> futureCallback = new FutureCallback<Void>() {
             @Override
             public void onSuccess(Void unused) {
                 logger.info("SUCCESS");
@@ -77,11 +80,11 @@ public class AmfMediaStateFsmTest {
             public void onFailure(Throwable throwable) {
                 logger.warn("FAIL");
             }
-        };*/
+        };
 
         logger.info("Current State: {}", stateManager.getFsmCurState(MEDIA_STATE_NAME));
 
-        stateManager.fireFsm(MEDIA_STATE_NAME, MediaEvent.MEDIA_START_EVENT, null);
+        stateManager.fireFsm(MEDIA_STATE_NAME, MediaEvent.MEDIA_START_EVENT, futureCallback);
         logger.info("Current State: {}", stateManager.getFsmCurState(MEDIA_STATE_NAME));
 
         stateManager.fireFsm(MEDIA_STATE_NAME, MediaEvent.MEDIA_CREATE_SUCCESS_EVENT, null);

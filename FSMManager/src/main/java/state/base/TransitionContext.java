@@ -18,7 +18,7 @@ public class TransitionContext {
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    FutureCallback<Void> getCallback() {
+    public FutureCallback<Void> getCallback() {
         return callback;
     }
 
