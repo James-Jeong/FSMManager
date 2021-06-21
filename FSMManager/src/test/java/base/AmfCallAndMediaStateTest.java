@@ -1,5 +1,7 @@
 package base;
 
+import base.call.base.CallState;
+import base.media.base.MediaState;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -216,14 +218,14 @@ public class AmfCallAndMediaStateTest {
         Assert.assertTrue(callStateHandler.addState(CALL_STOP_DONE_SUCCESS_EVENT, CallState.HANGUP_REQ.name(), CallState.INIT.name(), callBack));
         Assert.assertTrue(callStateHandler.addState(CALL_STOP_DONE_FAIL_EVENT, CallState.HANGUP_REQ.name(), CallState.IDLE.name(), callBack));
 
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_START_EVENT, MediaState.IDLE_STATE.name(), MediaState.ACTIVE_REQUEST.name(), callBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_START_EVENT, MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST, callBack));
 
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_CREATE_SUCCESS_EVENT, MediaState.ACTIVE_REQUEST.name(), MediaState.ACTIVE_STATE.name(), callBack));
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_CREATE_FAIL_EVENT, MediaState.ACTIVE_REQUEST.name(), MediaState.IDLE_STATE.name(), callBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_CREATE_SUCCESS_EVENT, MediaState.ACTIVE_REQUEST, MediaState.ACTIVE_STATE, callBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_CREATE_FAIL_EVENT, MediaState.ACTIVE_REQUEST, MediaState.IDLE_STATE, callBack));
 
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_STOP_EVENT, MediaState.ACTIVE_STATE.name(), MediaState.IDLE_REQUEST.name(), callBack));
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_SUCCESS_EVENT, MediaState.IDLE_REQUEST.name(), MediaState.IDLE_STATE.name(), callBack));
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_FAIL_EVENT, MediaState.IDLE_REQUEST.name(), MediaState.ACTIVE_STATE.name(), callBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_STOP_EVENT, MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST, callBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_SUCCESS_EVENT, MediaState.IDLE_REQUEST, MediaState.IDLE_STATE, callBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_FAIL_EVENT, MediaState.IDLE_REQUEST, MediaState.ACTIVE_STATE, callBack));
 
         Assert.assertNotNull(mediaStateHandler.getStateList());
         ////////////////////////////////////////////////////////////////////////////////
@@ -231,18 +233,18 @@ public class AmfCallAndMediaStateTest {
         ////////////////////////////////////////////////////////////////////////////////
         // 3. 상태 천이
         callStateHandler.setCurState(CallState.INIT.name());
-        mediaStateHandler.setCurState(MediaState.IDLE_STATE.name());
+        mediaStateHandler.setCurState(MediaState.IDLE_STATE);
 
         callStart();
         Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.OFFER.name());
 
         earlyNegoStart();
         Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.EARLY_NEGO_REQ.name());
-        Assert.assertEquals(mediaStateHandler.getCallBackResult(), MediaState.ACTIVE_REQUEST.name());
+        Assert.assertEquals(mediaStateHandler.getCallBackResult(), MediaState.ACTIVE_REQUEST);
 
         earlyMediaStart();
         Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.EARLY_MEDIA.name());
-        Assert.assertEquals(mediaStateHandler.getCallBackResult(), MediaState.ACTIVE_STATE.name());
+        Assert.assertEquals(mediaStateHandler.getCallBackResult(), MediaState.ACTIVE_STATE);
 
         earlyNegoNegoStart();
         Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.NEGO_REQ.name());
@@ -252,11 +254,11 @@ public class AmfCallAndMediaStateTest {
 
         activeHangupStart();
         Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.HANGUP_REQ.name());
-        Assert.assertEquals(mediaStateHandler.getCallBackResult(), MediaState.IDLE_REQUEST.name());
+        Assert.assertEquals(mediaStateHandler.getCallBackResult(), MediaState.IDLE_REQUEST);
 
         callStopSuccess();
         Assert.assertEquals(callStateHandler.getCallBackResult(), CallState.INIT.name());
-        Assert.assertEquals(mediaStateHandler.getCallBackResult(), MediaState.IDLE_STATE.name());
+        Assert.assertEquals(mediaStateHandler.getCallBackResult(), MediaState.IDLE_STATE);
         ////////////////////////////////////////////////////////////////////////////////
     }
 }

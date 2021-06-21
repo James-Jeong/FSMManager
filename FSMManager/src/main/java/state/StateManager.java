@@ -1,8 +1,8 @@
 package state;
 
-import org.squirrelframework.foundation.fsm.StateMachineBuilder;
-import org.squirrelframework.foundation.fsm.StateMachineBuilderFactory;
-import state.base.AbstractFsm;
+import com.google.common.util.concurrent.FutureCallback;
+import org.squirrelframework.foundation.fsm.*;
+import state.base.*;
 import state.module.StateHandler;
 
 import java.util.HashMap;
@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public class StateManager {
 
-    private final Map<String, StateMachineBuilder<?, ?, ?, ?>> fsmMap = new HashMap<>();
+    private final Map<String, FsmContainer> fsmMap = new HashMap<>();
 
     // StateHandler Map
     private final Map<String, StateHandler> stateHandlerMap = new HashMap<>();
@@ -47,30 +47,73 @@ public class StateManager {
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    public synchronized void addFsm (String name,
-                                     AbstractFsm abstractFsm,
-                                     Object abstractState,
-                                     Object abstractEvent,
-                                     Object transitionContext,
-                                     Object ...extraConstParamTypes) {
+    public synchronized void addFsmContainer (String name,
+                                             AbstractFsm abstractFsm,
+                                             AbstractState abstractState,
+                                             AbstractEvent abstractEvent,
+                                             TransitionContext transitionContext,
+                                             Class<?> ...extraConstParamTypes) {
         if (fsmMap.get(name) != null) { return; }
-        fsmMap.putIfAbsent(name, StateMachineBuilderFactory.create(
+
+        FsmContainer fsmContainer = new FsmContainer(
+                StateMachineBuilderFactory.create(
                 abstractFsm.getClass(),
                 abstractState.getClass(),
                 abstractEvent.getClass(),
                 transitionContext.getClass(),
                 extraConstParamTypes.getClass()
-            )
-        );
+        ));
+
+        fsmMap.putIfAbsent(name, fsmContainer);
     }
 
-    public synchronized void removeFsm (String name) {
+    public synchronized void removeFsmContainer (String name) {
         if (fsmMap.get(name) == null) { return; }
         fsmMap.remove(name);
     }
 
-    public StateMachineBuilder<?, ?, ?, ?> getFsm (String name) {
+    public FsmContainer getFsmContainer (String name) {
         return fsmMap.get(name);
+    }
+
+    private UntypedStateMachineBuilder getFsmBuilder (String name) {
+        return fsmMap.get(name).getUntypedStateMachineBuilder();
+    }
+
+    public void setFsmCondition (String name, String from, String to, String event) {
+        getFsmBuilder(name).externalTransition().from(from).to(to).on(event);
+    }
+
+    public void setFsmOnEntry (String name, String state, String funcName) {
+        getFsmBuilder(name).onEntry(state).callMethod(funcName);
+    }
+
+    public void setFsmOnExit (String name, String state, String funcName) {
+        getFsmBuilder(name).onExit(state).callMethod(funcName);
+    }
+
+    public String getFsmCurState (String name) {
+        return (String) getFsmContainer(name).getUntypedStateMachine().getCurrentState();
+    }
+
+    public void setFsmFinalState (String name, String state) {
+        getFsmContainer(name).getUntypedStateMachineBuilder().defineFinalState(state);
+    }
+
+    public void buildFsm (String name, String initState, boolean isDebugMode, Object context) {
+        getFsmContainer(name).setUntypedStateMachine(getFsmContainer(name).getUntypedStateMachineBuilder().newStateMachine(initState, StateMachineConfiguration.getInstance().enableDebugMode(isDebugMode), context));
+        getFsmContainer(name).getUntypedStateMachine().start();
+    }
+
+    public void fireFsm (String name, String event, FutureCallback<Void> callback) {
+        TransitionContext transitionContext;
+        if (callback != null) {
+            transitionContext = new TransitionContext().setCallback(callback);
+        } else {
+            transitionContext = null;
+        }
+
+        getFsmContainer(name).getUntypedStateMachine().fire(event, transitionContext);
     }
 
     ////////////////////////////////////////////////////////////////////////////////
