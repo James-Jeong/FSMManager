@@ -72,108 +72,108 @@ public class AmfCallAndMediaStateTest {
     ////////////////////////////////////////////////////////////////////////////////
 
     public void callStart () {
-        logger.debug("@ Call is started!");
+        logger.info("@ Call is started!");
         callStateHandler.fire(CALL_START_EVENT);
 
         if (callStateHandler.getCallBackResult() == null) {
-            logger.debug("@ Call is failed!");
+            logger.info("@ Call is failed!");
             callStateHandler.fire(CALL_FAIL_EVENT);
         }
     }
 
     public void earlyNegoStart () {
-        logger.debug("@ Early Nego is started by offer!");
+        logger.info("@ Early Nego is started by offer!");
         callStateHandler.fire(OFFER_EARLY_NEGO_START_EVENT);
         mediaStart();
     }
 
     public void earlyMediaStart () {
-        logger.debug("@ Early Media is started!");
+        logger.info("@ Early Media is started!");
         callStateHandler.fire(EARLY_MEDIA_START_EVENT);
         mediaCreateSuccess();
     }
 
     public void activeStart () {
-        logger.debug("@ Active is started!");
+        logger.info("@ Active is started!");
         callStateHandler.fire(ACTIVE_START_EVENT);
     }
 
     public void earlyNegoInActiveStart () {
-        logger.debug("@ InActive is started by early_nego!");
+        logger.info("@ InActive is started by early_nego!");
         callStateHandler.fire(EARLY_NEGO_INACTIVE_START_EVENT);
     }
 
     public void negoInActiveStart () {
-        logger.debug("@ InActive is started by nego!");
+        logger.info("@ InActive is started by nego!");
         callStateHandler.fire(NEGO_INACTIVE_START_EVENT);
     }
 
     public void offerNegoStart () {
-        logger.debug("@ Nego is started by offer!");
+        logger.info("@ Nego is started by offer!");
         callStateHandler.fire(OFFER_NEGO_START_EVENT);
     }
 
     public void earlyNegoNegoStart () {
-        logger.debug("@ Nego is started by early_nego!");
+        logger.info("@ Nego is started by early_nego!");
         callStateHandler.fire(EARLY_NEGO_NEGO_START_EVENT);
     }
 
     public void offerHangupStart () {
-        logger.debug("@ Hangup is started by offer!");
+        logger.info("@ Hangup is started by offer!");
         callStateHandler.fire(OFFER_STOP_EVENT);
         mediaStop();
     }
 
     public void earlyNegoHangupStart () {
-        logger.debug("@ Hangup is started by early_nego!");
+        logger.info("@ Hangup is started by early_nego!");
         callStateHandler.fire(EARLY_NEGO_STOP_EVENT);
         mediaStop();
     }
 
     public void activeHangupStart() {
-        logger.debug("@ Hangup is started by nego!");
+        logger.info("@ Hangup is started by nego!");
         callStateHandler.fire(ACTIVE_STOP_EVENT);
         mediaStop();
     }
 
     public void callStopSuccess () {
-        logger.debug("@ Success to stop the call!");
+        logger.info("@ Success to stop the call!");
         callStateHandler.fire(CALL_STOP_DONE_SUCCESS_EVENT);
         mediaDeleteSuccess();
     }
 
     public void callStopFail () {
-        logger.debug("@ Fail to stop the call!");
+        logger.info("@ Fail to stop the call!");
         callStateHandler.fire(CALL_STOP_DONE_FAIL_EVENT);
     }
 
     public void mediaStart () {
-        logger.debug("@ Media is started!");
+        logger.info("@ Media is started!");
         mediaStateHandler.fire(MEDIA_START_EVENT);
     }
 
     public void mediaStop () {
-        logger.debug("@ Media is stopped!");
+        logger.info("@ Media is stopped!");
         mediaStateHandler.fire(MEDIA_STOP_EVENT);
     }
 
     public void mediaCreateSuccess () {
-        logger.debug("@ Success to create media!");
+        logger.info("@ Success to create media!");
         mediaStateHandler.fire(MEDIA_CREATE_SUCCESS_EVENT);
     }
 
     public void mediaCreateFail () {
-        logger.debug("@ Fail to create media!");
+        logger.info("@ Fail to create media!");
         mediaStateHandler.fire(MEDIA_CREATE_FAIL_EVENT);
     }
 
     public void mediaDeleteSuccess () {
-        logger.debug("@ Success to delete media!");
+        logger.info("@ Success to delete media!");
         mediaStateHandler.fire(MEDIA_DELETE_SUCCESS_EVENT);
     }
 
     public void mediaDeleteFail () {
-        logger.debug("@ Fail to delete media!");
+        logger.info("@ Fail to delete media!");
         mediaStateHandler.fire(MEDIA_DELETE_FAIL_EVENT);
     }
 

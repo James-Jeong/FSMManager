@@ -17,7 +17,7 @@ public class FsmManagerMain {
         }
 
         String configPath = args[1].trim();
-        logger.debug("| Config path: {}", configPath);
+        logger.info("| Config path: {}", configPath);
 
     }
 

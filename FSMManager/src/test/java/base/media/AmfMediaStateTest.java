@@ -45,32 +45,32 @@ public class AmfMediaStateTest {
     ////////////////////////////////////////////////////////////////////////////////
 
     public void mediaStart () {
-        logger.debug("@ Media is started!");
+        logger.info("@ Media is started!");
         mediaStateHandler.fire(MEDIA_START_EVENT);
     }
 
     public void mediaStop () {
-        logger.debug("@ Media is stopped!");
+        logger.info("@ Media is stopped!");
         mediaStateHandler.fire(MEDIA_STOP_EVENT);
     }
 
     public void mediaCreateSuccess () {
-        logger.debug("@ Success to create media!");
+        logger.info("@ Success to create media!");
         mediaStateHandler.fire(MEDIA_CREATE_SUCCESS_EVENT);
     }
 
     public void mediaCreateFail () {
-        logger.debug("@ Fail to create media!");
+        logger.info("@ Fail to create media!");
         mediaStateHandler.fire(MEDIA_CREATE_FAIL_EVENT);
     }
 
     public void mediaDeleteSuccess () {
-        logger.debug("@ Success to delete media!");
+        logger.info("@ Success to delete media!");
         mediaStateHandler.fire(MEDIA_DELETE_SUCCESS_EVENT);
     }
 
     public void mediaDeleteFail () {
-        logger.debug("@ Fail to delete media!");
+        logger.info("@ Fail to delete media!");
         mediaStateHandler.fire(MEDIA_DELETE_FAIL_EVENT);
     }
 

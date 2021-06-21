@@ -59,13 +59,13 @@ public class StateContainer {
 
             boolean result = stateMap.putIfAbsent(fromState, toStateMap) == null;
             if (result) {
-                logger.debug("({}) Success to add state. (fromState={}, toState={})", name, fromState, toState);
+                logger.info("({}) Success to add state. (fromState={}, toState={})", name, fromState, toState);
             } else {
                 result = toStateMap.putIfAbsent(toState, callBack) == null;
                 if (result) {
-                    logger.debug("({}) Success to add state. (fromState={}, toState={})", name, fromState, toState);
+                    logger.info("({}) Success to add state. (fromState={}, toState={})", name, fromState, toState);
                 } else {
-                    logger.debug("({}) Fail to add state. (fromState={}, toState={})", name, fromState, toState);
+                    logger.info("({}) Fail to add state. (fromState={}, toState={})", name, fromState, toState);
                 }
             }
             return result;
@@ -93,9 +93,9 @@ public class StateContainer {
                     }
                 }
 
-                logger.debug("({}) Success to remove the from state. (fromState={})", name, fromState);
+                logger.info("({}) Success to remove the from state. (fromState={})", name, fromState);
             } else {
-                logger.debug("({}) Fail to remove the from state. (fromState={})", name, fromState);
+                logger.info("({}) Fail to remove the from state. (fromState={})", name, fromState);
             }
             return result;
         }
@@ -117,9 +117,9 @@ public class StateContainer {
 
             boolean result = getToStateByFromState(fromState).remove(toState) != null;
             if (result) {
-                logger.debug("({}) Success to remove the to state. (fromState={}, toState={})", name, fromState, toState);
+                logger.info("({}) Success to remove the to state. (fromState={}, toState={})", name, fromState, toState);
             } else {
-                logger.debug("({}) Fail to remove the to state. (fromState={}, toState={})", name, fromState, toState);
+                logger.info("({}) Fail to remove the to state. (fromState={}, toState={})", name, fromState, toState);
             }
             return result;
         }
@@ -162,7 +162,7 @@ public class StateContainer {
      * @param curState 현재 State 이름
      */
     public synchronized void setCurState(String curState) {
-        logger.debug("({}) State is changed. ([{}] > [{}])", name, this.curState, curState);
+        logger.info("({}) State is changed. ([{}] > [{}])", name, this.curState, curState);
         this.curState = curState;
     }
 

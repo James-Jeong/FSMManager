@@ -26,8 +26,8 @@ public class TestMain {
         //AmfMediaStateTest amfMediaStateTest = new AmfMediaStateTest();
         //amfMediaStateTest.testStart();
 
-/*        AmfCallAndMediaStateTest amfCallAndMediaStateTest = new AmfCallAndMediaStateTest();
-        amfCallAndMediaStateTest.testStart();*/
+        AmfCallAndMediaStateTest amfCallAndMediaStateTest = new AmfCallAndMediaStateTest();
+        amfCallAndMediaStateTest.testStart();
 
         ////////////////////////////////////////////////////////////////////////////////
 
@@ -37,8 +37,8 @@ public class TestMain {
         AmfCallStateFsmTest amfCallStateFsmTest = new AmfCallStateFsmTest();
         amfCallStateFsmTest.testStart();*/
 
-        AmfCallAndMediaStateFsmTest amfCallAndMediaStateFsmTest = new AmfCallAndMediaStateFsmTest();
-        amfCallAndMediaStateFsmTest.testStart();
+/*        AmfCallAndMediaStateFsmTest amfCallAndMediaStateFsmTest = new AmfCallAndMediaStateFsmTest();
+        amfCallAndMediaStateFsmTest.testStart();*/
     }
 
 }
