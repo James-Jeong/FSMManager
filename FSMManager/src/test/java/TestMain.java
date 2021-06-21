@@ -1,9 +1,4 @@
 import base.AmfCallAndMediaStateFsmTest;
-import base.AmfCallAndMediaStateTest;
-import base.call.AmfCallStateFsmTest;
-import base.call.AmfCallStateTest;
-import base.media.AmfMediaStateFsmTest;
-import base.media.AmfMediaStateTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

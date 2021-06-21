@@ -2,11 +2,9 @@ package base;
 
 import base.call.base.CallEvent;
 import base.call.base.CallFsm;
-import base.call.base.CallGlobalContext;
 import base.call.base.CallState;
 import base.media.base.MediaEvent;
 import base.media.base.MediaFsm;
-import base.media.base.MediaGlobalContext;
 import base.media.base.MediaState;
 import com.google.common.util.concurrent.FutureCallback;
 import org.junit.Assert;
@@ -33,17 +31,13 @@ public class AmfCallAndMediaStateFsmTest {
         stateManager.addFsmContainer(CallFsm.CALL_STATE_NAME,
                 new CallFsm(),
                 new CallState(),
-                new CallEvent(),
-                new TransitionContext(),
-                CallGlobalContext.class
+                new CallEvent()
         );
 
         stateManager.addFsmContainer(MediaFsm.MEDIA_STATE_NAME,
                 new MediaFsm(),
                 new MediaState(),
-                new MediaEvent(),
-                new TransitionContext(),
-                MediaGlobalContext.class
+                new MediaEvent()
         );
 
         normalTest();
@@ -104,8 +98,7 @@ public class AmfCallAndMediaStateFsmTest {
         stateManager.setFsmOnEntry(CallFsm.CALL_STATE_NAME, CallState.INIT, "callInitSuccess");
         stateManager.setFsmCondition(CallFsm.CALL_STATE_NAME, CallState.HANGUP_REQ, CallState.INIT, CallEvent.CALL_STOP_DONE_SUCCESS_EVENT);
 
-        CallGlobalContext callGlobalContext = new CallGlobalContext("010-1234-5678");
-        stateManager.buildFsm(CallFsm.CALL_STATE_NAME, CallState.IDLE, false, callGlobalContext);
+        stateManager.buildFsm(CallFsm.CALL_STATE_NAME, CallState.IDLE, true);
 
         stateManager.setFsmCondition(MediaFsm.MEDIA_STATE_NAME, MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST, MediaEvent.MEDIA_START_EVENT);
 
@@ -122,8 +115,7 @@ public class AmfCallAndMediaStateFsmTest {
         stateManager.setFsmOnEntry(MediaFsm.MEDIA_STATE_NAME, MediaState.ACTIVE_STATE, "mediaDeleteSuccess");
 
         //stateManager.setFsmFinalState(MediaFsm.MEDIA_STATE_NAME, MediaState.IDLE_STATE);
-        MediaGlobalContext mediaGlobalContext = new MediaGlobalContext("127.0.0.1", 5000);
-        stateManager.buildFsm(MediaFsm.MEDIA_STATE_NAME, MediaState.IDLE_STATE, true, mediaGlobalContext);
+        stateManager.buildFsm(MediaFsm.MEDIA_STATE_NAME, MediaState.IDLE_STATE, true);
         ////////////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////////////

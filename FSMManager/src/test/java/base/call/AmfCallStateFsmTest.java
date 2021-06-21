@@ -2,21 +2,14 @@ package base.call;
 
 import base.call.base.CallEvent;
 import base.call.base.CallFsm;
-import base.call.base.CallGlobalContext;
 import base.call.base.CallState;
-import base.media.base.MediaEvent;
-import base.media.base.MediaFsm;
-import base.media.base.MediaGlobalContext;
-import base.media.base.MediaState;
 import com.google.common.util.concurrent.FutureCallback;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.StateManager;
-import state.base.CallBack;
 import state.base.TransitionContext;
-import state.module.StateHandler;
 
 /**
  * @class public class AmfCallStateTest
@@ -35,9 +28,7 @@ public class AmfCallStateFsmTest {
         stateManager.addFsmContainer(CallFsm.CALL_STATE_NAME,
                 new CallFsm(),
                 new CallState(),
-                new CallEvent(),
-                new TransitionContext(),
-                CallGlobalContext.class
+                new CallEvent()
         );
 
         normalTest();
@@ -98,8 +89,7 @@ public class AmfCallStateFsmTest {
         stateManager.setFsmOnEntry(CallFsm.CALL_STATE_NAME, CallState.INIT, "callInitSuccess");
         stateManager.setFsmCondition(CallFsm.CALL_STATE_NAME, CallState.HANGUP_REQ, CallState.INIT, CallEvent.CALL_STOP_DONE_SUCCESS_EVENT);
 
-        CallGlobalContext callGlobalContext = new CallGlobalContext("010-1234-5678");
-        stateManager.buildFsm(CallFsm.CALL_STATE_NAME, CallState.IDLE, false, callGlobalContext);
+        stateManager.buildFsm(CallFsm.CALL_STATE_NAME, CallState.IDLE, false);
         ////////////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////////////

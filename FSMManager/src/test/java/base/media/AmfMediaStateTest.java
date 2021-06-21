@@ -5,9 +5,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import state.StateManager;
 import state.base.CallBack;
 import state.module.StateHandler;
-import state.StateManager;
 
 /**
  * @class public class AmfMediaStateTest

@@ -13,7 +13,6 @@ import state.base.TransitionContext;
 public class CallFsm extends AbstractFsm {
 
     private static final Logger logger = LoggerFactory.getLogger(CallFsm.class);
-
     public static final String CALL_STATE_NAME = "call_state";
 
     public CallFsm() {

@@ -2,7 +2,6 @@ package base.media;
 
 import base.media.base.MediaEvent;
 import base.media.base.MediaFsm;
-import base.media.base.MediaGlobalContext;
 import base.media.base.MediaState;
 import com.google.common.util.concurrent.FutureCallback;
 import org.junit.Assert;
@@ -10,10 +9,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.StateManager;
-import state.base.CallBack;
 import state.base.TransitionContext;
-
-import javax.print.attribute.standard.Media;
 
 /**
  * @class public class AmfMediaStateTest
@@ -23,19 +19,16 @@ public class AmfMediaStateFsmTest {
 
     private static final Logger logger = LoggerFactory.getLogger(AmfMediaStateFsmTest.class);
 
-
-    ////////////////////////////////////////////////////////////////////////////////
     private final StateManager stateManager = StateManager.getInstance();
 
+    ////////////////////////////////////////////////////////////////////////////////
 
     @Test
     public void testStart () {
         stateManager.addFsmContainer(MediaFsm.MEDIA_STATE_NAME,
                 new MediaFsm(),
                 new MediaState(),
-                new MediaEvent(),
-                new TransitionContext(),
-                MediaGlobalContext.class
+                new MediaEvent()
         );
 
         normalTest();
@@ -76,8 +69,7 @@ public class AmfMediaStateFsmTest {
         stateManager.setFsmOnEntry(MediaFsm.MEDIA_STATE_NAME, MediaState.ACTIVE_STATE, "mediaDeleteSuccess");
 
         //stateManager.setFsmFinalState(MediaFsm.MEDIA_STATE_NAME, MediaState.IDLE_STATE);
-        MediaGlobalContext mediaGlobalContext = new MediaGlobalContext("127.0.0.1", 5000);
-        stateManager.buildFsm(MediaFsm.MEDIA_STATE_NAME, MediaState.IDLE_STATE, true, mediaGlobalContext);
+        stateManager.buildFsm(MediaFsm.MEDIA_STATE_NAME, MediaState.IDLE_STATE, true);
         ////////////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////////////

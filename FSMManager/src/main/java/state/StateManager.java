@@ -50,9 +50,7 @@ public class StateManager {
     public synchronized void addFsmContainer (String name,
                                              AbstractFsm abstractFsm,
                                              AbstractState abstractState,
-                                             AbstractEvent abstractEvent,
-                                             TransitionContext transitionContext,
-                                             Class<?> ...extraConstParamTypes) {
+                                             AbstractEvent abstractEvent) {
         if (fsmMap.get(name) != null) { return; }
 
         FsmContainer fsmContainer = new FsmContainer(
@@ -60,8 +58,7 @@ public class StateManager {
                 abstractFsm.getClass(),
                 abstractState.getClass(),
                 abstractEvent.getClass(),
-                transitionContext.getClass(),
-                extraConstParamTypes.getClass()
+                TransitionContext.class
         ));
 
         fsmMap.putIfAbsent(name, fsmContainer);
@@ -104,8 +101,8 @@ public class StateManager {
         getFsmContainer(name).getUntypedStateMachineBuilder().defineFinalState(state);
     }
 
-    public synchronized void buildFsm (String name, String initState, boolean isDebugMode, Object context) {
-        getFsmContainer(name).setUntypedStateMachine(getFsmContainer(name).getUntypedStateMachineBuilder().newStateMachine(initState, StateMachineConfiguration.getInstance().enableDebugMode(isDebugMode), context));
+    public synchronized void buildFsm (String name, String initState, boolean isDebugMode) {
+        getFsmContainer(name).setUntypedStateMachine(getFsmContainer(name).getUntypedStateMachineBuilder().newStateMachine(initState, StateMachineConfiguration.getInstance().enableDebugMode(isDebugMode)));
         getFsmContainer(name).getUntypedStateMachine().start();
     }
 

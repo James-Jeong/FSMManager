@@ -9,8 +9,8 @@ import org.squirrelframework.foundation.fsm.UntypedStateMachineBuilder;
  */
 public class FsmContainer {
 
-    UntypedStateMachineBuilder untypedStateMachineBuilder;
-    UntypedStateMachine untypedStateMachine = null;
+    private final UntypedStateMachineBuilder untypedStateMachineBuilder;
+    private UntypedStateMachine untypedStateMachine = null;
 
     public FsmContainer(UntypedStateMachineBuilder untypedStateMachineBuilder) {
         this.untypedStateMachineBuilder = untypedStateMachineBuilder;
