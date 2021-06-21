@@ -23,7 +23,6 @@ public class AmfMediaStateFsmTest {
 
     private static final Logger logger = LoggerFactory.getLogger(AmfMediaStateFsmTest.class);
 
-    private static final String MEDIA_STATE_NAME = "media_state";
 
     ////////////////////////////////////////////////////////////////////////////////
     private final StateManager stateManager = StateManager.getInstance();
@@ -31,7 +30,7 @@ public class AmfMediaStateFsmTest {
 
     @Test
     public void testStart () {
-        stateManager.addFsmContainer(MEDIA_STATE_NAME,
+        stateManager.addFsmContainer(MediaFsm.MEDIA_STATE_NAME,
                 new MediaFsm(),
                 new MediaState(),
                 new MediaEvent(),
@@ -50,7 +49,7 @@ public class AmfMediaStateFsmTest {
         FutureCallback<Object> futureCallback = new FutureCallback<Object>() {
             @Override
             public void onSuccess(Object param) {
-                logger.info("SUCCESS: {}", param);
+                logger.info("SUCCESS: Current State = {}", param);
             }
 
             @Override
@@ -62,45 +61,40 @@ public class AmfMediaStateFsmTest {
 
         ////////////////////////////////////////////////////////////////////////////////
         // 2. 상태 정의
-        stateManager.setFsmCondition(MEDIA_STATE_NAME, MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST, MediaEvent.MEDIA_START_EVENT);
+        stateManager.setFsmCondition(MediaFsm.MEDIA_STATE_NAME, MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST, MediaEvent.MEDIA_START_EVENT);
 
-        stateManager.setFsmOnEntry(MEDIA_STATE_NAME, MediaState.ACTIVE_REQUEST, "mediaStart");
-        stateManager.setFsmCondition(MEDIA_STATE_NAME, MediaState.ACTIVE_REQUEST, MediaState.ACTIVE_STATE, MediaEvent.MEDIA_CREATE_SUCCESS_EVENT);
-        stateManager.setFsmCondition(MEDIA_STATE_NAME, MediaState.ACTIVE_REQUEST, MediaState.IDLE_STATE, MediaEvent.MEDIA_CREATE_FAIL_EVENT);
-        stateManager.setFsmOnEntry(MEDIA_STATE_NAME, MediaState.ACTIVE_STATE, "mediaCreateSuccess");
+        stateManager.setFsmOnEntry(MediaFsm.MEDIA_STATE_NAME, MediaState.ACTIVE_REQUEST, "mediaStart");
+        stateManager.setFsmCondition(MediaFsm.MEDIA_STATE_NAME, MediaState.ACTIVE_REQUEST, MediaState.ACTIVE_STATE, MediaEvent.MEDIA_CREATE_SUCCESS_EVENT);
+        stateManager.setFsmCondition(MediaFsm.MEDIA_STATE_NAME, MediaState.ACTIVE_REQUEST, MediaState.IDLE_STATE, MediaEvent.MEDIA_CREATE_FAIL_EVENT);
+        stateManager.setFsmOnEntry(MediaFsm.MEDIA_STATE_NAME, MediaState.ACTIVE_STATE, "mediaCreateSuccess");
 
-        stateManager.setFsmCondition(MEDIA_STATE_NAME, MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST, MediaEvent.MEDIA_STOP_EVENT);
+        stateManager.setFsmCondition(MediaFsm.MEDIA_STATE_NAME, MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST, MediaEvent.MEDIA_STOP_EVENT);
 
-        stateManager.setFsmOnEntry(MEDIA_STATE_NAME, MediaState.IDLE_REQUEST, "mediaStop");
-        stateManager.setFsmCondition(MEDIA_STATE_NAME, MediaState.IDLE_REQUEST, MediaState.IDLE_STATE, MediaEvent.MEDIA_DELETE_SUCCESS_EVENT);
-        stateManager.setFsmCondition(MEDIA_STATE_NAME, MediaState.IDLE_REQUEST, MediaState.ACTIVE_STATE, MediaEvent.MEDIA_DELETE_FAIL_EVENT);
-        stateManager.setFsmOnEntry(MEDIA_STATE_NAME, MediaState.ACTIVE_STATE, "mediaDeleteSuccess");
+        stateManager.setFsmOnEntry(MediaFsm.MEDIA_STATE_NAME, MediaState.IDLE_REQUEST, "mediaStop");
+        stateManager.setFsmCondition(MediaFsm.MEDIA_STATE_NAME, MediaState.IDLE_REQUEST, MediaState.IDLE_STATE, MediaEvent.MEDIA_DELETE_SUCCESS_EVENT);
+        stateManager.setFsmCondition(MediaFsm.MEDIA_STATE_NAME, MediaState.IDLE_REQUEST, MediaState.ACTIVE_STATE, MediaEvent.MEDIA_DELETE_FAIL_EVENT);
+        stateManager.setFsmOnEntry(MediaFsm.MEDIA_STATE_NAME, MediaState.ACTIVE_STATE, "mediaDeleteSuccess");
 
-        //stateManager.setFsmFinalState(MEDIA_STATE_NAME, MediaState.IDLE_STATE);
+        //stateManager.setFsmFinalState(MediaFsm.MEDIA_STATE_NAME, MediaState.IDLE_STATE);
         MediaGlobalContext mediaGlobalContext = new MediaGlobalContext("127.0.0.1", 5000);
-        stateManager.buildFsm(MEDIA_STATE_NAME, MediaState.IDLE_STATE, true, mediaGlobalContext);
+        stateManager.buildFsm(MediaFsm.MEDIA_STATE_NAME, MediaState.IDLE_STATE, true, mediaGlobalContext);
         ////////////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////////////
         // 3. 상태 천이
-        logger.info("Current State: {}", stateManager.getFsmCurState(MEDIA_STATE_NAME));
-        Assert.assertEquals(MediaState.IDLE_STATE, stateManager.getFsmCurState(MEDIA_STATE_NAME));
+        Assert.assertEquals(MediaState.IDLE_STATE, stateManager.getFsmCurState(MediaFsm.MEDIA_STATE_NAME));
 
-        stateManager.fireFsm(MEDIA_STATE_NAME, MediaEvent.MEDIA_START_EVENT, futureCallback);
-        logger.info("Current State: {}", stateManager.getFsmCurState(MEDIA_STATE_NAME));
-        Assert.assertEquals(MediaState.ACTIVE_REQUEST, stateManager.getFsmCurState(MEDIA_STATE_NAME));
+        stateManager.fireFsm(MediaFsm.MEDIA_STATE_NAME, MediaEvent.MEDIA_START_EVENT, futureCallback);
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, stateManager.getFsmCurState(MediaFsm.MEDIA_STATE_NAME));
 
-        stateManager.fireFsm(MEDIA_STATE_NAME, MediaEvent.MEDIA_CREATE_SUCCESS_EVENT, futureCallback);
-        logger.info("Current State: {}", stateManager.getFsmCurState(MEDIA_STATE_NAME));
-        Assert.assertEquals(MediaState.ACTIVE_STATE, stateManager.getFsmCurState(MEDIA_STATE_NAME));
+        stateManager.fireFsm(MediaFsm.MEDIA_STATE_NAME, MediaEvent.MEDIA_CREATE_SUCCESS_EVENT, futureCallback);
+        Assert.assertEquals(MediaState.ACTIVE_STATE, stateManager.getFsmCurState(MediaFsm.MEDIA_STATE_NAME));
 
-        stateManager.fireFsm(MEDIA_STATE_NAME, MediaEvent.MEDIA_STOP_EVENT, futureCallback);
-        logger.info("Current State: {}", stateManager.getFsmCurState(MEDIA_STATE_NAME));
-        Assert.assertEquals(MediaState.IDLE_REQUEST, stateManager.getFsmCurState(MEDIA_STATE_NAME));
+        stateManager.fireFsm(MediaFsm.MEDIA_STATE_NAME, MediaEvent.MEDIA_STOP_EVENT, futureCallback);
+        Assert.assertEquals(MediaState.IDLE_REQUEST, stateManager.getFsmCurState(MediaFsm.MEDIA_STATE_NAME));
 
-        stateManager.fireFsm(MEDIA_STATE_NAME, MediaEvent.MEDIA_DELETE_SUCCESS_EVENT, futureCallback);
-        logger.info("Current State: {}", stateManager.getFsmCurState(MEDIA_STATE_NAME));
-        Assert.assertEquals(MediaState.IDLE_STATE, stateManager.getFsmCurState(MEDIA_STATE_NAME));
+        stateManager.fireFsm(MediaFsm.MEDIA_STATE_NAME, MediaEvent.MEDIA_DELETE_SUCCESS_EVENT, futureCallback);
+        Assert.assertEquals(MediaState.IDLE_STATE, stateManager.getFsmCurState(MediaFsm.MEDIA_STATE_NAME));
         ////////////////////////////////////////////////////////////////////////////////
     }
 

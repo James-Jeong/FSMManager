@@ -1,3 +1,4 @@
+import base.AmfCallAndMediaStateFsmTest;
 import base.AmfCallAndMediaStateTest;
 import base.call.AmfCallStateFsmTest;
 import base.call.AmfCallStateTest;
@@ -28,11 +29,16 @@ public class TestMain {
         //AmfCallAndMediaStateTest amfCallAndMediaStateTest = new AmfCallAndMediaStateTest();
         //amfCallAndMediaStateTest.testStart();
 
+        ////////////////////////////////////////////////////////////////////////////////
+
 /*        AmfMediaStateFsmTest amfMediaStateFsmTest = new AmfMediaStateFsmTest();
         amfMediaStateFsmTest.testStart();*/
 
-        AmfCallStateFsmTest amfCallStateFsmTest = new AmfCallStateFsmTest();
-        amfCallStateFsmTest.testStart();
+/*        AmfCallStateFsmTest amfCallStateFsmTest = new AmfCallStateFsmTest();
+        amfCallStateFsmTest.testStart();*/
+
+        AmfCallAndMediaStateFsmTest amfCallAndMediaStateFsmTest = new AmfCallAndMediaStateFsmTest();
+        amfCallAndMediaStateFsmTest.testStart();
     }
 
 }

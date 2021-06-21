@@ -13,6 +13,8 @@ public class MediaFsm extends AbstractFsm {
 
     private static final Logger logger = LoggerFactory.getLogger(MediaFsm.class);
 
+    public static final String MEDIA_STATE_NAME = "media_state";
+
     public MediaFsm() {
         // Nothing
     }
