@@ -19,27 +19,37 @@ public class MediaFsm extends AbstractFsm {
 
     public void mediaStart (Object from, Object to, Object event, Object transitionContext) {
         TransitionContext context = (TransitionContext) transitionContext;
-        context.getCallback().onSuccess(null);
+        context.getCallback().onSuccess(event);
         logger.info("@ Media is started! ({} > {}) (event={})", from, to, event);
     }
 
     public void mediaStop (Object from, Object to, Object event, Object transitionContext) {
+        TransitionContext context = (TransitionContext) transitionContext;
+        context.getCallback().onSuccess(event);
         logger.info("@ Media is stopped! ({} > {}) (event={})", from, to, event);
     }
 
     public void mediaCreateSuccess (Object from, Object to, Object event, Object transitionContext) {
+        TransitionContext context = (TransitionContext) transitionContext;
+        context.getCallback().onSuccess(event);
         logger.info("@ Success to create media! ({} > {}) (event={})", from, to, event);
     }
 
     public void mediaCreateFail (Object from, Object to, Object event, Object transitionContext) {
+        TransitionContext context = (TransitionContext) transitionContext;
+        context.getCallback().onSuccess(event);
         logger.info("@ Fail to create media! ({} > {}) (event={})", from, to, event);
     }
 
     public void mediaDeleteSuccess (Object from, Object to, Object event, Object transitionContext) {
+        TransitionContext context = (TransitionContext) transitionContext;
+        context.getCallback().onSuccess(event);
         logger.info("@ Success to delete media! ({} > {}) (event={})", from, to, event);
     }
 
     public void mediaDeleteFail (Object from, Object to, Object event, Object transitionContext) {
+        TransitionContext context = (TransitionContext) transitionContext;
+        context.getCallback().onSuccess(event);
         logger.info("@ Fail to delete media! ({} > {}) (event={})", from, to, event);
     }
 

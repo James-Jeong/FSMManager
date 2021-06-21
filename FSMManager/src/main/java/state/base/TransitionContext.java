@@ -8,7 +8,7 @@ import com.google.common.util.concurrent.FutureCallback;
  */
 public class TransitionContext {
 
-    private FutureCallback<Void> callback;
+    private FutureCallback<Object> callback;
 
     ////////////////////////////////////////////////////////////////////////////////
 
@@ -18,11 +18,11 @@ public class TransitionContext {
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    public FutureCallback<Void> getCallback() {
+    public FutureCallback<Object> getCallback() {
         return callback;
     }
 
-    public TransitionContext setCallback(FutureCallback<Void> callback) {
+    public TransitionContext setCallback(FutureCallback<Object> callback) {
         this.callback = callback;
         return this;
     }

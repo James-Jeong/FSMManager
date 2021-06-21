@@ -105,7 +105,7 @@ public class StateManager {
         getFsmContainer(name).getUntypedStateMachine().start();
     }
 
-    public void fireFsm (String name, String event, FutureCallback<Void> callback) {
+    public void fireFsm (String name, String event, FutureCallback<Object> callback) {
         TransitionContext transitionContext;
         if (callback != null) {
             transitionContext = new TransitionContext().setCallback(callback);

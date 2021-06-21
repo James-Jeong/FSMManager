@@ -70,15 +70,15 @@ public class AmfMediaStateFsmTest {
         ////////////////////////////////////////////////////////////////////////////////
         // 2. 상태 천이
 
-        FutureCallback<Void> futureCallback = new FutureCallback<Void>() {
+        FutureCallback<Object> futureCallback = new FutureCallback<Object>() {
             @Override
-            public void onSuccess(Void unused) {
-                logger.info("SUCCESS");
+            public void onSuccess(Object param) {
+                logger.info("SUCCESS: {}", param);
             }
 
             @Override
             public void onFailure(Throwable throwable) {
-                logger.warn("FAIL");
+                logger.warn("FAIL: {}", (throwable.getCause() == null ? null : throwable.getCause().toString()));
             }
         };
 
@@ -87,13 +87,13 @@ public class AmfMediaStateFsmTest {
         stateManager.fireFsm(MEDIA_STATE_NAME, MediaEvent.MEDIA_START_EVENT, futureCallback);
         logger.info("Current State: {}", stateManager.getFsmCurState(MEDIA_STATE_NAME));
 
-        stateManager.fireFsm(MEDIA_STATE_NAME, MediaEvent.MEDIA_CREATE_SUCCESS_EVENT, null);
+        stateManager.fireFsm(MEDIA_STATE_NAME, MediaEvent.MEDIA_CREATE_SUCCESS_EVENT, futureCallback);
         logger.info("Current State: {}", stateManager.getFsmCurState(MEDIA_STATE_NAME));
 
-        stateManager.fireFsm(MEDIA_STATE_NAME, MediaEvent.MEDIA_STOP_EVENT, null);
+        stateManager.fireFsm(MEDIA_STATE_NAME, MediaEvent.MEDIA_STOP_EVENT, futureCallback);
         logger.info("Current State: {}", stateManager.getFsmCurState(MEDIA_STATE_NAME));
 
-        stateManager.fireFsm(MEDIA_STATE_NAME, MediaEvent.MEDIA_DELETE_SUCCESS_EVENT, null);
+        stateManager.fireFsm(MEDIA_STATE_NAME, MediaEvent.MEDIA_DELETE_SUCCESS_EVENT, futureCallback);
         logger.info("Current State: {}", stateManager.getFsmCurState(MEDIA_STATE_NAME));
 
         ////////////////////////////////////////////////////////////////////////////////
