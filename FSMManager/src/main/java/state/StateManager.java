@@ -96,6 +96,10 @@ public class StateManager {
         return (String) getFsmContainer(name).getUntypedStateMachine().getCurrentState();
     }
 
+    public String getFsmLastState (String name) {
+        return (String) getFsmContainer(name).getUntypedStateMachine().getLastState();
+    }
+
     public synchronized void setFsmFinalState (String name, String state) {
         getFsmContainer(name).getUntypedStateMachineBuilder().defineFinalState(state);
     }

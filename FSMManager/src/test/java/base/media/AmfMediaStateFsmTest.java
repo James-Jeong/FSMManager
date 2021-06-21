@@ -23,8 +23,6 @@ public class AmfMediaStateFsmTest {
 
     private static final Logger logger = LoggerFactory.getLogger(AmfMediaStateFsmTest.class);
 
-    ////////////////////////////////////////////////////////////////////////////////
-
     private static final String MEDIA_STATE_NAME = "media_state";
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -48,7 +46,22 @@ public class AmfMediaStateFsmTest {
 
     public void normalTest () {
         ////////////////////////////////////////////////////////////////////////////////
-        // 1. 상태 정의
+        // 1. CallBack 함수 정의
+        FutureCallback<Object> futureCallback = new FutureCallback<Object>() {
+            @Override
+            public void onSuccess(Object param) {
+                logger.info("SUCCESS: {}", param);
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                logger.warn("FAIL: {}", (throwable.getCause() == null ? null : throwable.getCause().toString()));
+            }
+        };
+        ////////////////////////////////////////////////////////////////////////////////
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // 2. 상태 정의
         stateManager.setFsmCondition(MEDIA_STATE_NAME, MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST, MediaEvent.MEDIA_START_EVENT);
 
         stateManager.setFsmOnEntry(MEDIA_STATE_NAME, MediaState.ACTIVE_REQUEST, "mediaStart");
@@ -69,20 +82,7 @@ public class AmfMediaStateFsmTest {
         ////////////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////////////
-        // 2. 상태 천이
-
-        FutureCallback<Object> futureCallback = new FutureCallback<Object>() {
-            @Override
-            public void onSuccess(Object param) {
-                logger.info("SUCCESS: {}", param);
-            }
-
-            @Override
-            public void onFailure(Throwable throwable) {
-                logger.warn("FAIL: {}", (throwable.getCause() == null ? null : throwable.getCause().toString()));
-            }
-        };
-
+        // 3. 상태 천이
         logger.info("Current State: {}", stateManager.getFsmCurState(MEDIA_STATE_NAME));
         Assert.assertEquals(MediaState.IDLE_STATE, stateManager.getFsmCurState(MEDIA_STATE_NAME));
 
@@ -101,7 +101,6 @@ public class AmfMediaStateFsmTest {
         stateManager.fireFsm(MEDIA_STATE_NAME, MediaEvent.MEDIA_DELETE_SUCCESS_EVENT, futureCallback);
         logger.info("Current State: {}", stateManager.getFsmCurState(MEDIA_STATE_NAME));
         Assert.assertEquals(MediaState.IDLE_STATE, stateManager.getFsmCurState(MEDIA_STATE_NAME));
-
         ////////////////////////////////////////////////////////////////////////////////
     }
 

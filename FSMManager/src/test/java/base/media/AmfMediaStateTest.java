@@ -110,16 +110,16 @@ public class AmfMediaStateTest {
         mediaStateHandler.setCurState(MediaState.IDLE_STATE);
 
         mediaStart();
-        Assert.assertEquals(mediaStateHandler.getCallBackResult(), MediaState.ACTIVE_REQUEST);
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStateHandler.getCallBackResult());
 
         mediaCreateSuccess();
-        Assert.assertEquals(mediaStateHandler.getCallBackResult(), MediaState.ACTIVE_STATE);
+        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaStateHandler.getCallBackResult());
 
         mediaStop();
-        Assert.assertEquals(mediaStateHandler.getCallBackResult(), MediaState.IDLE_REQUEST);
+        Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStateHandler.getCallBackResult());
 
         mediaDeleteSuccess();
-        Assert.assertEquals(mediaStateHandler.getCallBackResult(), MediaState.IDLE_STATE);
+        Assert.assertEquals(MediaState.IDLE_STATE, mediaStateHandler.getCallBackResult());
         ////////////////////////////////////////////////////////////////////////////////
     }
 
