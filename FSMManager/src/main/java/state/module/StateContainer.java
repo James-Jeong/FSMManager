@@ -4,7 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.base.CallBack;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @class public class StateContainer
@@ -15,7 +18,7 @@ public class StateContainer {
     private static final Logger logger = LoggerFactory.getLogger(StateContainer.class);
 
     // State Map
-    private final Map<String, Map<String, CallBack>> stateMap = new HashMap<>();
+    private final Map<String, Map<String, CallBack>> stateMap = new ConcurrentHashMap<>();
 
     // 현재 State 이름
     private String curState = null;
@@ -46,30 +49,28 @@ public class StateContainer {
      * @return 성공 시 true, 실패 시 false 반환
      */
     public boolean addToStateByFromState(String fromState, String toState, CallBack callBack) {
-        synchronized (stateMap) {
-            if (getCallBackByFromState(fromState, toState) != null) {
-                return false;
-            }
+        if (getCallBackByFromState(fromState, toState) != null) {
+            return false;
+        }
 
-            Map<String, CallBack> toStateMap = getToStateByFromState(fromState);
-            if (toStateMap == null) {
-                toStateMap = new HashMap<>();
-                toStateMap.putIfAbsent(toState, callBack);
-            }
+        Map<String, CallBack> toStateMap = getToStateByFromState(fromState);
+        if (toStateMap == null) {
+            toStateMap = new ConcurrentHashMap<>();
+            toStateMap.putIfAbsent(toState, callBack);
+        }
 
-            boolean result = stateMap.putIfAbsent(fromState, toStateMap) == null;
+        boolean result = stateMap.putIfAbsent(fromState, toStateMap) == null;
+        if (result) {
+            logger.info("({}) Success to add state. (fromState={}, toState={})", name, fromState, toState);
+        } else {
+            result = toStateMap.putIfAbsent(toState, callBack) == null;
             if (result) {
                 logger.info("({}) Success to add state. (fromState={}, toState={})", name, fromState, toState);
             } else {
-                result = toStateMap.putIfAbsent(toState, callBack) == null;
-                if (result) {
-                    logger.info("({}) Success to add state. (fromState={}, toState={})", name, fromState, toState);
-                } else {
-                    logger.info("({}) Fail to add state. (fromState={}, toState={})", name, fromState, toState);
-                }
+                logger.info("({}) Fail to add state. (fromState={}, toState={})", name, fromState, toState);
             }
-            return result;
         }
+        return result;
     }
 
     /**
@@ -80,25 +81,23 @@ public class StateContainer {
      * @return 성공 시 true, 실패 시 false 반환
      */
     public boolean removeFromState(String fromState) {
-        synchronized (stateMap) {
-            boolean result = stateMap.remove(fromState) != null;
-            if (result) {
-                // 다른 From state 와 To state 로 포함되어 있으면 다 삭제
-                for (Map.Entry<String, Map<String, CallBack>> mapEntry : stateMap.entrySet()) {
-                    if (mapEntry.getValue() == null) { continue; }
-                    for (String toState : mapEntry.getValue().keySet()) {
-                        if (toState.equals(fromState)) {
-                            removeToStateByFromState(mapEntry.getKey(), fromState);
-                        }
+        boolean result = stateMap.remove(fromState) != null;
+        if (result) {
+            // 다른 From state 와 To state 로 포함되어 있으면 다 삭제
+            for (Map.Entry<String, Map<String, CallBack>> mapEntry : stateMap.entrySet()) {
+                if (mapEntry.getValue() == null) { continue; }
+                for (String toState : mapEntry.getValue().keySet()) {
+                    if (toState.equals(fromState)) {
+                        removeToStateByFromState(mapEntry.getKey(), fromState);
                     }
                 }
-
-                logger.info("({}) Success to remove the from state. (fromState={})", name, fromState);
-            } else {
-                logger.info("({}) Fail to remove the from state. (fromState={})", name, fromState);
             }
-            return result;
+
+            logger.info("({}) Success to remove the from state. (fromState={})", name, fromState);
+        } else {
+            logger.info("({}) Fail to remove the from state. (fromState={})", name, fromState);
         }
+        return result;
     }
 
     /**
@@ -110,19 +109,17 @@ public class StateContainer {
      * @return 성공 시 true, 실패 시 false 반환
      */
     public boolean removeToStateByFromState(String fromState, String toState) {
-        synchronized (stateMap) {
-            if (getToStateByFromState(fromState) == null) {
-                return false;
-            }
-
-            boolean result = getToStateByFromState(fromState).remove(toState) != null;
-            if (result) {
-                logger.info("({}) Success to remove the to state. (fromState={}, toState={})", name, fromState, toState);
-            } else {
-                logger.info("({}) Fail to remove the to state. (fromState={}, toState={})", name, fromState, toState);
-            }
-            return result;
+        if (getToStateByFromState(fromState) == null) {
+            return false;
         }
+
+        boolean result = getToStateByFromState(fromState).remove(toState) != null;
+        if (result) {
+            logger.info("({}) Success to remove the to state. (fromState={}, toState={})", name, fromState, toState);
+        } else {
+            logger.info("({}) Fail to remove the to state. (fromState={}, toState={})", name, fromState, toState);
+        }
+        return result;
     }
 
     /**
