@@ -1,4 +1,4 @@
-package state.base;
+package state.squirrel;
 
 /**
  * @interface public interface CallBack

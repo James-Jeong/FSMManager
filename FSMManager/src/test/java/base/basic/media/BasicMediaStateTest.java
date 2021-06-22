@@ -1,22 +1,22 @@
-package base.media;
+package base.basic.media;
 
-import base.media.base.MediaState;
+import base.squirrel.media.base.MediaState;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.StateManager;
-import state.base.CallBack;
+import state.squirrel.CallBack;
 import state.module.StateHandler;
 
 /**
  * @class public class AmfMediaStateTest
  * @brief AmfMediaStateTest class
  */
-public class AmfMediaStateTest {
+public class BasicMediaStateTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(AmfMediaStateTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(BasicMediaStateTest.class);
 
     private final StopWatch stopWatch = new StopWatch();
 

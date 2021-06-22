@@ -1,6 +1,6 @@
-package base.call.base;
+package base.squirrel.call.base;
 
-import state.base.AbstractEvent;
+import state.squirrel.AbstractEvent;
 
 /**
  * @class public class CallEvent

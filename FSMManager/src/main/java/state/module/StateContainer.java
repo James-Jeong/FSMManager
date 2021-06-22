@@ -2,7 +2,7 @@ package state.module;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import state.base.CallBack;
+import state.squirrel.CallBack;
 
 import java.util.ArrayList;
 import java.util.HashMap;

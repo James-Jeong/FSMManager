@@ -4,8 +4,9 @@ import com.google.common.util.concurrent.FutureCallback;
 import org.squirrelframework.foundation.fsm.StateMachineBuilderFactory;
 import org.squirrelframework.foundation.fsm.StateMachineConfiguration;
 import org.squirrelframework.foundation.fsm.UntypedStateMachineBuilder;
-import state.base.*;
+import state.akka.AkkaContainer;
 import state.module.StateHandler;
+import state.squirrel.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +16,8 @@ import java.util.Map;
  * @brief StateManager class
  */
 public class StateManager {
+
+    private final Map<String, AkkaContainer> akkaMap = new HashMap<>();
 
     private final Map<String, FsmContainer> fsmMap = new HashMap<>();
 
@@ -48,6 +51,27 @@ public class StateManager {
     }
 
     ////////////////////////////////////////////////////////////////////////////////
+    // # Akka FSM
+
+    public synchronized void addAkkaContainer (String name) {
+        if (getAkkaContainer(name) != null) { return; }
+        akkaMap.putIfAbsent(
+                name,
+                new AkkaContainer(name)
+        );
+    }
+
+    public synchronized void removeAkkaContainer (String name) {
+        if (getAkkaContainer(name) == null) { return; }
+        akkaMap.remove(name);
+    }
+
+    public AkkaContainer getAkkaContainer (String name) {
+        return akkaMap.get(name);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // # Squirrel FSM
 
     public synchronized void addFsmContainer (String name,
                                              AbstractFsm abstractFsm,
@@ -126,6 +150,7 @@ public class StateManager {
     }
 
     ////////////////////////////////////////////////////////////////////////////////
+    // # Handmade FSM
 
     /**
      * @fn public synchronized void addStateHandler (String name)

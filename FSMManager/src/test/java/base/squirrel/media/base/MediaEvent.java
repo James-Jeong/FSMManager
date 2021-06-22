@@ -1,6 +1,6 @@
-package base.media.base;
+package base.squirrel.media.base;
 
-import state.base.AbstractEvent;
+import state.squirrel.AbstractEvent;
 
 /**
  * @class public class MediaEvent

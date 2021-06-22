@@ -1,9 +1,9 @@
-package base.media.base;
+package base.squirrel.media.base;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import state.base.AbstractFsm;
-import state.base.TransitionContext;
+import state.squirrel.AbstractFsm;
+import state.squirrel.TransitionContext;
 
 /**
  * @class public class MediaFsm extends AbstractFsm

@@ -1,8 +1,8 @@
-package base.media;
+package base.squirrel.media;
 
-import base.media.base.MediaEvent;
-import base.media.base.MediaFsm;
-import base.media.base.MediaState;
+import base.squirrel.media.base.MediaEvent;
+import base.squirrel.media.base.MediaFsm;
+import base.squirrel.media.base.MediaState;
 import com.google.common.util.concurrent.FutureCallback;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Assert;
@@ -15,9 +15,9 @@ import state.StateManager;
  * @class public class AmfMediaStateTest
  * @brief AmfMediaStateTest class
  */
-public class AmfMediaStateFsmTest {
+public class SquirrelMediaStateFsmTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(AmfMediaStateFsmTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(SquirrelMediaStateFsmTest.class);
 
     private final StateManager stateManager = StateManager.getInstance();
 

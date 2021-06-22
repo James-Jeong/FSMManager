@@ -1,6 +1,6 @@
-package base.call.base;
+package base.squirrel.call.base;
 
-import state.base.AbstractState;
+import state.squirrel.AbstractState;
 
 /**
  * @class public class CallState extends AbstractState

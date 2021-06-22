@@ -1,4 +1,4 @@
-package state.base;
+package state.squirrel;
 
 import org.squirrelframework.foundation.fsm.UntypedStateMachine;
 import org.squirrelframework.foundation.fsm.UntypedStateMachineBuilder;

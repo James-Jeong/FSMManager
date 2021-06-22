@@ -1,7 +1,7 @@
 package state.module;
 
 import event.StateEventManager;
-import state.base.CallBack;
+import state.squirrel.CallBack;
 
 import java.util.List;
 import java.util.Map;

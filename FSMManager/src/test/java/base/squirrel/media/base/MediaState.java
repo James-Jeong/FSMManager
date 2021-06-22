@@ -1,6 +1,6 @@
-package base.media.base;
+package base.squirrel.media.base;
 
-import state.base.AbstractState;
+import state.squirrel.AbstractState;
 
 public class MediaState extends AbstractState {
 

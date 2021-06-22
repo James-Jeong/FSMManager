@@ -1,4 +1,4 @@
-package state.base;
+package state.squirrel;
 
 /**
  * @class public abstract class AbstractEvent
