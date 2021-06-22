@@ -5,9 +5,9 @@ import org.slf4j.LoggerFactory;
 import state.base.CallBack;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @class public class StateContainer
@@ -18,7 +18,7 @@ public class StateContainer {
     private static final Logger logger = LoggerFactory.getLogger(StateContainer.class);
 
     // State Map
-    private final Map<String, Map<String, CallBack>> stateMap = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, CallBack>> stateMap = new HashMap<>();
 
     // 현재 State 이름
     private String curState = null;
@@ -41,21 +41,21 @@ public class StateContainer {
     ////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @fn public boolean addToStateByFromState(String fromState, String toState, CallBack callBack)
+     * @fn public synchronized boolean addToStateByFromState(String fromState, String toState, CallBack callBack)
      * @brief From state 와 연관된 To state 를 모두 Map 에 추가하는 함수
      * @param fromState From state
      * @param toState To state
      * @param callBack CallBack
      * @return 성공 시 true, 실패 시 false 반환
      */
-    public boolean addToStateByFromState(String fromState, String toState, CallBack callBack) {
+    public synchronized boolean addToStateByFromState(String fromState, String toState, CallBack callBack) {
         if (getCallBackByFromState(fromState, toState) != null) {
             return false;
         }
 
         Map<String, CallBack> toStateMap = getToStateByFromState(fromState);
         if (toStateMap == null) {
-            toStateMap = new ConcurrentHashMap<>();
+            toStateMap = new HashMap<>();
             toStateMap.putIfAbsent(toState, callBack);
         }
 
@@ -74,13 +74,13 @@ public class StateContainer {
     }
 
     /**
-     * @fn public boolean removeFromState(String fromState)
+     * @fn public synchronized boolean removeFromState(String fromState)
      * @brief From state 를 Map 에서 삭제하는 함수
      * 다른 From state 와 To state 로 포함되어 있으면 다 삭제
      * @param fromState From state
      * @return 성공 시 true, 실패 시 false 반환
      */
-    public boolean removeFromState(String fromState) {
+    public synchronized boolean removeFromState(String fromState) {
         boolean result = stateMap.remove(fromState) != null;
         if (result) {
             // 다른 From state 와 To state 로 포함되어 있으면 다 삭제
@@ -101,14 +101,14 @@ public class StateContainer {
     }
 
     /**
-     * @fn public boolean removeToStateByFromState(String fromState, String toState)
+     * @fn public synchronized boolean removeToStateByFromState(String fromState, String toState)
      * @brief From state 와 연관된 To state 를 Map 에서 삭제
      * From state 는 삭제되지 않고 To state 만 삭제
      * @param fromState From state
      * @param toState To state
      * @return 성공 시 true, 실패 시 false 반환
      */
-    public boolean removeToStateByFromState(String fromState, String toState) {
+    public synchronized boolean removeToStateByFromState(String fromState, String toState) {
         if (getToStateByFromState(fromState) == null) {
             return false;
         }

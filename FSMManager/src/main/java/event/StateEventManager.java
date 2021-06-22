@@ -1,7 +1,6 @@
 package event;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -46,7 +45,7 @@ public class StateEventManager {
     public synchronized void addEvent(String event, String fromState, String toState) {
         Map<String, String> stateMap = getStateMap(event);
         if (stateMap == null) {
-            stateMap = new LinkedHashMap<>();
+            stateMap = new HashMap<>();
             stateMap.putIfAbsent(fromState, toState);
             eventMap.putIfAbsent(event, stateMap);
         } else {
