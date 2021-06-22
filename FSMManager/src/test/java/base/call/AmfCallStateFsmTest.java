@@ -4,6 +4,7 @@ import base.call.base.CallEvent;
 import base.call.base.CallFsm;
 import base.call.base.CallState;
 import com.google.common.util.concurrent.FutureCallback;
+import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -19,6 +20,8 @@ public class AmfCallStateFsmTest {
     private static final Logger logger = LoggerFactory.getLogger(AmfCallStateFsmTest.class);
 
     private final StateManager stateManager = StateManager.getInstance();
+
+    private final StopWatch stopWatch = new StopWatch();
 
     ////////////////////////////////////////////////////////////////////////////////
 
@@ -95,8 +98,8 @@ public class AmfCallStateFsmTest {
 
         ////////////////////////////////////////////////////////////////////////////////
         // 3. 상태 천이
+        this.stopWatch.start();
         Assert.assertTrue(stateManager.fireFsm(CallFsm.CALL_STATE_NAME, CallEvent.CALL_INIT_EVENT, futureCallback));
-
         Assert.assertEquals(CallState.INIT, stateManager.getFsmCurState(CallFsm.CALL_STATE_NAME));
 
         Assert.assertTrue(stateManager.fireFsm(CallFsm.CALL_STATE_NAME, CallEvent.CALL_START_EVENT, futureCallback));
@@ -119,6 +122,9 @@ public class AmfCallStateFsmTest {
 
         Assert.assertTrue(stateManager.fireFsm(CallFsm.CALL_STATE_NAME, CallEvent.CALL_STOP_DONE_SUCCESS_EVENT, futureCallback));
         Assert.assertEquals(CallState.INIT, stateManager.getFsmCurState(CallFsm.CALL_STATE_NAME));
+
+        this.stopWatch.stop();
+        logger.info("Done. (total time: {} s)", String.format("%.3f", ((double) this.stopWatch.getTime()) / 1000));
 
         ////////////////////////////////////////////////////////////////////////////////
     }

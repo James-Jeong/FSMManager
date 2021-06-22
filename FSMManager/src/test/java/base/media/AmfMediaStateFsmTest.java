@@ -4,6 +4,7 @@ import base.media.base.MediaEvent;
 import base.media.base.MediaFsm;
 import base.media.base.MediaState;
 import com.google.common.util.concurrent.FutureCallback;
+import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -19,6 +20,8 @@ public class AmfMediaStateFsmTest {
     private static final Logger logger = LoggerFactory.getLogger(AmfMediaStateFsmTest.class);
 
     private final StateManager stateManager = StateManager.getInstance();
+
+    private final StopWatch stopWatch = new StopWatch();
 
     ////////////////////////////////////////////////////////////////////////////////
 
@@ -75,6 +78,7 @@ public class AmfMediaStateFsmTest {
 
         ////////////////////////////////////////////////////////////////////////////////
         // 3. 상태 천이
+        this.stopWatch.start();
         Assert.assertEquals(MediaState.IDLE_STATE, stateManager.getFsmCurState(MediaFsm.MEDIA_STATE_NAME));
 
         Assert.assertTrue(stateManager.fireFsm(MediaFsm.MEDIA_STATE_NAME, MediaEvent.MEDIA_START_EVENT, futureCallback));
@@ -88,6 +92,9 @@ public class AmfMediaStateFsmTest {
 
         Assert.assertTrue(stateManager.fireFsm(MediaFsm.MEDIA_STATE_NAME, MediaEvent.MEDIA_DELETE_SUCCESS_EVENT, futureCallback));
         Assert.assertEquals(MediaState.IDLE_STATE, stateManager.getFsmCurState(MediaFsm.MEDIA_STATE_NAME));
+
+        this.stopWatch.stop();
+        logger.info("Done. (total time: {} s)", String.format("%.3f", ((double) this.stopWatch.getTime()) / 1000));
         ////////////////////////////////////////////////////////////////////////////////
     }
 

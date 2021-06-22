@@ -2,6 +2,7 @@ package base;
 
 import base.call.base.CallState;
 import base.media.base.MediaState;
+import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -17,6 +18,8 @@ import state.module.StateHandler;
 public class AmfCallAndMediaStateTest {
 
     private static final Logger logger = LoggerFactory.getLogger(AmfCallAndMediaStateTest.class);
+
+    private final StopWatch stopWatch = new StopWatch();
 
     private static final String CALL_START_EVENT = "call_start";
     private static final String CALL_FAIL_EVENT = "call_fail";
@@ -232,6 +235,8 @@ public class AmfCallAndMediaStateTest {
 
         ////////////////////////////////////////////////////////////////////////////////
         // 3. 상태 천이
+        this.stopWatch.start();
+
         callStateHandler.setCurState(CallState.INIT);
         mediaStateHandler.setCurState(MediaState.IDLE_STATE);
 
@@ -259,6 +264,9 @@ public class AmfCallAndMediaStateTest {
         callStopSuccess();
         Assert.assertEquals(CallState.INIT, callStateHandler.getCallBackResult());
         Assert.assertEquals(MediaState.IDLE_STATE, mediaStateHandler.getCallBackResult());
+
+        this.stopWatch.stop();
+        logger.info("Done. (total time: {} s)", String.format("%.3f", ((double) this.stopWatch.getTime()) / 1000));
         ////////////////////////////////////////////////////////////////////////////////
     }
 }

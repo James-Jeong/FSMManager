@@ -1,6 +1,7 @@
 package base.media;
 
 import base.media.base.MediaState;
+import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -16,6 +17,8 @@ import state.module.StateHandler;
 public class AmfMediaStateTest {
 
     private static final Logger logger = LoggerFactory.getLogger(AmfMediaStateTest.class);
+
+    private final StopWatch stopWatch = new StopWatch();
 
     private static final String MEDIA_START_EVENT = "media_start_success";
     private static final String MEDIA_STOP_EVENT = "media_stop_success";
@@ -105,6 +108,8 @@ public class AmfMediaStateTest {
 
         ////////////////////////////////////////////////////////////////////////////////
         // 3. 상태 천이
+        this.stopWatch.start();
+
         mediaStart();
 
         mediaStateHandler.setCurState(MediaState.IDLE_STATE);
@@ -120,6 +125,9 @@ public class AmfMediaStateTest {
 
         mediaDeleteSuccess();
         Assert.assertEquals(MediaState.IDLE_STATE, mediaStateHandler.getCallBackResult());
+
+        this.stopWatch.stop();
+        logger.info("Done. (total time: {} s)", String.format("%.3f", ((double) this.stopWatch.getTime()) / 1000));
         ////////////////////////////////////////////////////////////////////////////////
     }
 

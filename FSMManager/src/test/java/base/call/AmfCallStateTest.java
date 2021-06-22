@@ -1,6 +1,7 @@
 package base.call;
 
 import base.call.base.CallState;
+import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -16,6 +17,8 @@ import state.module.StateHandler;
 public class AmfCallStateTest {
 
     private static final Logger logger = LoggerFactory.getLogger(AmfCallStateTest.class);
+
+    private final StopWatch stopWatch = new StopWatch();
 
     private static final String CALL_START_EVENT = "call_start";
     private static final String CALL_FAIL_EVENT = "call_fail";
@@ -178,7 +181,9 @@ public class AmfCallStateTest {
 
         callStateHandler.setCurState(CallState.INIT);
 
+        this.stopWatch.start();
         callStart();
+
         Assert.assertEquals(CallState.OFFER, callStateHandler.getCallBackResult());
 
         earlyNegoStart();
@@ -199,6 +204,8 @@ public class AmfCallStateTest {
         callStopSuccess();
         Assert.assertEquals(CallState.INIT, callStateHandler.getCallBackResult());
 
+        this.stopWatch.stop();
+        logger.info("Done. (total time: {} s)", String.format("%.3f", ((double) this.stopWatch.getTime()) / 1000));
 
 /*        Assert.assertNotNull(callStateHandler.nextState(CallState.OFFER));
         Assert.assertEquals(CallState.OFFER, callStateHandler.getCallBackResult());

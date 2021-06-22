@@ -20,25 +20,25 @@ public class TestMain {
 
     @Test
     public void TotalTest () {
-        //AmfCallStateTest amfCallStateTest = new AmfCallStateTest();
-        //amfCallStateTest.testStart();
+        AmfCallStateTest amfCallStateTest = new AmfCallStateTest();
+        amfCallStateTest.testStart();
 
-        //AmfMediaStateTest amfMediaStateTest = new AmfMediaStateTest();
-        //amfMediaStateTest.testStart();
+        AmfMediaStateTest amfMediaStateTest = new AmfMediaStateTest();
+        amfMediaStateTest.testStart();
 
-        //AmfCallAndMediaStateTest amfCallAndMediaStateTest = new AmfCallAndMediaStateTest();
-        //amfCallAndMediaStateTest.testStart();
+        AmfCallAndMediaStateTest amfCallAndMediaStateTest = new AmfCallAndMediaStateTest();
+        amfCallAndMediaStateTest.testStart();
 
         ////////////////////////////////////////////////////////////////////////////////
-
-        //AmfMediaStateFsmTest amfMediaStateFsmTest = new AmfMediaStateFsmTest();
-        //amfMediaStateFsmTest.testStart();
 
         AmfCallStateFsmTest amfCallStateFsmTest = new AmfCallStateFsmTest();
         amfCallStateFsmTest.testStart();
 
-        //AmfCallAndMediaStateFsmTest amfCallAndMediaStateFsmTest = new AmfCallAndMediaStateFsmTest();
-        //amfCallAndMediaStateFsmTest.testStart();
+        AmfMediaStateFsmTest amfMediaStateFsmTest = new AmfMediaStateFsmTest();
+        amfMediaStateFsmTest.testStart();
+
+        AmfCallAndMediaStateFsmTest amfCallAndMediaStateFsmTest = new AmfCallAndMediaStateFsmTest();
+        amfCallAndMediaStateFsmTest.testStart();
     }
 
 }
