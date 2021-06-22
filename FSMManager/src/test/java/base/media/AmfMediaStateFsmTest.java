@@ -9,7 +9,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.StateManager;
-import state.base.TransitionContext;
 
 /**
  * @class public class AmfMediaStateTest
@@ -32,6 +31,8 @@ public class AmfMediaStateFsmTest {
         );
 
         normalTest();
+
+        stateManager.removeFsmContainer(MediaFsm.MEDIA_STATE_NAME);
     }
 
     ////////////////////////////////////////////////////////////////////////////////

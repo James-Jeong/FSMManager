@@ -9,7 +9,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.StateManager;
-import state.base.TransitionContext;
 
 /**
  * @class public class AmfCallStateTest
@@ -32,6 +31,8 @@ public class AmfCallStateFsmTest {
         );
 
         normalTest();
+
+        stateManager.removeFsmContainer(CallFsm.CALL_STATE_NAME);
     }
 
     ////////////////////////////////////////////////////////////////////////////////
