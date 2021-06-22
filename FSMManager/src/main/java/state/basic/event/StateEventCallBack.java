@@ -1,4 +1,4 @@
-package event;
+package state.basic.event;
 
 /**
  * @interface  public interface EventCallBack

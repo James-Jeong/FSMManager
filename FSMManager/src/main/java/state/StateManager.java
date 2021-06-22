@@ -5,7 +5,7 @@ import org.squirrelframework.foundation.fsm.StateMachineBuilderFactory;
 import org.squirrelframework.foundation.fsm.StateMachineConfiguration;
 import org.squirrelframework.foundation.fsm.UntypedStateMachineBuilder;
 import state.akka.AkkaContainer;
-import state.module.StateHandler;
+import state.basic.StateHandler;
 import state.squirrel.*;
 
 import java.util.HashMap;

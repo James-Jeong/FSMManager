@@ -1,4 +1,4 @@
-package event;
+package state.basic.event;
 
 import java.util.HashMap;
 import java.util.Map;

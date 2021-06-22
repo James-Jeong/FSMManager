@@ -1,6 +1,6 @@
-package event;
+package state.basic.event;
 
-import state.module.StateHandler;
+import state.basic.StateHandler;
 import state.StateManager;
 
 import java.util.Map;

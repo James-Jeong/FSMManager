@@ -1,6 +1,6 @@
-package state.module;
+package state.basic;
 
-import event.StateEventManager;
+import state.basic.event.StateEventManager;
 import state.squirrel.CallBack;
 
 import java.util.List;

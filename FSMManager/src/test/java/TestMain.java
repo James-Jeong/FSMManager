@@ -1,4 +1,5 @@
 import base.akka.media.AkkaMediaStateTest;
+import base.basic.media.BasicMediaStateTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -22,8 +23,8 @@ public class TestMain {
         //BasicCallStateTest amfCallStateTest = new BasicCallStateTest();
         //amfCallStateTest.testStart();
 
-        //BasicMediaStateTest amfMediaStateTest = new BasicMediaStateTest();
-        //amfMediaStateTest.testStart();
+        BasicMediaStateTest amfMediaStateTest = new BasicMediaStateTest();
+        amfMediaStateTest.testStart();
 
         //BasicCallAndMediaStateTest amfCallAndMediaStateTest = new BasicCallAndMediaStateTest();
         //amfCallAndMediaStateTest.testStart();

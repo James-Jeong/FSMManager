@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.StateManager;
 import state.squirrel.CallBack;
-import state.module.StateHandler;
+import state.basic.StateHandler;
 
 /**
  * @class
