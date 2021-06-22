@@ -6,6 +6,7 @@ import state.base.*;
 import state.module.StateHandler;
 
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 
 /**
@@ -16,8 +17,8 @@ public class StateManager {
 
     private final Map<String, FsmContainer> fsmMap = new HashMap<>();
 
-    // StateHandler Map
-    private final Map<String, StateHandler> stateHandlerMap = new HashMap<>();
+    // StateHandler Hashtable
+    private final Hashtable<String, StateHandler> stateHandlerTable = new Hashtable<>();
 
     // StateManager 싱글턴 인스턴스 변수
     private static StateManager stateManager;
@@ -131,8 +132,8 @@ public class StateManager {
      * @param name StateHandler 이름
      */
     public synchronized void addStateHandler (String name) {
-        if (stateHandlerMap.get(name) != null) { return; }
-        stateHandlerMap.putIfAbsent(name, new StateHandler(name));
+        if (stateHandlerTable.get(name) != null) { return; }
+        stateHandlerTable.putIfAbsent(name, new StateHandler(name));
     }
 
     /**
@@ -141,8 +142,8 @@ public class StateManager {
      * @param name StateHandler 이름
      */
     public synchronized void removeStateHandler (String name) {
-        if (stateHandlerMap.get(name) == null) { return; }
-        stateHandlerMap.remove(name);
+        if (stateHandlerTable.get(name) == null) { return; }
+        stateHandlerTable.remove(name);
     }
 
     /**
@@ -152,8 +153,8 @@ public class StateManager {
      * @return 성공 시 StateHandler 객체, 실패 시 null 반환
      */
     public StateHandler getStateHandler (String name) {
-        if (stateHandlerMap.get(name) == null) { return null; }
-        return stateHandlerMap.get(name);
+        if (stateHandlerTable.get(name) == null) { return null; }
+        return stateHandlerTable.get(name);
     }
 
 }

@@ -14,8 +14,8 @@ public class StateContainer {
 
     private static final Logger logger = LoggerFactory.getLogger(StateContainer.class);
 
-    // State Map
-    private final Map<String, Map<String, CallBack>> stateMap = new HashMap<>();
+    // State Hashtable
+    private final Hashtable<String, Hashtable<String, CallBack>> stateTable = new Hashtable<>();
 
     // 현재 State 이름
     private String curState = null;
@@ -39,29 +39,29 @@ public class StateContainer {
 
     /**
      * @fn public boolean addToStateByFromState(String fromState, String toState, CallBack callBack)
-     * @brief From state 와 연관된 To state 를 모두 Map 에 추가하는 함수
+     * @brief From state 와 연관된 To state 를 모두 Hashtable 에 추가하는 함수
      * @param fromState From state
      * @param toState To state
      * @param callBack CallBack
      * @return 성공 시 true, 실패 시 false 반환
      */
     public boolean addToStateByFromState(String fromState, String toState, CallBack callBack) {
-        synchronized (stateMap) {
+        synchronized (stateTable) {
             if (getCallBackByFromState(fromState, toState) != null) {
                 return false;
             }
 
-            Map<String, CallBack> toStateMap = getToStateByFromState(fromState);
-            if (toStateMap == null) {
-                toStateMap = new HashMap<>();
-                toStateMap.putIfAbsent(toState, callBack);
+            Hashtable<String, CallBack> toStateTable = getToStateByFromState(fromState);
+            if (toStateTable == null) {
+                toStateTable = new Hashtable<>();
+                toStateTable.putIfAbsent(toState, callBack);
             }
 
-            boolean result = stateMap.putIfAbsent(fromState, toStateMap) == null;
+            boolean result = stateTable.putIfAbsent(fromState, toStateTable) == null;
             if (result) {
                 logger.info("({}) Success to add state. (fromState={}, toState={})", name, fromState, toState);
             } else {
-                result = toStateMap.putIfAbsent(toState, callBack) == null;
+                result = toStateTable.putIfAbsent(toState, callBack) == null;
                 if (result) {
                     logger.info("({}) Success to add state. (fromState={}, toState={})", name, fromState, toState);
                 } else {
@@ -74,17 +74,17 @@ public class StateContainer {
 
     /**
      * @fn public boolean removeFromState(String fromState)
-     * @brief From state 를 Map 에서 삭제하는 함수
+     * @brief From state 를 Hashtable 에서 삭제하는 함수
      * 다른 From state 와 To state 로 포함되어 있으면 다 삭제
      * @param fromState From state
      * @return 성공 시 true, 실패 시 false 반환
      */
     public boolean removeFromState(String fromState) {
-        synchronized (stateMap) {
-            boolean result = stateMap.remove(fromState) != null;
+        synchronized (stateTable) {
+            boolean result = stateTable.remove(fromState) != null;
             if (result) {
                 // 다른 From state 와 To state 로 포함되어 있으면 다 삭제
-                for (Map.Entry<String, Map<String, CallBack>> mapEntry : stateMap.entrySet()) {
+                for (Map.Entry<String, Hashtable<String, CallBack>> mapEntry : stateTable.entrySet()) {
                     if (mapEntry.getValue() == null) { continue; }
                     for (String toState : mapEntry.getValue().keySet()) {
                         if (toState.equals(fromState)) {
@@ -103,14 +103,14 @@ public class StateContainer {
 
     /**
      * @fn public boolean removeToStateByFromState(String fromState, String toState)
-     * @brief From state 와 연관된 To state 를 Map 에서 삭제
+     * @brief From state 와 연관된 To state 를 Hashtable 에서 삭제
      * From state 는 삭제되지 않고 To state 만 삭제
      * @param fromState From state
      * @param toState To state
      * @return 성공 시 true, 실패 시 false 반환
      */
     public boolean removeToStateByFromState(String fromState, String toState) {
-        synchronized (stateMap) {
+        synchronized (stateTable) {
             if (getToStateByFromState(fromState) == null) {
                 return false;
             }
@@ -126,13 +126,13 @@ public class StateContainer {
     }
 
     /**
-     * @fn public Map<String, CallBack> getToStateByFromState(String fromState)
-     * @brief From state 와 연관된 To state Map 을 반환하는 함수
+     * @fn public Hashtable<String, CallBack> getToStateByFromState(String fromState)
+     * @brief From state 와 연관된 To state Hashtable 을 반환하는 함수
      * @param fromState From state
-     * @return 성공 시 To state Map, 실패 시 null 반환
+     * @return 성공 시 To state Hashtable, 실패 시 null 반환
      */
-    public Map<String, CallBack> getToStateByFromState(String fromState) {
-        return stateMap.get(fromState);
+    public Hashtable<String, CallBack> getToStateByFromState(String fromState) {
+        return stateTable.get(fromState);
     }
 
     /**
@@ -181,8 +181,8 @@ public class StateContainer {
      * @return 성공 시 정의된 상태 리스트, 실패 시 null 반환
      */
     public List<String> getAllStates () {
-        if (stateMap.isEmpty()) { return null; }
-        return new ArrayList<>(stateMap.keySet());
+        if (stateTable.isEmpty()) { return null; }
+        return new ArrayList<>(stateTable.keySet());
     }
 
     /**
@@ -205,14 +205,14 @@ public class StateContainer {
             return null;
         }
 
-        Map<String, CallBack> nextStateCallBackMap = getToStateByFromState(curState);
-        if (nextStateCallBackMap == null) { return null; }
+        Hashtable<String, CallBack> nextStateCallBackTable = getToStateByFromState(curState);
+        if (nextStateCallBackTable == null) { return null; }
 
         // 1) 상태 천이 먼저 수행
         setCurState(toState);
 
         // 2) CallBack 함수 나중에 수행
-        CallBack nextStateCallBack = nextStateCallBackMap.get(toState);
+        CallBack nextStateCallBack = nextStateCallBackTable.get(toState);
         if (nextStateCallBack == null) {
             logger.warn("({}) Fail to get the next state's call back. Not defined. (curState={}, nextState={})", name, curState, toState);
             callBackResult = null;
