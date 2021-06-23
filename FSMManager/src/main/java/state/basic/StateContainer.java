@@ -5,9 +5,10 @@ import org.slf4j.LoggerFactory;
 import state.squirrel.CallBack;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @class public class StateContainer
@@ -18,10 +19,10 @@ public class StateContainer {
     private static final Logger logger = LoggerFactory.getLogger(StateContainer.class);
 
     // State Map
-    private final Map<String, Map<String, CallBack>> stateMap = new HashMap<>();
+    private final Map<String, Map<String, CallBack>> stateMap = new ConcurrentHashMap<>();
 
     // 현재 State 이름
-    private String curState = null;
+    private final AtomicReference<String> curState = new AtomicReference<>(null);
     // CallBack 결과값
     private Object callBackResult = null;
     // StateContainer 이름
@@ -41,21 +42,21 @@ public class StateContainer {
     ////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @fn public synchronized boolean addToStateByFromState(String fromState, String toState, CallBack callBack)
+     * @fn public boolean addToStateByFromState(String fromState, String toState, CallBack callBack)
      * @brief From state 와 연관된 To state 를 모두 Map 에 추가하는 함수
      * @param fromState From state
      * @param toState To state
      * @param callBack CallBack
      * @return 성공 시 true, 실패 시 false 반환
      */
-    public synchronized boolean addToStateByFromState(String fromState, String toState, CallBack callBack) {
+    public boolean addToStateByFromState(String fromState, String toState, CallBack callBack) {
         if (getCallBackByFromState(fromState, toState) != null) {
             return false;
         }
 
         Map<String, CallBack> toStateMap = getToStateByFromState(fromState);
         if (toStateMap == null) {
-            toStateMap = new HashMap<>();
+            toStateMap = new ConcurrentHashMap<>();
             toStateMap.putIfAbsent(toState, callBack);
         }
 
@@ -74,13 +75,13 @@ public class StateContainer {
     }
 
     /**
-     * @fn public synchronized boolean removeFromState(String fromState)
+     * @fn public boolean removeFromState(String fromState)
      * @brief From state 를 Map 에서 삭제하는 함수
      * 다른 From state 와 To state 로 포함되어 있으면 다 삭제
      * @param fromState From state
      * @return 성공 시 true, 실패 시 false 반환
      */
-    public synchronized boolean removeFromState(String fromState) {
+    public boolean removeFromState(String fromState) {
         boolean result = stateMap.remove(fromState) != null;
         if (result) {
             // 다른 From state 와 To state 로 포함되어 있으면 다 삭제
@@ -101,14 +102,14 @@ public class StateContainer {
     }
 
     /**
-     * @fn public synchronized boolean removeToStateByFromState(String fromState, String toState)
+     * @fn public boolean removeToStateByFromState(String fromState, String toState)
      * @brief From state 와 연관된 To state 를 Map 에서 삭제
      * From state 는 삭제되지 않고 To state 만 삭제
      * @param fromState From state
      * @param toState To state
      * @return 성공 시 true, 실패 시 false 반환
      */
-    public synchronized boolean removeToStateByFromState(String fromState, String toState) {
+    public boolean removeToStateByFromState(String fromState, String toState) {
         if (getToStateByFromState(fromState) == null) {
             return false;
         }
@@ -145,22 +146,22 @@ public class StateContainer {
     }
 
     /**
-     * @fn public synchronized String getCurState ()
+     * @fn public String getCurState ()
      * @brief 현재 State 이름을 반환하는 함수
      * @return 현재 State 이름
      */
-    public synchronized String getCurState() {
-        return curState;
+    public String getCurState() {
+        return curState.get();
     }
 
     /**
-     * @fn public synchronized void setCurState (String state)
+     * @fn public void setCurState (String state)
      * @brief 현재 State 를 설정하는 함수
      * @param curState 현재 State 이름
      */
-    public synchronized void setCurState(String curState) {
-        logger.info("({}) State is changed. ([{}] > [{}])", name, this.curState, curState);
-        this.curState = curState;
+    public void setCurState(String curState) {
+        logger.info("({}) State is changed. ([{}] > [{}])", name, getCurState(), curState);
+        this.curState.set(curState);
     }
 
     /**
@@ -190,19 +191,20 @@ public class StateContainer {
      * @return 성공 시 To state, 실패 시 null 반환
      */
     public String nextState (String toState) {
-        if (curState == null) {
+        String curStateStr = getCurState();
+        if (curStateStr == null) {
             logger.warn("({}) Fail to transit. Current state is null. (curState=null, nextState={})", name, toState);
             callBackResult = null;
             return null;
         }
 
-        if (curState.equals(toState)) {
-            logger.warn("({}) Fail to transit. State is same. (curState={}, nextState={})", name, curState, toState);
+        if (curStateStr.equals(toState)) {
+            logger.warn("({}) Fail to transit. State is same. (curState={}, nextState={})", name, curStateStr, toState);
             callBackResult = null;
             return null;
         }
 
-        Map<String, CallBack> nextStateCallBackMap = getToStateByFromState(curState);
+        Map<String, CallBack> nextStateCallBackMap = getToStateByFromState(curStateStr);
         if (nextStateCallBackMap == null) { return null; }
 
         // 1) 상태 천이 먼저 수행
@@ -211,7 +213,7 @@ public class StateContainer {
         // 2) CallBack 함수 나중에 수행
         CallBack nextStateCallBack = nextStateCallBackMap.get(toState);
         if (nextStateCallBack == null) {
-            logger.warn("({}) Fail to get the next state's call back. Not defined. (curState={}, nextState={})", name, curState, toState);
+            logger.warn("({}) Fail to get the next state's call back. Not defined. (curState={}, nextState={})", name, curStateStr, toState);
             callBackResult = null;
             return null;
         } else {

@@ -2,6 +2,7 @@ package state.basic.event;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @class public class StateEventManager
@@ -12,7 +13,7 @@ public class StateEventManager {
     // stateEventCallBack
     private StateEventCallBack stateEventCallBack = null;
     // Event Map
-    private static final Map<String, Map<String, String>> eventMap = new HashMap<>();
+    private static final Map<String, Map<String, String>> eventMap = new ConcurrentHashMap<>();
 
     ////////////////////////////////////////////////////////////////////////////////
 
@@ -27,22 +28,22 @@ public class StateEventManager {
     ////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @fn public synchronized void setListener(StateEventCallBack eventCallBack)
+     * @fn public void setListener(StateEventCallBack eventCallBack)
      * @brief StateEventCallBack 을 설정하는 함수
      * @param eventCallBack StateEventCallBack
      */
-    public synchronized void setListener(StateEventCallBack eventCallBack) {
+    public void setListener(StateEventCallBack eventCallBack) {
         stateEventCallBack = eventCallBack;
     }
 
     /**
-     * @fn public synchronized void addEvent(String event, String fromState, String toState)
+     * @fn public void addEvent(String event, String fromState, String toState)
      * @brief 새로운 이벤트를 생성하는 함수
      * @param event 이벤트 이름
      * @param fromState 천이 전 State 이름
      * @param toState 천이 후 State 이름
      */
-    public synchronized void addEvent(String event, String fromState, String toState) {
+    public void addEvent(String event, String fromState, String toState) {
         Map<String, String> stateMap = getStateMap(event);
         if (stateMap == null) {
             stateMap = new HashMap<>();
@@ -65,13 +66,13 @@ public class StateEventManager {
     }
 
     /**
-     * @fn public synchronized void callEvent(String handlerName, String event, String fromState)
+     * @fn public void callEvent(String handlerName, String event, String fromState)
      * @brief 지정한 이벤트를 호출하는 함수
      * @param handlerName 이벤트를 호출하는 StateHandler 이름
      * @param event 이벤트 이름
      * @param fromState 천이 전 State 이름
      */
-    public synchronized void callEvent(String handlerName, String event, String fromState) {
+    public void callEvent(String handlerName, String event, String fromState) {
         if (stateEventCallBack == null) { return; }
         stateEventCallBack.onEvent(handlerName, event, fromState);
     }

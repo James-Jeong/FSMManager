@@ -50,7 +50,6 @@ public class AkkaMediaStateTest {
 
     public void mediaStart () {
         AkkaContainer akkaContainer = stateManager.getAkkaContainer(MEDIA_STATE_NAME);
-        // TODO : Get Cur State
 
         String curMediaState = (String) akkaContainer.ask(
                 MediaActor.MEDIA_ACTOR_NAME,

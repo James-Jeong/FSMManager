@@ -12,8 +12,8 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -25,7 +25,7 @@ public class AkkaContainer {
     private static final Logger logger = LoggerFactory.getLogger(AkkaContainer.class);
 
     private final ActorSystem actorSystem;
-    private final Map<String, ActorRef> actorRefMap = new HashMap<>();
+    private final Map<String, ActorRef> actorRefMap = new ConcurrentHashMap<>();
 
     private final String name;
 
@@ -34,7 +34,7 @@ public class AkkaContainer {
         this.actorSystem = ActorSystem.create(name);
     }
 
-    public synchronized void addActorRef(String name, Props props) {
+    public void addActorRef(String name, Props props) {
         if (getActorRef(name) != null) { return; }
         actorRefMap.putIfAbsent(
                 name,
@@ -42,7 +42,7 @@ public class AkkaContainer {
         );
     }
 
-    public synchronized void removeActorRef(String name) {
+    public void removeActorRef(String name) {
         actorRefMap.remove(name);
     }
 

@@ -80,20 +80,20 @@ public class StateHandler {
     }
 
     /**
-     * @fn public synchronized String getCurState ()
+     * @fn public String getCurState ()
      * @brief 현재 State 이름을 반환하는 함수
      * @return 현재 State 이름
      */
-    public synchronized String getCurState () {
+    public String getCurState () {
         return stateContainer.getCurState();
     }
 
     /**
-     * @fn public synchronized void setCurState (String state)
+     * @fn public void setCurState (String state)
      * @brief 현재 State 를 설정하는 함수
      * @param curState 현재 State 이름
      */
-    public synchronized void setCurState (String curState) {
+    public void setCurState (String curState) {
         stateContainer.setCurState(curState);
     }
 

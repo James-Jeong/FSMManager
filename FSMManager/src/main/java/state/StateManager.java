@@ -8,8 +8,8 @@ import state.akka.AkkaContainer;
 import state.basic.StateHandler;
 import state.squirrel.*;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @class public class StateManager
@@ -17,12 +17,12 @@ import java.util.Map;
  */
 public class StateManager {
 
-    private final Map<String, AkkaContainer> akkaMap = new HashMap<>();
+    private final Map<String, AkkaContainer> akkaMap = new ConcurrentHashMap<>();
 
-    private final Map<String, FsmContainer> fsmMap = new HashMap<>();
+    private final Map<String, FsmContainer> fsmMap = new ConcurrentHashMap<>();
 
     // StateHandler Map
-    private final Map<String, StateHandler> stateHandlerMap = new HashMap<>();
+    private final Map<String, StateHandler> stateHandlerMap = new ConcurrentHashMap<>();
 
     // StateManager 싱글턴 인스턴스 변수
     private static StateManager stateManager;
@@ -53,7 +53,7 @@ public class StateManager {
     ////////////////////////////////////////////////////////////////////////////////
     // # Akka FSM
 
-    public synchronized void addAkkaContainer (String name) {
+    public void addAkkaContainer (String name) {
         if (getAkkaContainer(name) != null) { return; }
         akkaMap.putIfAbsent(
                 name,
@@ -61,7 +61,7 @@ public class StateManager {
         );
     }
 
-    public synchronized void removeAkkaContainer (String name) {
+    public void removeAkkaContainer (String name) {
         if (getAkkaContainer(name) == null) { return; }
 
         getAkkaContainer(name).removeAllActorRefs();
@@ -75,7 +75,7 @@ public class StateManager {
     ////////////////////////////////////////////////////////////////////////////////
     // # Squirrel FSM
 
-    public synchronized void addFsmContainer (String name,
+    public void addFsmContainer (String name,
                                              AbstractFsm abstractFsm,
                                              AbstractState abstractState,
                                              AbstractEvent abstractEvent) {
@@ -92,7 +92,7 @@ public class StateManager {
         fsmMap.putIfAbsent(name, fsmContainer);
     }
 
-    public synchronized void removeFsmContainer (String name) {
+    public void removeFsmContainer (String name) {
         if (fsmMap.get(name) == null) { return; }
         fsmMap.remove(name);
     }
@@ -105,15 +105,15 @@ public class StateManager {
         return fsmMap.get(name).getUntypedStateMachineBuilder();
     }
 
-    public synchronized void setFsmCondition (String name, String from, String to, String event) {
+    public void setFsmCondition (String name, String from, String to, String event) {
         getFsmBuilder(name).externalTransition().from(from).to(to).on(event);
     }
 
-    public synchronized void setFsmOnEntry (String name, String state, String funcName) {
+    public void setFsmOnEntry (String name, String state, String funcName) {
         getFsmBuilder(name).onEntry(state).callMethod(funcName);
     }
 
-    public synchronized void setFsmOnExit (String name, String state, String funcName) {
+    public void setFsmOnExit (String name, String state, String funcName) {
         getFsmBuilder(name).onExit(state).callMethod(funcName);
     }
 
@@ -125,11 +125,11 @@ public class StateManager {
         return (String) getFsmContainer(name).getUntypedStateMachine().getLastState();
     }
 
-    public synchronized void setFsmFinalState (String name, String state) {
+    public void setFsmFinalState (String name, String state) {
         getFsmContainer(name).getUntypedStateMachineBuilder().defineFinalState(state);
     }
 
-    public synchronized void buildFsm (String name, String initState, boolean isDebugMode) {
+    public void buildFsm (String name, String initState, boolean isDebugMode) {
         getFsmContainer(name).setUntypedStateMachine(getFsmContainer(name).getUntypedStateMachineBuilder().newStateMachine(initState, StateMachineConfiguration.getInstance().enableDebugMode(isDebugMode)));
         getFsmContainer(name).getUntypedStateMachine().start();
     }
@@ -155,21 +155,21 @@ public class StateManager {
     // # Handmade FSM
 
     /**
-     * @fn public synchronized void addStateHandler (String name)
+     * @fn public void addStateHandler (String name)
      * @brief StateHandler 를 새로 추가하는 함수
      * @param name StateHandler 이름
      */
-    public synchronized void addStateHandler (String name) {
+    public void addStateHandler (String name) {
         if (stateHandlerMap.get(name) != null) { return; }
         stateHandlerMap.putIfAbsent(name, new StateHandler(name));
     }
 
     /**
-     * @fn public synchronized void removeStateHandler (String name)
+     * @fn public void removeStateHandler (String name)
      * @brief 지정한 이름의 StateHandler 를 삭제하는 함수
      * @param name StateHandler 이름
      */
-    public synchronized void removeStateHandler (String name) {
+    public void removeStateHandler (String name) {
         if (stateHandlerMap.get(name) == null) { return; }
         stateHandlerMap.remove(name);
     }

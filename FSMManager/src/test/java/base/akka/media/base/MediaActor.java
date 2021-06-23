@@ -6,6 +6,8 @@ import base.squirrel.media.base.MediaState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * @class public class MediaActor extends AbstractActor
  * @brief MediaActor class
@@ -16,7 +18,7 @@ public class MediaActor extends AbstractActor {
 
     public static final String MEDIA_ACTOR_NAME = "MediaActor";
 
-    private String mediaState = MediaState.IDLE_STATE;
+    private final AtomicReference<String> mediaState = new AtomicReference<>(MediaState.IDLE_STATE);
 
     public MediaActor() {
         // Nothing
@@ -54,6 +56,7 @@ public class MediaActor extends AbstractActor {
                     setMediaState(transition.nextMediaState);
 
                     sender().tell(true, this.self());
+
                     /*StateManager stateManager = StateManager.getInstance();
                     AkkaContainer akkaContainer = stateManager.getAkkaContainer(AkkaMediaStateTest.MEDIA_STATE_NAME);
                     if (akkaContainer != null) {
@@ -63,11 +66,11 @@ public class MediaActor extends AbstractActor {
                 .build();
     }
 
-    public synchronized void setMediaState(String mediaState) {
-        this.mediaState = mediaState;
+    public void setMediaState(String mediaState) {
+        this.mediaState.set(mediaState);
     }
 
     public String getMediaState() {
-        return mediaState;
+        return mediaState.get();
     }
 }

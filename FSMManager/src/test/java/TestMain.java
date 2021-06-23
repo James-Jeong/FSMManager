@@ -46,7 +46,6 @@ public class TestMain {
         ////////////////////////////////////////////////////////////////////////////////
         // # Akka FSM
 
-        // TODO
         AkkaMediaStateTest akkaMediaStateTest = new AkkaMediaStateTest();
         akkaMediaStateTest.testStart();
     }
