@@ -41,7 +41,7 @@ public class StateContainer {
     ////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @fn public boolean addToStateByFromState(String fromState, String toState, CallBack callBack)
+     * @fn public boolean addToStateByFromState(String fromState, String toState, String failState, CallBack callBack)
      * @brief From state 와 연관된 To state 를 모두 Map 에 추가하는 함수
      * @param fromState From state
      * @param toState To state
@@ -70,6 +70,17 @@ public class StateContainer {
             } else {
                 logger.warn("({}) Fail to add state. (fromState={}, toState={})", name, fromState, toState);
             }
+        }
+
+        return result;
+    }
+
+    public boolean removeAllState() {
+        boolean result = false;
+
+        for (String fromState : stateMap.keySet()) {
+            result = removeFromState(fromState);
+            if (!result) { break; }
         }
 
         return result;
@@ -179,32 +190,33 @@ public class StateContainer {
     }
 
     /**
-     * @fn public String nextState (String toState)
+     * @fn public Object nextState (String toState)
      * @brief 현재 상태에서 매개변수로 전달받은 다음 상태로 천이하는 함수
      * 이 함수에서 To state 와 연관된 CallBack 이 실행되며, CallBack 결과값이 StateContainer 에 저장됨
      * @param toState To state
+     * @return 성공 시 다음 상태값, 실패 시 정의된 실패값 반환
      */
-    public void nextState (String toState) {
+    public String nextState (String toState, String failState) {
         if (toState == null) {
             logger.warn("({}) Fail to transit. To state is null. (curState={})", name, curState);
-            return;
+            return failState;
         }
 
         synchronized(this) {
             String curStateStr = getCurState();
             if (curStateStr == null) {
                 logger.warn("({}) Fail to transit. Current state is null. (curState=null, nextState={})", name, toState);
-                return;
+                return failState;
             }
 
             if (curStateStr.equals(toState)) {
                 logger.warn("({}) Fail to transit. State is same. (curState={}, nextState={})", name, curStateStr, toState);
-                return;
+                return failState;
             }
 
             Map<String, CallBack> nextStateCallBackMap = getToStateByFromState(curStateStr);
             if (nextStateCallBackMap == null) {
-                return;
+                return failState;
             }
 
             // 1) 상태 천이 먼저 수행
@@ -214,7 +226,12 @@ public class StateContainer {
             CallBack nextStateCallBack = nextStateCallBackMap.get(toState);
             if (nextStateCallBack == null) {
                 logger.warn("({}) Fail to get the next state's call back. Not defined. (curState={}, nextState={})", name, curStateStr, toState);
+                return failState;
+            } else {
+                nextStateCallBack.callBackFunc(toState);
             }
+
+            return curState;
         }
     }
 

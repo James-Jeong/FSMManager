@@ -43,40 +43,44 @@ public class BasicMediaStateTest {
 
     @Test
     public void testStart () {
-        //normalTest();
+        normalTest();
         timingTest();
     }
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    public void mediaStart () {
+    public String mediaStart () {
         //logger.info("@ Media is started!");
-        mediaStateHandler.fire(MEDIA_START_EVENT);
+        return mediaStateHandler.fire(MEDIA_START_EVENT, MediaState.IDLE_STATE);
     }
 
-    public void mediaStop () {
+    public String mediaStop () {
         //logger.info("@ Media is stopped!");
-        mediaStateHandler.fire(MEDIA_STOP_EVENT);
+        return mediaStateHandler.fire(MEDIA_STOP_EVENT, MediaState.ACTIVE_STATE);
     }
 
-    public void mediaCreateSuccess () {
+    public String mediaCreateSuccess () {
         //logger.info("@ Success to create media!");
-        mediaStateHandler.fire(MEDIA_CREATE_SUCCESS_EVENT);
+        return mediaStateHandler.fire(MEDIA_CREATE_SUCCESS_EVENT, MediaState.ACTIVE_REQUEST);
     }
 
-    public void mediaCreateFail () {
+    public String mediaCreateFail () {
         //logger.info("@ Fail to create media!");
-        mediaStateHandler.fire(MEDIA_CREATE_FAIL_EVENT);
+        return mediaStateHandler.fire(MEDIA_CREATE_FAIL_EVENT, MediaState.ACTIVE_REQUEST);
     }
 
-    public void mediaDeleteSuccess () {
+    public String mediaDeleteSuccess () {
         //logger.info("@ Success to delete media!");
-        mediaStateHandler.fire(MEDIA_DELETE_SUCCESS_EVENT);
+        return mediaStateHandler.fire(MEDIA_DELETE_SUCCESS_EVENT, MediaState.IDLE_REQUEST);
     }
 
-    public void mediaDeleteFail () {
+    public String mediaDeleteFail () {
         //logger.info("@ Fail to delete media!");
-        mediaStateHandler.fire(MEDIA_DELETE_FAIL_EVENT);
+        return mediaStateHandler.fire(MEDIA_DELETE_FAIL_EVENT, MediaState.IDLE_REQUEST);
+    }
+
+    private void printCallBackResult (String state) {
+        logger.info("CallBack is called. (curState={})", state);
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -91,7 +95,7 @@ public class BasicMediaStateTest {
             if (object.length == 0) { return null; }
 
             String stateName = (String) object[0];
-            System.out.println("CallBack is called. (curState=" + stateName + ")");
+            printCallBackResult(stateName);
 
             return stateName;
         };
@@ -116,16 +120,20 @@ public class BasicMediaStateTest {
         this.stopWatch.reset();
         this.stopWatch.start();
 
-        mediaStart();
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStart());
         Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStateHandler.getCurState());
 
-        mediaCreateSuccess();
+        // 상태 처리 실패 시 반환될 실패 상태값 정상 동작하는지 확인
+        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaStop());
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStateHandler.getCurState());
+
+        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaCreateSuccess());
         Assert.assertEquals(MediaState.ACTIVE_STATE, mediaStateHandler.getCurState());
 
-        mediaStop();
+        Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStop());
         Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStateHandler.getCurState());
 
-        mediaDeleteSuccess();
+        Assert.assertEquals(MediaState.IDLE_STATE, mediaDeleteSuccess());
         Assert.assertEquals(MediaState.IDLE_STATE, mediaStateHandler.getCurState());
 
         this.stopWatch.stop();
@@ -146,7 +154,7 @@ public class BasicMediaStateTest {
             if (object.length == 0) { return null; }
 
             String stateName = (String) object[0];
-            //System.out.println("CallBack is called. (curState=" + stateName + ")");
+            printCallBackResult(stateName);
 
             return stateName;
         };

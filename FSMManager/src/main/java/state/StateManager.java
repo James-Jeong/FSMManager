@@ -167,13 +167,15 @@ public class StateManager {
     }
 
     /**
-     * @fn public void removeStateHandler (String name)
+     * @fn public boolean removeStateHandler (String name)
      * @brief 지정한 이름의 StateHandler 를 삭제하는 함수
      * @param name StateHandler 이름
+     * @return 성공 시 true, 실패 시 false 반환
      */
-    public void removeStateHandler (String name) {
-        if (stateHandlerMap.get(name) == null) { return; }
-        stateHandlerMap.remove(name);
+    public boolean removeStateHandler (String name) {
+        StateHandler stateHandler = stateHandlerMap.get(name);
+        if (stateHandler == null) { return false; }
+        return stateHandler.clearStateContainer() && stateHandler.clearStateEventManager() && stateHandlerMap.remove(name) != null;
     }
 
     /**

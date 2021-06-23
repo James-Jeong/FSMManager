@@ -6,6 +6,6 @@ package state.squirrel;
  */
 public interface CallBack {
 
-    Object callBackFunc (Object ...object);
+    String callBackFunc (Object ...object);
 
 }

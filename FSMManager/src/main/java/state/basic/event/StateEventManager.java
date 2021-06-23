@@ -15,7 +15,7 @@ public class StateEventManager {
     private static final Logger logger = LoggerFactory.getLogger(StateEventManager.class);
 
     // stateEventCallBack
-    private StateEventCallBack stateEventCallBack = null;
+    private final StateEventCallBack stateEventCallBack;
     // Event Map
     private static final Map<String, Map<String, String>> eventMap = new ConcurrentHashMap<>();
 
@@ -26,22 +26,13 @@ public class StateEventManager {
      * @brief StateEventManager 생성자 함수
      */
     public StateEventManager() {
-        setListener(new StateEventListener());
+        stateEventCallBack = new StateEventListener();
     }
 
     ////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @fn public void setListener(StateEventCallBack eventCallBack)
-     * @brief StateEventCallBack 을 설정하는 함수
-     * @param eventCallBack StateEventCallBack
-     */
-    public void setListener(StateEventCallBack eventCallBack) {
-        stateEventCallBack = eventCallBack;
-    }
-
-    /**
-     * @fn public void addEvent(String event, String fromState, String toState)
+     * @fn public void addEvent(String event, String fromState, String toState, String failState)
      * @brief 새로운 이벤트를 생성하는 함수
      * @param event 이벤트 이름
      * @param fromState 천이 전 State 이름
@@ -75,6 +66,35 @@ public class StateEventManager {
         return result;
     }
 
+    public boolean removeAllEvent() {
+        boolean result = false;
+
+        for (String event : eventMap.keySet()) {
+            result = removeFromState(event);
+            if (!result) { break; }
+        }
+
+        return result;
+    }
+
+    /**
+     * @fn public boolean removeFromState(String fromState)
+     * @brief From state 를 Map 에서 삭제하는 함수
+     * 다른 From state 와 To state 로 포함되어 있으면 다 삭제
+     * @param event Event
+     * @return 성공 시 true, 실패 시 false 반환
+     */
+    public boolean removeFromState(String event) {
+        boolean result = eventMap.remove(event) != null;
+        if (result) {
+            logger.info("Success to remove the from state. (event={})", event);
+        } else {
+            logger.info("Fail to remove the from state. (event={})", event);
+        }
+
+        return result;
+    }
+
     public String getToStateFromEvent (String event, String fromState) {
         if (getStateMap(event) == null) { return null; }
         return getStateMap(event).get(fromState);
@@ -92,19 +112,16 @@ public class StateEventManager {
     }
 
     /**
-     * @fn public void callEvent(String handlerName, String event, String fromState)
+     * @fn public String callEvent(String handlerName, String event, String fromState)
      * @brief 지정한 이벤트를 호출하는 함수
      * @param handlerName 이벤트를 호출하는 StateHandler 이름
      * @param event 이벤트 이름
      * @param fromState 천이 전 State 이름
+     * @param failState 천이 실패 시 반환될 State 이름
+     * @return 성공 시 지정한 결과값 반환, 실패 시 null 반환
      */
-    public void callEvent(String handlerName, String event, String fromState) {
-        if (stateEventCallBack == null) {
-            logger.warn("Unknown event. (handlerName={}, event={}, fromState={})", handlerName, event, fromState);
-            return;
-        }
-
-        stateEventCallBack.onEvent(handlerName, event, fromState);
+    public String callEvent(String handlerName, String event, String fromState, String failState) {
+        return stateEventCallBack.onEvent(handlerName, event, fromState, failState);
     }
 
 }

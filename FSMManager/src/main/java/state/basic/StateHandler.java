@@ -31,6 +31,14 @@ public class StateHandler {
         stateEventManager = new StateEventManager();
     }
 
+    public boolean clearStateContainer() {
+        return stateContainer.removeAllState();
+    }
+
+    public boolean clearStateEventManager() {
+        return stateEventManager.removeAllEvent();
+    }
+
     /**
      * @fn public String getName()
      * @brief StateHandler 이름을 반환하는 함수
@@ -41,7 +49,7 @@ public class StateHandler {
     }
 
     /**
-     * @fn public boolean addState (String event, String fromState, String toState, CallBack callBack)
+     * @fn public boolean addState (String event, String fromState, String toState, String failState, CallBack callBack)
      * @brief 새로운 State 를 추가하는 함수
      * fromState 가 toState 로 천이되기 위한 trigger 이벤트와 천이 후에 실행될 CallBack 을 정의한다.
      * @param event Trigger 될 이벤트 이름
@@ -51,7 +59,7 @@ public class StateHandler {
      * @return 성공 시 true, 실패 시 false 반환
      */
     public boolean addState (String event, String fromState, String toState, CallBack callBack) {
-        return stateEventManager.addEvent(event, fromState, toState) &
+        return stateEventManager.addEvent(event, fromState, toState) &&
                 stateContainer.addToStateByFromState(fromState, toState, callBack);
     }
 
@@ -88,12 +96,13 @@ public class StateHandler {
     }
 
     /**
-     * @fn public String nextState (String toState)
+     * @fn public String nextState (String toState, String failState)
      * @brief 현재 상태에서 매개변수로 전달받은 다음 상태로 천이하는 함수
      * @param toState To state
+     * @return 성공 시 다음 상태값, 실패 시 정의된 실패값 반환
      */
-    public void nextState (String toState) {
-        stateContainer.nextState(toState);
+    public String nextState (String toState, String failState) {
+        return stateContainer.nextState(toState, failState);
     }
 
     /**
@@ -106,12 +115,14 @@ public class StateHandler {
     }
 
     /**
-     * @fn public void fire (String event)
+     * @fn public String fire (String event)
      * @brief 정의된 State 천이를 위해 지정한 이벤트를 발생시키는 함수
      * @param event 발생할 이벤트 이름
+     * @param failState 천이 실패 시 반환될 State 이름
+     * @return 성공 시 지정한 결과값 반환, 실패 시 failState 반환
      */
-    public synchronized void fire (String event) {
-        stateEventManager.callEvent(name, event, getCurState());
+    public String fire (String event, String failState) {
+        return stateEventManager.callEvent(name, event, getCurState(), failState);
     }
 
     /**

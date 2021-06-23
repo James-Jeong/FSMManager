@@ -76,108 +76,102 @@ public class BasicCallAndMediaStateTest {
 
     public void callStart () {
         logger.info("@ Call is started!");
-        callStateHandler.fire(CALL_START_EVENT);
+        Assert.assertEquals(CallState.INIT, callStateHandler.fire(CALL_START_EVENT, null));
 
         if (callStateHandler.getCurState() == null) {
             logger.info("@ Call is failed!");
-            callStateHandler.fire(CALL_FAIL_EVENT);
+            callStateHandler.fire(CALL_FAIL_EVENT, null);
         }
     }
 
     public void earlyNegoStart () {
         logger.info("@ Early Nego is started by offer!");
-        callStateHandler.fire(OFFER_EARLY_NEGO_START_EVENT);
-        mediaStart();
+        Assert.assertEquals(CallState.OFFER, callStateHandler.fire(OFFER_EARLY_NEGO_START_EVENT, CallState.INIT));
     }
 
     public void earlyMediaStart () {
         logger.info("@ Early Media is started!");
-        callStateHandler.fire(EARLY_MEDIA_START_EVENT);
-        mediaCreateSuccess();
+        callStateHandler.fire(EARLY_MEDIA_START_EVENT, CallState.EARLY_NEGO_REQ);
     }
 
     public void activeStart () {
         logger.info("@ Active is started!");
-        callStateHandler.fire(ACTIVE_START_EVENT);
+        callStateHandler.fire(ACTIVE_START_EVENT, CallState.NEGO_REQ);
     }
 
     public void earlyNegoInActiveStart () {
         logger.info("@ InActive is started by early_nego!");
-        callStateHandler.fire(EARLY_NEGO_INACTIVE_START_EVENT);
+        callStateHandler.fire(EARLY_NEGO_INACTIVE_START_EVENT, CallState.EARLY_NEGO_REQ);
     }
 
     public void negoInActiveStart () {
         logger.info("@ InActive is started by nego!");
-        callStateHandler.fire(NEGO_INACTIVE_START_EVENT);
+        callStateHandler.fire(NEGO_INACTIVE_START_EVENT, CallState.NEGO_REQ);
     }
 
     public void offerNegoStart () {
         logger.info("@ Nego is started by offer!");
-        callStateHandler.fire(OFFER_NEGO_START_EVENT);
+        callStateHandler.fire(OFFER_NEGO_START_EVENT, CallState.OFFER);
     }
 
     public void earlyNegoNegoStart () {
         logger.info("@ Nego is started by early_nego!");
-        callStateHandler.fire(EARLY_NEGO_NEGO_START_EVENT);
+        callStateHandler.fire(EARLY_NEGO_NEGO_START_EVENT, CallState.EARLY_NEGO_REQ);
     }
 
     public void offerHangupStart () {
         logger.info("@ Hangup is started by offer!");
-        callStateHandler.fire(OFFER_STOP_EVENT);
-        mediaStop();
+        callStateHandler.fire(OFFER_STOP_EVENT, CallState.OFFER);
     }
 
     public void earlyNegoHangupStart () {
         logger.info("@ Hangup is started by early_nego!");
-        callStateHandler.fire(EARLY_NEGO_STOP_EVENT);
-        mediaStop();
+        callStateHandler.fire(EARLY_NEGO_STOP_EVENT, CallState.EARLY_NEGO_REQ);
     }
 
     public void activeHangupStart() {
         logger.info("@ Hangup is started by nego!");
-        callStateHandler.fire(ACTIVE_STOP_EVENT);
-        mediaStop();
+        callStateHandler.fire(ACTIVE_STOP_EVENT, CallState.ACTIVE);
     }
 
     public void callStopSuccess () {
         logger.info("@ Success to stop the call!");
-        callStateHandler.fire(CALL_STOP_DONE_SUCCESS_EVENT);
-        mediaDeleteSuccess();
+        callStateHandler.fire(CALL_STOP_DONE_SUCCESS_EVENT, CallState.HANGUP_REQ);
     }
 
     public void callStopFail () {
         logger.info("@ Fail to stop the call!");
-        callStateHandler.fire(CALL_STOP_DONE_FAIL_EVENT);
+        callStateHandler.fire(CALL_STOP_DONE_FAIL_EVENT, CallState.HANGUP_REQ);
     }
 
     public void mediaStart () {
-        logger.info("@ Media is started!");
-        mediaStateHandler.fire(MEDIA_START_EVENT);
+        //logger.info("@ Media is started!");
+        mediaStateHandler.fire(MEDIA_START_EVENT, MediaState.IDLE_STATE);
     }
 
     public void mediaStop () {
-        logger.info("@ Media is stopped!");
-        mediaStateHandler.fire(MEDIA_STOP_EVENT);
+        //logger.info("@ Media is stopped!");
+        mediaStateHandler.fire(MEDIA_STOP_EVENT, MediaState.ACTIVE_STATE);
     }
 
     public void mediaCreateSuccess () {
-        logger.info("@ Success to create media!");
-        mediaStateHandler.fire(MEDIA_CREATE_SUCCESS_EVENT);
+        //logger.info("@ Success to create media!");
+        mediaStateHandler.fire(MEDIA_CREATE_SUCCESS_EVENT, MediaState.ACTIVE_REQUEST);
     }
 
     public void mediaCreateFail () {
-        logger.info("@ Fail to create media!");
-        mediaStateHandler.fire(MEDIA_CREATE_FAIL_EVENT);
+        //logger.info("@ Fail to create media!");
+        mediaStateHandler.fire(MEDIA_CREATE_FAIL_EVENT, MediaState.ACTIVE_REQUEST);
     }
 
     public void mediaDeleteSuccess () {
-        logger.info("@ Success to delete media!");
-        mediaStateHandler.fire(MEDIA_DELETE_SUCCESS_EVENT);
+        //logger.info("@ Success to delete media!");
+        mediaStateHandler.fire(MEDIA_DELETE_SUCCESS_EVENT, MediaState.IDLE_REQUEST);
     }
 
     public void mediaDeleteFail () {
-        logger.info("@ Fail to delete media!");
-        mediaStateHandler.fire(MEDIA_DELETE_FAIL_EVENT);
+        //logger.info("@ Fail to delete media!");
+        mediaStateHandler.fire(MEDIA_DELETE_FAIL_EVENT, MediaState.IDLE_REQUEST);
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -220,7 +214,6 @@ public class BasicCallAndMediaStateTest {
 
         Assert.assertTrue(callStateHandler.addState(CALL_STOP_DONE_SUCCESS_EVENT, CallState.HANGUP_REQ, CallState.INIT, callBack));
         Assert.assertTrue(callStateHandler.addState(CALL_STOP_DONE_FAIL_EVENT, CallState.HANGUP_REQ, CallState.IDLE, callBack));
-
         Assert.assertTrue(mediaStateHandler.addState(MEDIA_START_EVENT, MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST, callBack));
 
         Assert.assertTrue(mediaStateHandler.addState(MEDIA_CREATE_SUCCESS_EVENT, MediaState.ACTIVE_REQUEST, MediaState.ACTIVE_STATE, callBack));
