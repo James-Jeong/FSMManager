@@ -3,15 +3,26 @@ package state.akka;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.dispatch.OnComplete;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @class public class AkkaContainer
  * @brief AkkaContainer class
  */
 public class AkkaContainer {
+
+    private static final Logger logger = LoggerFactory.getLogger(AkkaContainer.class);
 
     private final ActorSystem actorSystem;
     private final Map<String, ActorRef> actorRefMap = new HashMap<>();
@@ -23,29 +34,58 @@ public class AkkaContainer {
         this.actorSystem = ActorSystem.create(name);
     }
 
-    public synchronized void addActor (String name, Props props) {
-        if (getActor(name) != null) { return; }
+    public synchronized void addActorRef(String name, Props props) {
+        if (getActorRef(name) != null) { return; }
         actorRefMap.putIfAbsent(
                 name,
                 actorSystem.actorOf(props, name)
         );
     }
 
-    public synchronized void removeActor (String name) {
-        if (getActor(name) == null) { return; }
+    public synchronized void removeActorRef(String name) {
         actorRefMap.remove(name);
     }
 
-    public ActorRef getActor (String name) {
+    public void removeAllActorRefs() {
+        actorRefMap.clear();
+    }
+
+    public ActorRef getActorRef(String name) {
         return actorRefMap.get(name);
     }
 
     public boolean tell (String name, Object msg) {
-        ActorRef actorRef = getActor(name);
+        ActorRef actorRef = getActorRef(name);
         if (actorRef == null) { return false; }
 
-        actorRef.tell(msg, ActorRef.noSender());
+        actorRef.tell(msg, actorRef);
         return true;
+    }
+
+    public Object ask (String name, Object msg) {
+        ActorRef actorRef = getActorRef(name);
+        if (actorRef == null) { return null; }
+
+        Timeout timeout = new Timeout(Duration.create(1, TimeUnit.SECONDS));
+        Future<Object> ask = Patterns.ask(actorRef, msg, timeout);
+        ask.onComplete(new OnComplete<Object>() {
+            @Override
+            public void onComplete(Throwable throwable, Object o) {
+                if (throwable != null) {
+                    logger.warn("Fail to complete the ask. (actorName={}, msg={})", name, o, throwable);
+                } else {
+                    logger.debug("Success to complete the ask. (actorName={}, msg={})", name, o);
+                }
+            }
+        }, actorSystem.dispatcher());
+
+        try {
+            return Await.result(ask, timeout.duration());
+        } catch (Exception e) {
+            logger.warn("Fail to get the result. (actorName={}, msg={})", name, msg, e);
+        }
+
+        return null;
     }
 
     public String getName() {

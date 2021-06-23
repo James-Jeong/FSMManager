@@ -63,6 +63,8 @@ public class StateManager {
 
     public synchronized void removeAkkaContainer (String name) {
         if (getAkkaContainer(name) == null) { return; }
+
+        getAkkaContainer(name).removeAllActorRefs();
         akkaMap.remove(name);
     }
 

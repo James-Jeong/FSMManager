@@ -2,12 +2,9 @@ package base.akka.media.base;
 
 import akka.actor.AbstractActor;
 import akka.actor.Props;
-import base.akka.media.AkkaMediaStateTest;
 import base.squirrel.media.base.MediaState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import state.StateManager;
-import state.akka.AkkaContainer;
 
 /**
  * @class public class MediaActor extends AbstractActor
@@ -37,18 +34,40 @@ public class MediaActor extends AbstractActor {
         }
     }
 
+    static public class GetState {
+        public GetState () {
+        }
+    }
+
     @Override
     public Receive createReceive() {
         return receiveBuilder()
                 // match 함수를 이용해서 여러 상태 Actor 로 필요한 상태 천이 메시지를 보낼 수 있다.
+                .match(GetState.class, getState -> {
+                    String mediaState = getMediaState();
+                    logger.info("Cur media state: {}", mediaState);
+
+                    sender().tell(mediaState, this.self());
+                })
                 .match(Transition.class, transition -> { // Action Message
                     logger.info("Transition: {} > {}", this.mediaState, transition.nextMediaState);
-                    this.mediaState = transition.nextMediaState;
+                    setMediaState(transition.nextMediaState);
 
-                    StateManager stateManager = StateManager.getInstance();
+                    sender().tell(true, this.self());
+                    /*StateManager stateManager = StateManager.getInstance();
                     AkkaContainer akkaContainer = stateManager.getAkkaContainer(AkkaMediaStateTest.MEDIA_STATE_NAME);
-                    akkaContainer.tell(PrinterActor.PRINTER_ACTOR_NAME, new PrinterActor.Printing(this.mediaState));
+                    if (akkaContainer != null) {
+                        akkaContainer.tell(PrinterActor.PRINTER_ACTOR_NAME, new PrinterActor.Printing(this.mediaState));
+                    }*/
                 })
                 .build();
+    }
+
+    public synchronized void setMediaState(String mediaState) {
+        this.mediaState = mediaState;
+    }
+
+    public String getMediaState() {
+        return mediaState;
     }
 }

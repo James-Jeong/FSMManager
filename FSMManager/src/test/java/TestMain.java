@@ -21,6 +21,8 @@ public class TestMain {
         // # basic
 
         //BasicCallStateTest amfCallStateTest = new BasicCallStateTest();
+
+
         //amfCallStateTest.testStart();
 
         BasicMediaStateTest amfMediaStateTest = new BasicMediaStateTest();

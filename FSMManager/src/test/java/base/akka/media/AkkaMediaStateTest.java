@@ -21,13 +21,6 @@ public class AkkaMediaStateTest {
 
     private final StopWatch stopWatch = new StopWatch();
 
-    private static final String MEDIA_START_EVENT = "media_start_success";
-    private static final String MEDIA_STOP_EVENT = "media_stop_success";
-    private static final String MEDIA_CREATE_SUCCESS_EVENT = "media_create_success";
-    private static final String MEDIA_CREATE_FAIL_EVENT = "media_create_fail";
-    private static final String MEDIA_DELETE_SUCCESS_EVENT = "media_delete_success";
-    private static final String MEDIA_DELETE_FAIL_EVENT = "media_delete_fail";
-
     ////////////////////////////////////////////////////////////////////////////////
 
     public static final String MEDIA_STATE_NAME = "media_state";
@@ -40,11 +33,11 @@ public class AkkaMediaStateTest {
     public void testStart () {
         stateManager.addAkkaContainer(MEDIA_STATE_NAME);
 
-        stateManager.getAkkaContainer(MEDIA_STATE_NAME).addActor(
+        stateManager.getAkkaContainer(MEDIA_STATE_NAME).addActorRef(
                 PrinterActor.PRINTER_ACTOR_NAME, PrinterActor.props()
         );
 
-        stateManager.getAkkaContainer(MEDIA_STATE_NAME).addActor(
+        stateManager.getAkkaContainer(MEDIA_STATE_NAME).addActorRef(
                 MediaActor.MEDIA_ACTOR_NAME, MediaActor.props()
         );
 
@@ -57,26 +50,63 @@ public class AkkaMediaStateTest {
 
     public void mediaStart () {
         AkkaContainer akkaContainer = stateManager.getAkkaContainer(MEDIA_STATE_NAME);
-        Assert.assertTrue(akkaContainer.tell(MediaActor.MEDIA_ACTOR_NAME,
-                new MediaActor.Transition(MediaState.ACTIVE_REQUEST))
+        // TODO : Get Cur State
+
+        String curMediaState = (String) akkaContainer.ask(
+                MediaActor.MEDIA_ACTOR_NAME,
+                new MediaActor.GetState()
         );
-        logger.info("@ Media is started!");
+
+        if (curMediaState.equals(MediaState.IDLE_STATE)) {
+            Assert.assertTrue((boolean) akkaContainer.ask(
+                    MediaActor.MEDIA_ACTOR_NAME,
+                    new MediaActor.Transition(MediaState.ACTIVE_REQUEST))
+            );
+
+            logger.info("@ Media is started!");
+        } else {
+            logger.warn("# Fail to start Media!");
+        }
     }
 
     public void mediaStop () {
         AkkaContainer akkaContainer = stateManager.getAkkaContainer(MEDIA_STATE_NAME);
-        Assert.assertTrue(akkaContainer.tell(MediaActor.MEDIA_ACTOR_NAME,
-                new MediaActor.Transition(MediaState.IDLE_REQUEST))
+
+        String curMediaState = (String) akkaContainer.ask(
+                MediaActor.MEDIA_ACTOR_NAME,
+                new MediaActor.GetState()
         );
-        logger.info("@ Media is stopped!");
+
+        if (curMediaState.equals(MediaState.ACTIVE_STATE)) {
+            Assert.assertTrue((boolean) akkaContainer.ask(
+                    MediaActor.MEDIA_ACTOR_NAME,
+                    new MediaActor.Transition(MediaState.IDLE_REQUEST))
+            );
+
+            logger.info("@ Media is stopped!");
+        } else {
+            logger.warn("# Fail to stop Media!");
+        }
     }
 
     public void mediaCreateSuccess () {
         AkkaContainer akkaContainer = stateManager.getAkkaContainer(MEDIA_STATE_NAME);
-        Assert.assertTrue(akkaContainer.tell(MediaActor.MEDIA_ACTOR_NAME,
-                new MediaActor.Transition(MediaState.ACTIVE_STATE))
+
+        String curMediaState = (String) akkaContainer.ask(
+                MediaActor.MEDIA_ACTOR_NAME,
+                new MediaActor.GetState()
         );
-        logger.info("@ Success to create media!");
+
+        if (curMediaState.equals(MediaState.ACTIVE_REQUEST)) {
+            Assert.assertTrue((boolean) akkaContainer.ask(
+                    MediaActor.MEDIA_ACTOR_NAME,
+                    new MediaActor.Transition(MediaState.ACTIVE_STATE))
+            );
+
+            logger.info("@ Success to create media!");
+        } else {
+            logger.warn("# Fail to create Media!");
+        }
     }
 
     public void mediaCreateFail () {
@@ -85,10 +115,22 @@ public class AkkaMediaStateTest {
 
     public void mediaDeleteSuccess () {
         AkkaContainer akkaContainer = stateManager.getAkkaContainer(MEDIA_STATE_NAME);
-        Assert.assertTrue(akkaContainer.tell(MediaActor.MEDIA_ACTOR_NAME,
-                new MediaActor.Transition(MediaState.IDLE_STATE))
+
+        String curMediaState = (String) akkaContainer.ask(
+                MediaActor.MEDIA_ACTOR_NAME,
+                new MediaActor.GetState()
         );
-        logger.info("@ Success to delete media!");
+
+        if (curMediaState.equals(MediaState.IDLE_REQUEST)) {
+            Assert.assertTrue((boolean) akkaContainer.ask(
+                    MediaActor.MEDIA_ACTOR_NAME,
+                    new MediaActor.Transition(MediaState.IDLE_STATE))
+            );
+
+            logger.info("@ Success to delete media!");
+        } else {
+            logger.warn("# Fail to delete Media!");
+        }
     }
 
     public void mediaDeleteFail () {
