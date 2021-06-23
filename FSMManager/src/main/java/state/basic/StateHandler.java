@@ -1,7 +1,6 @@
 package state.basic;
 
 import state.basic.event.StateEventManager;
-import state.squirrel.CallBack;
 
 import java.util.List;
 
@@ -32,11 +31,11 @@ public class StateHandler {
     }
 
     public boolean clearStateContainer() {
-        return stateContainer.removeAllState();
+        return stateContainer.removeAllStates();
     }
 
     public boolean clearStateEventManager() {
-        return stateEventManager.removeAllEvent();
+        return stateEventManager.removeAllEvents();
     }
 
     /**
@@ -133,6 +132,19 @@ public class StateHandler {
      */
     public synchronized String findToStateFromEvent(String event, String fromState) {
         return stateEventManager.getToStateFromEvent(event, fromState);
+    }
+
+    /**
+     * @fn public Object getCallBackResult (String fromState, String toState)
+     * @brief CallBack 결과를 반환하는 함수
+     * @param fromState From state
+     * @param toState To state
+     * @return 성공 시 CallBack 결과값, 실패 시 null 반환
+     */
+    public Object getCallBackResult (String fromState, String toState) {
+        CallBack callBack = stateContainer.getCallBackByFromState(fromState, toState);
+        if (callBack == null) { return null; }
+        return callBack.getResult();
     }
 
 }

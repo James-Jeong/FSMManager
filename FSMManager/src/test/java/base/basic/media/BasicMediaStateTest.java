@@ -1,5 +1,6 @@
 package base.basic.media;
 
+import base.basic.media.base.MediaCallBack;
 import base.squirrel.media.base.MediaState;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Assert;
@@ -8,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.StateManager;
 import state.basic.StateHandler;
-import state.squirrel.CallBack;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -79,10 +79,6 @@ public class BasicMediaStateTest {
         return mediaStateHandler.fire(MEDIA_DELETE_FAIL_EVENT, MediaState.IDLE_REQUEST);
     }
 
-    private void printCallBackResult (String state) {
-        logger.info("CallBack is called. (curState={})", state);
-    }
-
     ////////////////////////////////////////////////////////////////////////////////
 
     public void normalTest () {
@@ -91,26 +87,22 @@ public class BasicMediaStateTest {
 
         ////////////////////////////////////////////////////////////////////////////////
         // 1. CallBack 함수 정의
-        CallBack callBack = object -> {
-            if (object.length == 0) { return null; }
-
-            String stateName = (String) object[0];
-            printCallBackResult(stateName);
-
-            return stateName;
-        };
+        MediaCallBack mediaStartCallBack = new MediaCallBack(MEDIA_START_EVENT);
+        MediaCallBack mediaCreateSuccessCallBack = new MediaCallBack(MEDIA_CREATE_SUCCESS_EVENT);
+        MediaCallBack mediaCreateFailCallBack = new MediaCallBack(MEDIA_CREATE_FAIL_EVENT);
+        MediaCallBack mediaStopCallBack = new MediaCallBack(MEDIA_STOP_EVENT);
+        MediaCallBack mediaDeleteSuccessCallBack = new MediaCallBack(MEDIA_DELETE_SUCCESS_EVENT);
+        MediaCallBack mediaDeleteFailCallBack = new MediaCallBack(MEDIA_DELETE_FAIL_EVENT);
         ////////////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////////////
         // 2. 상태 정의
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_START_EVENT, MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST, callBack));
-
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_CREATE_SUCCESS_EVENT, MediaState.ACTIVE_REQUEST, MediaState.ACTIVE_STATE, callBack));
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_CREATE_FAIL_EVENT, MediaState.ACTIVE_REQUEST, MediaState.IDLE_STATE, callBack));
-
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_STOP_EVENT, MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST, callBack));
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_SUCCESS_EVENT, MediaState.IDLE_REQUEST, MediaState.IDLE_STATE, callBack));
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_FAIL_EVENT, MediaState.IDLE_REQUEST, MediaState.ACTIVE_STATE, callBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_START_EVENT, MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST, mediaStartCallBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_CREATE_SUCCESS_EVENT, MediaState.ACTIVE_REQUEST, MediaState.ACTIVE_STATE, mediaCreateSuccessCallBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_CREATE_FAIL_EVENT, MediaState.ACTIVE_REQUEST, MediaState.IDLE_STATE, mediaCreateFailCallBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_STOP_EVENT, MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST, mediaStopCallBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_SUCCESS_EVENT, MediaState.IDLE_REQUEST, MediaState.IDLE_STATE, mediaDeleteSuccessCallBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_FAIL_EVENT, MediaState.IDLE_REQUEST, MediaState.ACTIVE_STATE, mediaDeleteFailCallBack));
 
         Assert.assertNotNull(mediaStateHandler.getStateList());
         ////////////////////////////////////////////////////////////////////////////////
@@ -122,19 +114,24 @@ public class BasicMediaStateTest {
 
         Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStart());
         Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStateHandler.getCurState());
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStateHandler.getCallBackResult(MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST));
 
         // 상태 처리 실패 시 반환될 실패 상태값 정상 동작하는지 확인
         Assert.assertEquals(MediaState.ACTIVE_STATE, mediaStop());
         Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStateHandler.getCurState());
+        Assert.assertNull(mediaStateHandler.getCallBackResult(MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST));
 
         Assert.assertEquals(MediaState.ACTIVE_STATE, mediaCreateSuccess());
         Assert.assertEquals(MediaState.ACTIVE_STATE, mediaStateHandler.getCurState());
+        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaStateHandler.getCallBackResult(MediaState.ACTIVE_REQUEST, MediaState.ACTIVE_STATE));
 
         Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStop());
         Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStateHandler.getCurState());
+        Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStateHandler.getCallBackResult(MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST));
 
         Assert.assertEquals(MediaState.IDLE_STATE, mediaDeleteSuccess());
         Assert.assertEquals(MediaState.IDLE_STATE, mediaStateHandler.getCurState());
+        Assert.assertEquals(MediaState.IDLE_STATE, mediaStateHandler.getCallBackResult(MediaState.IDLE_REQUEST, MediaState.IDLE_STATE));
 
         this.stopWatch.stop();
         logger.info("Done. (total time: {} s)", String.format("%.3f", ((double) this.stopWatch.getTime()) / 1000));
@@ -150,26 +147,22 @@ public class BasicMediaStateTest {
 
         ////////////////////////////////////////////////////////////////////////////////
         // 1. CallBack 함수 정의
-        CallBack callBack = object -> {
-            if (object.length == 0) { return null; }
-
-            String stateName = (String) object[0];
-            printCallBackResult(stateName);
-
-            return stateName;
-        };
+        MediaCallBack mediaStartCallBack = new MediaCallBack(MEDIA_START_EVENT);
+        MediaCallBack mediaCreateSuccessCallBack = new MediaCallBack(MEDIA_CREATE_SUCCESS_EVENT);
+        MediaCallBack mediaCreateFailCallBack = new MediaCallBack(MEDIA_CREATE_FAIL_EVENT);
+        MediaCallBack mediaStopCallBack = new MediaCallBack(MEDIA_STOP_EVENT);
+        MediaCallBack mediaDeleteSuccessCallBack = new MediaCallBack(MEDIA_DELETE_SUCCESS_EVENT);
+        MediaCallBack mediaDeleteFailCallBack = new MediaCallBack(MEDIA_DELETE_FAIL_EVENT);
         ////////////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////////////
         // 2. 상태 정의
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_START_EVENT, MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST, callBack));
-
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_CREATE_SUCCESS_EVENT, MediaState.ACTIVE_REQUEST, MediaState.ACTIVE_STATE, callBack));
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_CREATE_FAIL_EVENT, MediaState.ACTIVE_REQUEST, MediaState.IDLE_STATE, callBack));
-
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_STOP_EVENT, MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST, callBack));
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_SUCCESS_EVENT, MediaState.IDLE_REQUEST, MediaState.IDLE_STATE, callBack));
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_FAIL_EVENT, MediaState.IDLE_REQUEST, MediaState.ACTIVE_STATE, callBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_START_EVENT, MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST, mediaStartCallBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_CREATE_SUCCESS_EVENT, MediaState.ACTIVE_REQUEST, MediaState.ACTIVE_STATE, mediaCreateSuccessCallBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_CREATE_FAIL_EVENT, MediaState.ACTIVE_REQUEST, MediaState.IDLE_STATE, mediaCreateFailCallBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_STOP_EVENT, MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST, mediaStopCallBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_SUCCESS_EVENT, MediaState.IDLE_REQUEST, MediaState.IDLE_STATE, mediaDeleteSuccessCallBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_FAIL_EVENT, MediaState.IDLE_REQUEST, MediaState.ACTIVE_STATE, mediaDeleteFailCallBack));
 
         Assert.assertNotNull(mediaStateHandler.getStateList());
         ////////////////////////////////////////////////////////////////////////////////

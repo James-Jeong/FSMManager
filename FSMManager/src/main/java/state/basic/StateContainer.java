@@ -2,7 +2,6 @@ package state.basic;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import state.squirrel.CallBack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +53,7 @@ public class StateContainer {
             return false;
         }
 
-        Map<String, CallBack> toStateMap = getToStateByFromState(fromState);
+        Map<String, CallBack> toStateMap = getToStateMapByFromState(fromState);
         if (toStateMap == null) {
             toStateMap = new ConcurrentHashMap<>();
             toStateMap.putIfAbsent(toState, callBack);
@@ -75,7 +74,7 @@ public class StateContainer {
         return result;
     }
 
-    public boolean removeAllState() {
+    public boolean removeAllStates() {
         boolean result = false;
 
         for (String fromState : stateMap.keySet()) {
@@ -123,12 +122,12 @@ public class StateContainer {
      * @return 성공 시 true, 실패 시 false 반환
      */
     public boolean removeToStateByFromState(String fromState, String toState) {
-        if (getToStateByFromState(fromState) == null) {
+        if (getToStateMapByFromState(fromState) == null) {
             logger.warn("Unknown state. (fromState={}, toState={})", fromState, toState);
             return false;
         }
 
-        boolean result = getToStateByFromState(fromState).remove(toState) != null;
+        boolean result = getToStateMapByFromState(fromState).remove(toState) != null;
         if (result) {
             logger.info("({}) Success to remove the to state. (fromState={}, toState={})", name, fromState, toState);
         } else {
@@ -139,12 +138,12 @@ public class StateContainer {
     }
 
     /**
-     * @fn public Map<String, CallBack> getToStateByFromState(String fromState)
+     * @fn public Map<String, CallBack> getToStateMapByFromState(String fromState)
      * @brief From state 와 연관된 To state Map 을 반환하는 함수
      * @param fromState From state
      * @return 성공 시 To state Map, 실패 시 null 반환
      */
-    public Map<String, CallBack> getToStateByFromState(String fromState) {
+    public Map<String, CallBack> getToStateMapByFromState(String fromState) {
         return stateMap.get(fromState);
     }
 
@@ -156,8 +155,9 @@ public class StateContainer {
      * @return 성공 시 CallBack, 실패 시 null 반환
      */
     public CallBack getCallBackByFromState(String fromState, String toState) {
-        if (getToStateByFromState(fromState) == null) { return null; }
-        return getToStateByFromState(fromState).get(toState);
+        Map<String, CallBack> toStateMap = getToStateMapByFromState(fromState);
+        if (toStateMap == null) { return null; }
+        return toStateMap.get(toState);
     }
 
     /**
@@ -214,8 +214,9 @@ public class StateContainer {
                 return failState;
             }
 
-            Map<String, CallBack> nextStateCallBackMap = getToStateByFromState(curStateStr);
+            Map<String, CallBack> nextStateCallBackMap = getToStateMapByFromState(curStateStr);
             if (nextStateCallBackMap == null) {
+                logger.warn("({}) Fail to transit. Next state is not defined. (curState={}, nextState={})", name, curStateStr, toState);
                 return failState;
             }
 

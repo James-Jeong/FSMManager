@@ -66,7 +66,7 @@ public class StateEventManager {
         return result;
     }
 
-    public boolean removeAllEvent() {
+    public boolean removeAllEvents() {
         boolean result = false;
 
         for (String event : eventMap.keySet()) {

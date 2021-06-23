@@ -175,7 +175,10 @@ public class StateManager {
     public boolean removeStateHandler (String name) {
         StateHandler stateHandler = stateHandlerMap.get(name);
         if (stateHandler == null) { return false; }
-        return stateHandler.clearStateContainer() && stateHandler.clearStateEventManager() && stateHandlerMap.remove(name) != null;
+
+        return stateHandler.clearStateContainer() &&
+                stateHandler.clearStateEventManager() &&
+                stateHandlerMap.remove(name) != null;
     }
 
     /**
