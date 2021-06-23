@@ -7,8 +7,14 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.StateManager;
-import state.squirrel.CallBack;
 import state.basic.StateHandler;
+import state.squirrel.CallBack;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @class public class AmfMediaStateTest
@@ -37,49 +43,48 @@ public class BasicMediaStateTest {
 
     @Test
     public void testStart () {
-        stateManager.addStateHandler(MEDIA_STATE_NAME);
-        mediaStateHandler = stateManager.getStateHandler(MEDIA_STATE_NAME);
-
-        normalTest();
-
-        stateManager.removeStateHandler(MEDIA_STATE_NAME);
+        //normalTest();
+        timingTest();
     }
 
     ////////////////////////////////////////////////////////////////////////////////
 
     public void mediaStart () {
-        logger.info("@ Media is started!");
+        //logger.info("@ Media is started!");
         mediaStateHandler.fire(MEDIA_START_EVENT);
     }
 
     public void mediaStop () {
-        logger.info("@ Media is stopped!");
+        //logger.info("@ Media is stopped!");
         mediaStateHandler.fire(MEDIA_STOP_EVENT);
     }
 
     public void mediaCreateSuccess () {
-        logger.info("@ Success to create media!");
+        //logger.info("@ Success to create media!");
         mediaStateHandler.fire(MEDIA_CREATE_SUCCESS_EVENT);
     }
 
     public void mediaCreateFail () {
-        logger.info("@ Fail to create media!");
+        //logger.info("@ Fail to create media!");
         mediaStateHandler.fire(MEDIA_CREATE_FAIL_EVENT);
     }
 
     public void mediaDeleteSuccess () {
-        logger.info("@ Success to delete media!");
+        //logger.info("@ Success to delete media!");
         mediaStateHandler.fire(MEDIA_DELETE_SUCCESS_EVENT);
     }
 
     public void mediaDeleteFail () {
-        logger.info("@ Fail to delete media!");
+        //logger.info("@ Fail to delete media!");
         mediaStateHandler.fire(MEDIA_DELETE_FAIL_EVENT);
     }
 
     ////////////////////////////////////////////////////////////////////////////////
 
     public void normalTest () {
+        stateManager.addStateHandler(MEDIA_STATE_NAME, MediaState.IDLE_STATE);
+        mediaStateHandler = stateManager.getStateHandler(MEDIA_STATE_NAME);
+
         ////////////////////////////////////////////////////////////////////////////////
         // 1. CallBack 함수 정의
         CallBack callBack = object -> {
@@ -108,27 +113,152 @@ public class BasicMediaStateTest {
 
         ////////////////////////////////////////////////////////////////////////////////
         // 3. 상태 천이
+        this.stopWatch.reset();
         this.stopWatch.start();
 
         mediaStart();
-
-        mediaStateHandler.setCurState(MediaState.IDLE_STATE);
-
-        mediaStart();
-        Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStateHandler.getCallBackResult());
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStateHandler.getCurState());
 
         mediaCreateSuccess();
-        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaStateHandler.getCallBackResult());
+        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaStateHandler.getCurState());
 
         mediaStop();
-        Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStateHandler.getCallBackResult());
+        Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStateHandler.getCurState());
 
         mediaDeleteSuccess();
-        Assert.assertEquals(MediaState.IDLE_STATE, mediaStateHandler.getCallBackResult());
+        Assert.assertEquals(MediaState.IDLE_STATE, mediaStateHandler.getCurState());
 
         this.stopWatch.stop();
         logger.info("Done. (total time: {} s)", String.format("%.3f", ((double) this.stopWatch.getTime()) / 1000));
         ////////////////////////////////////////////////////////////////////////////////
+
+        stateManager.removeStateHandler(MEDIA_STATE_NAME);
+        mediaStateHandler = null;
+    }
+
+    public void timingTest() {
+        stateManager.addStateHandler(MEDIA_STATE_NAME, MediaState.IDLE_STATE);
+        mediaStateHandler = stateManager.getStateHandler(MEDIA_STATE_NAME);
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // 1. CallBack 함수 정의
+        CallBack callBack = object -> {
+            if (object.length == 0) { return null; }
+
+            String stateName = (String) object[0];
+            //System.out.println("CallBack is called. (curState=" + stateName + ")");
+
+            return stateName;
+        };
+        ////////////////////////////////////////////////////////////////////////////////
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // 2. 상태 정의
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_START_EVENT, MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST, callBack));
+
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_CREATE_SUCCESS_EVENT, MediaState.ACTIVE_REQUEST, MediaState.ACTIVE_STATE, callBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_CREATE_FAIL_EVENT, MediaState.ACTIVE_REQUEST, MediaState.IDLE_STATE, callBack));
+
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_STOP_EVENT, MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST, callBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_SUCCESS_EVENT, MediaState.IDLE_REQUEST, MediaState.IDLE_STATE, callBack));
+        Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_FAIL_EVENT, MediaState.IDLE_REQUEST, MediaState.ACTIVE_STATE, callBack));
+
+        Assert.assertNotNull(mediaStateHandler.getStateList());
+        ////////////////////////////////////////////////////////////////////////////////
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // 3. 상태 천이
+        Map<String, ScheduledFuture<?>> taskMap = new ConcurrentHashMap<>();
+        ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(100);
+
+        int totalTaskCount;
+
+        int initDelayMs = 100;
+        int delayMs = 1;
+
+        // mediaStart
+        for (totalTaskCount = 0; totalTaskCount < 1; totalTaskCount++) {
+            ScheduledFuture<?> scheduledFuture;
+            try {
+                scheduledFuture = executor.scheduleAtFixedRate(
+                        this::mediaStart,
+                        initDelayMs,
+                        delayMs,
+                        TimeUnit.MILLISECONDS
+                );
+                logger.info("mediaStart is scheduled.");
+                taskMap.putIfAbsent(String.valueOf(totalTaskCount), scheduledFuture);
+            } catch (Exception e) {
+                logger.warn("() () () Schedule Exception", e);
+            }
+        }
+
+        // mediaCreateSuccess
+        for (totalTaskCount = 0; totalTaskCount < 1; totalTaskCount++) {
+            ScheduledFuture<?> scheduledFuture;
+            try {
+                scheduledFuture = executor.scheduleAtFixedRate(
+                        this::mediaCreateSuccess,
+                        initDelayMs,
+                        delayMs,
+                        TimeUnit.MILLISECONDS
+                );
+                logger.info("mediaCreateSuccess is scheduled.");
+                taskMap.putIfAbsent(String.valueOf(totalTaskCount), scheduledFuture);
+            } catch (Exception e) {
+                logger.warn("() () () Schedule Exception", e);
+            }
+        }
+
+        // mediaStop
+        for (totalTaskCount = 0; totalTaskCount < 1; totalTaskCount++) {
+            ScheduledFuture<?> scheduledFuture;
+            try {
+                scheduledFuture = executor.scheduleAtFixedRate(
+                        this::mediaStop,
+                        initDelayMs,
+                        delayMs,
+                        TimeUnit.MILLISECONDS
+                );
+                logger.info("mediaStop is scheduled.");
+                taskMap.putIfAbsent(String.valueOf(totalTaskCount), scheduledFuture);
+            } catch (Exception e) {
+                logger.warn("() () () Schedule Exception", e);
+            }
+        }
+
+        // mediaDeleteSuccess
+        for (totalTaskCount = 0; totalTaskCount < 1; totalTaskCount++) {
+            ScheduledFuture<?> scheduledFuture;
+            try {
+                scheduledFuture = executor.scheduleAtFixedRate(
+                        this::mediaDeleteSuccess,
+                        initDelayMs,
+                        delayMs,
+                        TimeUnit.MILLISECONDS
+                );
+                logger.info("mediaDeleteSuccess is scheduled.");
+                taskMap.putIfAbsent(String.valueOf(totalTaskCount), scheduledFuture);
+            } catch (Exception e) {
+                logger.warn("() () () Schedule Exception", e);
+            }
+        }
+
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        for (ScheduledFuture<?> scheduledFuture : taskMap.values()) {
+            scheduledFuture.cancel(true);
+        }
+
+        executor.shutdown();
+        ////////////////////////////////////////////////////////////////////////////////
+
+        stateManager.removeStateHandler(MEDIA_STATE_NAME);
+        mediaStateHandler = null;
     }
 
 }

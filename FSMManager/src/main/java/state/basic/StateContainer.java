@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @class public class StateContainer
@@ -22,21 +21,21 @@ public class StateContainer {
     private final Map<String, Map<String, CallBack>> stateMap = new ConcurrentHashMap<>();
 
     // 현재 State 이름
-    private final AtomicReference<String> curState = new AtomicReference<>(null);
-    // CallBack 결과값
-    private Object callBackResult = null;
+    private String curState;
     // StateContainer 이름
     private final String name;
 
     ////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @fn public StateContainer()
+     * @fn public StateContainer(String name, String initState)
      * @brief StateContainer 생성자 함수
      * @param name StateContainer 이름
+     * @param initState 초기 상태
      */
-    public StateContainer(String name) {
+    public StateContainer(String name, String initState) {
         this.name = name;
+        this.curState = initState;
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -51,6 +50,7 @@ public class StateContainer {
      */
     public boolean addToStateByFromState(String fromState, String toState, CallBack callBack) {
         if (getCallBackByFromState(fromState, toState) != null) {
+            logger.warn("Duplicated state. (fromState={}, toState={})", fromState, toState);
             return false;
         }
 
@@ -68,9 +68,10 @@ public class StateContainer {
             if (result) {
                 logger.info("({}) Success to add state. (fromState={}, toState={})", name, fromState, toState);
             } else {
-                logger.info("({}) Fail to add state. (fromState={}, toState={})", name, fromState, toState);
+                logger.warn("({}) Fail to add state. (fromState={}, toState={})", name, fromState, toState);
             }
         }
+
         return result;
     }
 
@@ -98,6 +99,7 @@ public class StateContainer {
         } else {
             logger.info("({}) Fail to remove the from state. (fromState={})", name, fromState);
         }
+
         return result;
     }
 
@@ -111,6 +113,7 @@ public class StateContainer {
      */
     public boolean removeToStateByFromState(String fromState, String toState) {
         if (getToStateByFromState(fromState) == null) {
+            logger.warn("Unknown state. (fromState={}, toState={})", fromState, toState);
             return false;
         }
 
@@ -120,6 +123,7 @@ public class StateContainer {
         } else {
             logger.info("({}) Fail to remove the to state. (fromState={}, toState={})", name, fromState, toState);
         }
+
         return result;
     }
 
@@ -151,26 +155,17 @@ public class StateContainer {
      * @return 현재 State 이름
      */
     public String getCurState() {
-        return curState.get();
+        return curState;
     }
 
     /**
-     * @fn public void setCurState (String state)
+     * @fn private void setCurState (String state)
      * @brief 현재 State 를 설정하는 함수
      * @param curState 현재 State 이름
      */
-    public void setCurState(String curState) {
+    private void setCurState(String curState) {
         logger.info("({}) State is changed. ([{}] > [{}])", name, getCurState(), curState);
-        this.curState.set(curState);
-    }
-
-    /**
-     * @fn public Object getCallBackResult()
-     * @brief CallBack 실행 후 발생한 결과값을 반환하는 함수
-     * @return 성공 시 결과갑, 실패 시 null 반환
-     */
-    public Object getCallBackResult() {
-        return callBackResult;
+        this.curState = curState;
     }
 
     /**
@@ -188,39 +183,39 @@ public class StateContainer {
      * @brief 현재 상태에서 매개변수로 전달받은 다음 상태로 천이하는 함수
      * 이 함수에서 To state 와 연관된 CallBack 이 실행되며, CallBack 결과값이 StateContainer 에 저장됨
      * @param toState To state
-     * @return 성공 시 To state, 실패 시 null 반환
      */
-    public String nextState (String toState) {
-        String curStateStr = getCurState();
-        if (curStateStr == null) {
-            logger.warn("({}) Fail to transit. Current state is null. (curState=null, nextState={})", name, toState);
-            callBackResult = null;
-            return null;
+    public void nextState (String toState) {
+        if (toState == null) {
+            logger.warn("({}) Fail to transit. To state is null. (curState={})", name, curState);
+            return;
         }
 
-        if (curStateStr.equals(toState)) {
-            logger.warn("({}) Fail to transit. State is same. (curState={}, nextState={})", name, curStateStr, toState);
-            callBackResult = null;
-            return null;
+        synchronized(this) {
+            String curStateStr = getCurState();
+            if (curStateStr == null) {
+                logger.warn("({}) Fail to transit. Current state is null. (curState=null, nextState={})", name, toState);
+                return;
+            }
+
+            if (curStateStr.equals(toState)) {
+                logger.warn("({}) Fail to transit. State is same. (curState={}, nextState={})", name, curStateStr, toState);
+                return;
+            }
+
+            Map<String, CallBack> nextStateCallBackMap = getToStateByFromState(curStateStr);
+            if (nextStateCallBackMap == null) {
+                return;
+            }
+
+            // 1) 상태 천이 먼저 수행
+            setCurState(toState);
+
+            // 2) CallBack 함수 나중에 수행
+            CallBack nextStateCallBack = nextStateCallBackMap.get(toState);
+            if (nextStateCallBack == null) {
+                logger.warn("({}) Fail to get the next state's call back. Not defined. (curState={}, nextState={})", name, curStateStr, toState);
+            }
         }
-
-        Map<String, CallBack> nextStateCallBackMap = getToStateByFromState(curStateStr);
-        if (nextStateCallBackMap == null) { return null; }
-
-        // 1) 상태 천이 먼저 수행
-        setCurState(toState);
-
-        // 2) CallBack 함수 나중에 수행
-        CallBack nextStateCallBack = nextStateCallBackMap.get(toState);
-        if (nextStateCallBack == null) {
-            logger.warn("({}) Fail to get the next state's call back. Not defined. (curState={}, nextState={})", name, curStateStr, toState);
-            callBackResult = null;
-            return null;
-        } else {
-            callBackResult = nextStateCallBack.callBackFunc(toState);
-        }
-
-        return toState;
     }
 
 }

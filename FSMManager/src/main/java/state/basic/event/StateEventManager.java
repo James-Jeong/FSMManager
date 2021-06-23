@@ -1,6 +1,8 @@
 package state.basic.event;
 
-import java.util.HashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -9,6 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @brief StateEventManager class
  */
 public class StateEventManager {
+
+    private static final Logger logger = LoggerFactory.getLogger(StateEventManager.class);
 
     // stateEventCallBack
     private StateEventCallBack stateEventCallBack = null;
@@ -42,16 +46,38 @@ public class StateEventManager {
      * @param event 이벤트 이름
      * @param fromState 천이 전 State 이름
      * @param toState 천이 후 State 이름
+     * @return 성공 시 true, 실패 시 false 반환
      */
-    public void addEvent(String event, String fromState, String toState) {
+    public boolean addEvent(String event, String fromState, String toState) {
+        if (getToStateFromEvent(event, fromState) != null) {
+            logger.warn("Duplicated event. (event={}, fromState={}, toState={})", event, fromState, toState);
+            return false;
+        }
+
         Map<String, String> stateMap = getStateMap(event);
         if (stateMap == null) {
-            stateMap = new HashMap<>();
-            stateMap.putIfAbsent(fromState, toState);
-            eventMap.putIfAbsent(event, stateMap);
-        } else {
+            stateMap = new ConcurrentHashMap<>();
             stateMap.putIfAbsent(fromState, toState);
         }
+
+        boolean result = eventMap.putIfAbsent(event, stateMap) == null;
+        if (result) {
+            logger.info("Success to add state into event. (event={}, fromState={}, toState={})", event, fromState, toState);
+        } else {
+            result = stateMap.putIfAbsent(fromState, toState) == null;
+            if (result) {
+                logger.info("Success to add state into event. (event={}, fromState={}, toState={})", event, fromState, toState);
+            } else {
+                logger.warn("Fail to add state into event. (event={}, fromState={}, toState={})", event, fromState, toState);
+            }
+        }
+
+        return result;
+    }
+
+    public String getToStateFromEvent (String event, String fromState) {
+        if (getStateMap(event) == null) { return null; }
+        return getStateMap(event).get(fromState);
     }
 
     /**
@@ -73,7 +99,11 @@ public class StateEventManager {
      * @param fromState 천이 전 State 이름
      */
     public void callEvent(String handlerName, String event, String fromState) {
-        if (stateEventCallBack == null) { return; }
+        if (stateEventCallBack == null) {
+            logger.warn("Unknown event. (handlerName={}, event={}, fromState={})", handlerName, event, fromState);
+            return;
+        }
+
         stateEventCallBack.onEvent(handlerName, event, fromState);
     }
 

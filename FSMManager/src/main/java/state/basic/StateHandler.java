@@ -4,7 +4,6 @@ import state.basic.event.StateEventManager;
 import state.squirrel.CallBack;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @class public class StateHandler
@@ -21,14 +20,14 @@ public class StateHandler {
     private final String name;
 
     /**
-     * @fn public StateHandler(String name)
+     * @fn public StateHandler(String name, String initState)
      * @brief StateHandler 생성자 함수
      * @param name StateHandler 이름
      */
-    public StateHandler(String name) {
+    public StateHandler(String name, String initState) {
        this.name = name;
 
-        stateContainer = new StateContainer(name);
+        stateContainer = new StateContainer(name, initState);
         stateEventManager = new StateEventManager();
     }
 
@@ -52,8 +51,8 @@ public class StateHandler {
      * @return 성공 시 true, 실패 시 false 반환
      */
     public boolean addState (String event, String fromState, String toState, CallBack callBack) {
-        stateEventManager.addEvent(event, fromState, toState);
-        return stateContainer.addToStateByFromState(fromState, toState, callBack);
+        return stateEventManager.addEvent(event, fromState, toState) &
+                stateContainer.addToStateByFromState(fromState, toState, callBack);
     }
 
     /**
@@ -89,22 +88,12 @@ public class StateHandler {
     }
 
     /**
-     * @fn public void setCurState (String state)
-     * @brief 현재 State 를 설정하는 함수
-     * @param curState 현재 State 이름
-     */
-    public void setCurState (String curState) {
-        stateContainer.setCurState(curState);
-    }
-
-    /**
      * @fn public String nextState (String toState)
      * @brief 현재 상태에서 매개변수로 전달받은 다음 상태로 천이하는 함수
      * @param toState To state
-     * @return 성공 시 To state, 실패 시 null 반환
      */
-    public String nextState (String toState) {
-        return stateContainer.nextState(toState);
+    public void nextState (String toState) {
+        stateContainer.nextState(toState);
     }
 
     /**
@@ -117,31 +106,22 @@ public class StateHandler {
     }
 
     /**
-     * @fn public Object getCallBackResult()
-     * @brief CallBack 실행 후 발생한 결과값을 반환하는 함수
-     * @return 성공 시 결과갑, 실패 시 null 반환
-     */
-    public Object getCallBackResult () {
-        return stateContainer.getCallBackResult();
-    }
-
-    /**
      * @fn public void fire (String event)
      * @brief 정의된 State 천이를 위해 지정한 이벤트를 발생시키는 함수
      * @param event 발생할 이벤트 이름
      */
-    public void fire (String event) {
+    public synchronized void fire (String event) {
         stateEventManager.callEvent(name, event, getCurState());
     }
 
     /**
-     * @fn public Map<String, String> findEvent (String event)
+     * @fn public Map<String, String> findToStateFromEvent (String event, String fromState)
      * @brief 지정한 이벤트에 등록된 State Map 을 찾아서 반환하는 함수
      * @param event 이벤트 이름
      * @return 성공 시 State Map, 실패 시 null 반환
      */
-    public Map<String, String> findEvent (String event) {
-        return stateEventManager.getStateMap(event);
+    public synchronized String findToStateFromEvent(String event, String fromState) {
+        return stateEventManager.getToStateFromEvent(event, fromState);
     }
 
 }

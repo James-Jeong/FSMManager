@@ -17,8 +17,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class StateManager {
 
+    // Akka Map
     private final Map<String, AkkaContainer> akkaMap = new ConcurrentHashMap<>();
 
+    // Squirrel FSM Map
     private final Map<String, FsmContainer> fsmMap = new ConcurrentHashMap<>();
 
     // StateHandler Map
@@ -155,13 +157,13 @@ public class StateManager {
     // # Handmade FSM
 
     /**
-     * @fn public void addStateHandler (String name)
+     * @fn public void addStateHandler (String name, String initState)
      * @brief StateHandler 를 새로 추가하는 함수
      * @param name StateHandler 이름
      */
-    public void addStateHandler (String name) {
+    public void addStateHandler (String name, String initState) {
         if (stateHandlerMap.get(name) != null) { return; }
-        stateHandlerMap.putIfAbsent(name, new StateHandler(name));
+        stateHandlerMap.putIfAbsent(name, new StateHandler(name, initState));
     }
 
     /**

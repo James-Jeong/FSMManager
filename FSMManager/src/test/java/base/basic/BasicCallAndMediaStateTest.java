@@ -60,10 +60,10 @@ public class BasicCallAndMediaStateTest {
 
     @Test
     public void testStart () {
-        stateManager.addStateHandler(CALL_STATE_NAME);
+        stateManager.addStateHandler(CALL_STATE_NAME, CallState.INIT);
         callStateHandler = stateManager.getStateHandler(CALL_STATE_NAME);
 
-        stateManager.addStateHandler(MEDIA_STATE_NAME);
+        stateManager.addStateHandler(MEDIA_STATE_NAME, MediaState.IDLE_STATE);
         mediaStateHandler = stateManager.getStateHandler(MEDIA_STATE_NAME);
 
         normalTest();
@@ -78,7 +78,7 @@ public class BasicCallAndMediaStateTest {
         logger.info("@ Call is started!");
         callStateHandler.fire(CALL_START_EVENT);
 
-        if (callStateHandler.getCallBackResult() == null) {
+        if (callStateHandler.getCurState() == null) {
             logger.info("@ Call is failed!");
             callStateHandler.fire(CALL_FAIL_EVENT);
         }
@@ -237,33 +237,30 @@ public class BasicCallAndMediaStateTest {
         // 3. 상태 천이
         this.stopWatch.start();
 
-        callStateHandler.setCurState(CallState.INIT);
-        mediaStateHandler.setCurState(MediaState.IDLE_STATE);
-
         callStart();
-        Assert.assertEquals(CallState.OFFER, callStateHandler.getCallBackResult());
+        Assert.assertEquals(CallState.OFFER, callStateHandler.getCurState());
 
         earlyNegoStart();
-        Assert.assertEquals(CallState.EARLY_NEGO_REQ, callStateHandler.getCallBackResult());
-        Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStateHandler.getCallBackResult());
+        Assert.assertEquals(CallState.EARLY_NEGO_REQ, callStateHandler.getCurState());
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStateHandler.getCurState());
 
         earlyMediaStart();
-        Assert.assertEquals(CallState.EARLY_MEDIA, callStateHandler.getCallBackResult());
-        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaStateHandler.getCallBackResult());
+        Assert.assertEquals(CallState.EARLY_MEDIA, callStateHandler.getCurState());
+        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaStateHandler.getCurState());
 
         earlyNegoNegoStart();
-        Assert.assertEquals(CallState.NEGO_REQ, callStateHandler.getCallBackResult());
+        Assert.assertEquals(CallState.NEGO_REQ, callStateHandler.getCurState());
 
         activeStart();
-        Assert.assertEquals(CallState.ACTIVE, callStateHandler.getCallBackResult());
+        Assert.assertEquals(CallState.ACTIVE, callStateHandler.getCurState());
 
         activeHangupStart();
-        Assert.assertEquals(CallState.HANGUP_REQ, callStateHandler.getCallBackResult());
-        Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStateHandler.getCallBackResult());
+        Assert.assertEquals(CallState.HANGUP_REQ, callStateHandler.getCurState());
+        Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStateHandler.getCurState());
 
         callStopSuccess();
-        Assert.assertEquals(CallState.INIT, callStateHandler.getCallBackResult());
-        Assert.assertEquals(MediaState.IDLE_STATE, mediaStateHandler.getCallBackResult());
+        Assert.assertEquals(CallState.INIT, callStateHandler.getCurState());
+        Assert.assertEquals(MediaState.IDLE_STATE, mediaStateHandler.getCurState());
 
         this.stopWatch.stop();
         logger.info("Done. (total time: {} s)", String.format("%.3f", ((double) this.stopWatch.getTime()) / 1000));

@@ -49,7 +49,7 @@ public class BasicCallStateTest {
 
     @Test
     public void testStart () {
-        stateManager.addStateHandler(CALL_STATE_NAME);
+        stateManager.addStateHandler(CALL_STATE_NAME, CallState.INIT);
         callStateHandler = stateManager.getStateHandler(CALL_STATE_NAME);
 
         normalTest();
@@ -63,7 +63,7 @@ public class BasicCallStateTest {
         logger.info("@ Call is started!");
         callStateHandler.fire(CALL_START_EVENT);
 
-        if (callStateHandler.getCallBackResult() == null) {
+        if (callStateHandler.getCurState() == null) {
             logger.info("@ Call is failed!");
             callStateHandler.fire(CALL_FAIL_EVENT);
         }
@@ -175,64 +175,61 @@ public class BasicCallStateTest {
 
         ////////////////////////////////////////////////////////////////////////////////
         // 3. 상태 천이
-        callStart();
         /*Assert.assertNull(stateManager.nextState(CallState.INACTIVE.name())); // 비정상 천이 > 아직 처음 상태가 정의되지 않음
-        Assert.assertNull(stateManager.getCallBackResult());*/
-
-        callStateHandler.setCurState(CallState.INIT);
+        Assert.assertNull(stateManager.getCurState());*/
 
         this.stopWatch.start();
         callStart();
 
-        Assert.assertEquals(CallState.OFFER, callStateHandler.getCallBackResult());
+        Assert.assertEquals(CallState.OFFER, callStateHandler.getCurState());
 
         earlyNegoStart();
-        Assert.assertEquals(CallState.EARLY_NEGO_REQ, callStateHandler.getCallBackResult());
+        Assert.assertEquals(CallState.EARLY_NEGO_REQ, callStateHandler.getCurState());
 
         earlyMediaStart();
-        Assert.assertEquals(CallState.EARLY_MEDIA, callStateHandler.getCallBackResult());
+        Assert.assertEquals(CallState.EARLY_MEDIA, callStateHandler.getCurState());
 
         earlyNegoNegoStart();
-        Assert.assertEquals(CallState.NEGO_REQ, callStateHandler.getCallBackResult());
+        Assert.assertEquals(CallState.NEGO_REQ, callStateHandler.getCurState());
 
         activeStart();
-        Assert.assertEquals(CallState.ACTIVE, callStateHandler.getCallBackResult());
+        Assert.assertEquals(CallState.ACTIVE, callStateHandler.getCurState());
 
         activeHangupStart();
-        Assert.assertEquals(CallState.HANGUP_REQ, callStateHandler.getCallBackResult());
+        Assert.assertEquals(CallState.HANGUP_REQ, callStateHandler.getCurState());
 
         callStopSuccess();
-        Assert.assertEquals(CallState.INIT, callStateHandler.getCallBackResult());
+        Assert.assertEquals(CallState.INIT, callStateHandler.getCurState());
 
         this.stopWatch.stop();
         logger.info("Done. (total time: {} s)", String.format("%.3f", ((double) this.stopWatch.getTime()) / 1000));
 
 /*        Assert.assertNotNull(callStateHandler.nextState(CallState.OFFER));
-        Assert.assertEquals(CallState.OFFER, callStateHandler.getCallBackResult());
+        Assert.assertEquals(CallState.OFFER, callStateHandler.getCurState());
 
         Assert.assertNull(callStateHandler.nextState(CallState.INACTIVE)); // 비정상 천이 > 정의되지 않은 상태로 천이
-        Assert.assertNull(callStateHandler.getCallBackResult());
+        Assert.assertNull(callStateHandler.getCurState());
 
         Assert.assertNotNull(callStateHandler.nextState(CallState.EARLY_NEGO_REQ));
-        Assert.assertEquals(CallState.EARLY_NEGO_REQ, callStateHandler.getCallBackResult());
+        Assert.assertEquals(CallState.EARLY_NEGO_REQ, callStateHandler.getCurState());
 
         Assert.assertNotNull(callStateHandler.nextState(CallState.EARLY_MEDIA));
-        Assert.assertEquals(CallState.EARLY_MEDIA, callStateHandler.getCallBackResult());
+        Assert.assertEquals(CallState.EARLY_MEDIA, callStateHandler.getCurState());
 
         Assert.assertNotNull(callStateHandler.nextState(CallState.NEGO_REQ));
-        Assert.assertEquals(CallState.NEGO_REQ, callStateHandler.getCallBackResult());
+        Assert.assertEquals(CallState.NEGO_REQ, callStateHandler.getCurState());
 
         Assert.assertNotNull(callStateHandler.nextState(CallState.ACTIVE));
-        Assert.assertEquals(CallState.ACTIVE, callStateHandler.getCallBackResult());
+        Assert.assertEquals(CallState.ACTIVE, callStateHandler.getCurState());
 
         Assert.assertNull(callStateHandler.nextState(CallState.ACTIVE)); // 비정상 천이 > 동일 상태로 천이
-        Assert.assertNull(callStateHandler.getCallBackResult());
+        Assert.assertNull(callStateHandler.getCurState());
 
         Assert.assertNotNull(callStateHandler.nextState(CallState.HANGUP_REQ));
-        Assert.assertEquals(CallState.HANGUP_REQ, callStateHandler.getCallBackResult());
+        Assert.assertEquals(CallState.HANGUP_REQ, callStateHandler.getCurState());
 
         Assert.assertNotNull(callStateHandler.nextState(CallState.INIT));
-        Assert.assertEquals(CallState.INIT, callStateHandler.getCallBackResult());*/
+        Assert.assertEquals(CallState.INIT, callStateHandler.getCurState());*/
         ////////////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////////////

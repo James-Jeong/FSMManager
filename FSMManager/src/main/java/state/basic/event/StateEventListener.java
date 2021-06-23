@@ -1,15 +1,17 @@
 package state.basic.event;
 
-import state.basic.StateHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import state.StateManager;
-
-import java.util.Map;
+import state.basic.StateHandler;
 
 /**
  * @class public class EventListener implements EventCallBack
  * @brief EventListener class
  */
 public class StateEventListener implements StateEventCallBack {
+
+    private static final Logger logger = LoggerFactory.getLogger(StateEventListener.class);
 
     /**
      * @fn public StateEventListener()
@@ -28,16 +30,23 @@ public class StateEventListener implements StateEventCallBack {
      */
     @Override
     public void onEvent(String handlerName, String event, String fromState) {
-        if (handlerName == null) { return; }
-
-        StateManager stateManager = StateManager.getInstance();
-        StateHandler stateHandler = stateManager.getStateHandler(handlerName);
-        if (stateHandler == null) { return; }
-
-        Map<String, String> stateMap = stateHandler.findEvent(event);
-        if (stateMap != null) {
-            String toState = stateMap.get(fromState);
-            stateHandler.nextState(toState);
+        if (handlerName == null) {
+            logger.warn("(null) Handler name is null. (event={}, fromState={})", event, fromState);
+            return;
         }
+
+        StateHandler stateHandler = StateManager.getInstance().getStateHandler(handlerName);
+        if (stateHandler == null) {
+            logger.warn("({}) Fail to find stateHandler. (event={}, fromState={})", handlerName, event, fromState);
+            return;
+        }
+
+        String toState = stateHandler.findToStateFromEvent(event, fromState);
+        if (toState == null) {
+            //logger.warn("({}) Fail to find To state. (event={}, fromState={})", handlerName, event, fromState);
+            return;
+        }
+
+        stateHandler.nextState(toState);
     }
 }
