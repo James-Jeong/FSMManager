@@ -3,6 +3,8 @@ package state.basic.event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -93,6 +95,16 @@ public class StateEventManager {
         }
 
         return result;
+    }
+
+    /**
+     * @fn public List<String> getAllEvents ()
+     * @brief 정의된 모든 이벤트들을 새로운 리스트에 저장하여 반환하는 함수
+     * @return 성공 시 정의된 이벤트 리스트, 실패 시 null 반환
+     */
+    public List<String> getAllEvents () {
+        if (eventMap.isEmpty()) { return null; }
+        return new ArrayList<>(eventMap.keySet());
     }
 
     public String getToStateFromEvent (String event, String fromState) {

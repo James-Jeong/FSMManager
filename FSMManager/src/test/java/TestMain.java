@@ -1,3 +1,5 @@
+import base.basic.BasicCallAndMediaStateTest;
+import base.basic.call.BasicCallStateTest;
 import base.basic.media.BasicMediaStateTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -19,26 +21,26 @@ public class TestMain {
         ////////////////////////////////////////////////////////////////////////////////
         // # basic
 
-        //BasicCallStateTest amfCallStateTest = new BasicCallStateTest();
-        //amfCallStateTest.testStart();
+        BasicCallStateTest basicCallStateTest = new BasicCallStateTest();
+        basicCallStateTest.testStart();
 
-        BasicMediaStateTest amfMediaStateTest = new BasicMediaStateTest();
-        amfMediaStateTest.testStart();
+        BasicMediaStateTest basicMediaStateTest = new BasicMediaStateTest();
+        basicMediaStateTest.testStart();
 
-        //BasicCallAndMediaStateTest amfCallAndMediaStateTest = new BasicCallAndMediaStateTest();
-        //amfCallAndMediaStateTest.testStart();
+        BasicCallAndMediaStateTest basicCallAndMediaStateTest = new BasicCallAndMediaStateTest();
+        basicCallAndMediaStateTest.testStart();
 
         ////////////////////////////////////////////////////////////////////////////////
         // # Squirrel FSM
 
-/*        SquirrelCallStateFsmTest amfCallStateFsmTest = new SquirrelCallStateFsmTest();
-        amfCallStateFsmTest.testStart();
+        //SquirrelCallStateFsmTest squirrelCallStateFsmTest = new SquirrelCallStateFsmTest();
+        //squirrelCallStateFsmTest.testStart();
 
-        SquirrelMediaStateFsmTest amfMediaStateFsmTest = new SquirrelMediaStateFsmTest();
-        amfMediaStateFsmTest.testStart();
+        //SquirrelMediaStateFsmTest squirrelMediaStateFsmTest = new SquirrelMediaStateFsmTest();
+        //squirrelCallStateFsmTest.testStart();
 
-        SquirrelCallAndMediaStateFsmTest amfCallAndMediaStateFsmTest = new SquirrelCallAndMediaStateFsmTest();
-        amfCallAndMediaStateFsmTest.testStart();*/
+        //SquirrelCallAndMediaStateFsmTest squirrelCallAndMediaStateFsmTest = new SquirrelCallAndMediaStateFsmTest();
+        //squirrelCallAndMediaStateFsmTest.testStart();
 
         ////////////////////////////////////////////////////////////////////////////////
         // # Akka FSM

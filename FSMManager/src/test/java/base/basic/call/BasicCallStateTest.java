@@ -59,74 +59,69 @@ public class BasicCallStateTest {
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    public void callStart () {
+    public String callStart () {
         logger.info("@ Call is started!");
-        Assert.assertEquals(CallState.INIT, callStateHandler.fire(CALL_START_EVENT, null));
-
-        if (callStateHandler.getCurState() == null) {
-            logger.info("@ Call is failed!");
-            callStateHandler.fire(CALL_FAIL_EVENT, null);
-        }
+        return callStateHandler.fire(CALL_START_EVENT, CallState.INIT);
     }
 
-    public void earlyNegoStart () {
+    public String offerEarlyNegoStart() {
         logger.info("@ Early Nego is started by offer!");
-        Assert.assertEquals(CallState.OFFER, callStateHandler.fire(OFFER_EARLY_NEGO_START_EVENT, CallState.INIT));
+        return callStateHandler.fire(OFFER_EARLY_NEGO_START_EVENT, CallState.OFFER);
     }
 
-    public void earlyMediaStart () {
+    public String earlyMediaStart () {
         logger.info("@ Early Media is started!");
-        callStateHandler.fire(EARLY_MEDIA_START_EVENT, CallState.EARLY_NEGO_REQ);
+        return callStateHandler.fire(EARLY_MEDIA_START_EVENT, CallState.EARLY_NEGO_REQ);
     }
 
-    public void activeStart () {
+    public String activeStart () {
         logger.info("@ Active is started!");
-        callStateHandler.fire(ACTIVE_START_EVENT, CallState.NEGO_REQ);
+        return callStateHandler.fire(ACTIVE_START_EVENT, CallState.NEGO_REQ);
     }
 
-    public void earlyNegoInActiveStart () {
+    public String earlyNegoInActiveStart () {
         logger.info("@ InActive is started by early_nego!");
-        callStateHandler.fire(EARLY_NEGO_INACTIVE_START_EVENT, CallState.EARLY_NEGO_REQ);
+        return callStateHandler.fire(EARLY_NEGO_INACTIVE_START_EVENT, CallState.EARLY_NEGO_REQ);
     }
 
-    public void negoInActiveStart () {
+    public String negoInActiveStart () {
         logger.info("@ InActive is started by nego!");
-        callStateHandler.fire(NEGO_INACTIVE_START_EVENT, CallState.NEGO_REQ);
+        return callStateHandler.fire(NEGO_INACTIVE_START_EVENT, CallState.NEGO_REQ);
     }
 
-    public void offerNegoStart () {
+    public String offerNegoStart () {
         logger.info("@ Nego is started by offer!");
-        callStateHandler.fire(OFFER_NEGO_START_EVENT, CallState.OFFER);
+        return callStateHandler.fire(OFFER_NEGO_START_EVENT, CallState.OFFER);
     }
 
-    public void earlyNegoNegoStart () {
+    public String earlyNegoNegoStart () {
         logger.info("@ Nego is started by early_nego!");
-        callStateHandler.fire(EARLY_NEGO_NEGO_START_EVENT, CallState.EARLY_NEGO_REQ);
+        return callStateHandler.fire(EARLY_NEGO_NEGO_START_EVENT, CallState.EARLY_NEGO_REQ);
     }
 
-    public void offerHangupStart () {
+    public String offerHangupStart () {
         logger.info("@ Hangup is started by offer!");
-        callStateHandler.fire(OFFER_STOP_EVENT, CallState.OFFER);
+        return callStateHandler.fire(OFFER_STOP_EVENT, CallState.OFFER);
     }
 
-    public void earlyNegoHangupStart () {
+    public String earlyNegoHangupStart () {
         logger.info("@ Hangup is started by early_nego!");
-        callStateHandler.fire(EARLY_NEGO_STOP_EVENT, CallState.EARLY_NEGO_REQ);
+        return callStateHandler.fire(EARLY_NEGO_STOP_EVENT, CallState.EARLY_NEGO_REQ);
     }
 
-    public void activeHangupStart() {
+    public String activeHangupStart() {
         logger.info("@ Hangup is started by nego!");
-        callStateHandler.fire(ACTIVE_STOP_EVENT, CallState.ACTIVE);
+        return callStateHandler.fire(ACTIVE_STOP_EVENT, CallState.ACTIVE);
     }
 
-    public void callStopSuccess () {
+    public String callStopSuccess () {
         logger.info("@ Success to stop the call!");
-        callStateHandler.fire(CALL_STOP_DONE_SUCCESS_EVENT, CallState.HANGUP_REQ);
+        return callStateHandler.fire(CALL_STOP_DONE_SUCCESS_EVENT, CallState.HANGUP_REQ);
     }
 
-    public void callStopFail () {
+    public String callStopFail () {
         logger.info("@ Fail to stop the call!");
-        callStateHandler.fire(CALL_STOP_DONE_FAIL_EVENT, CallState.HANGUP_REQ);
+        return callStateHandler.fire(CALL_STOP_DONE_FAIL_EVENT, CallState.HANGUP_REQ);
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -171,84 +166,44 @@ public class BasicCallStateTest {
         Assert.assertTrue(callStateHandler.addState(CALL_STOP_DONE_SUCCESS_EVENT, CallState.HANGUP_REQ, CallState.INIT, callStopDoneSuccessCallBack));
         Assert.assertTrue(callStateHandler.addState(CALL_STOP_DONE_FAIL_EVENT, CallState.HANGUP_REQ, CallState.IDLE, callStopDoneFailCallBack));
 
-        Assert.assertNotNull(callStateHandler.getStateList());
+        Assert.assertFalse(callStateHandler.getEventList().isEmpty());
+        Assert.assertFalse(callStateHandler.getStateList().isEmpty());
         ////////////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////////////
         // 3. 상태 천이
-        /*Assert.assertNull(stateManager.nextState(CallState.INACTIVE.name())); // 비정상 천이 > 아직 처음 상태가 정의되지 않음
-        Assert.assertNull(stateManager.getCurState());*/
-
         this.stopWatch.start();
-        callStart();
 
+        Assert.assertEquals(CallState.OFFER, callStart());
         Assert.assertEquals(CallState.OFFER, callStateHandler.getCurState());
+        Assert.assertEquals(CallState.OFFER, callStateHandler.getCallBackResultByState(CallState.INIT, CallState.OFFER));
 
-        earlyNegoStart();
+        Assert.assertEquals(CallState.EARLY_NEGO_REQ, offerEarlyNegoStart());
         Assert.assertEquals(CallState.EARLY_NEGO_REQ, callStateHandler.getCurState());
+        Assert.assertEquals(CallState.EARLY_NEGO_REQ, callStateHandler.getCallBackResultByState(CallState.OFFER, CallState.EARLY_NEGO_REQ));
 
-        earlyMediaStart();
+        Assert.assertEquals(CallState.EARLY_MEDIA, earlyMediaStart());
         Assert.assertEquals(CallState.EARLY_MEDIA, callStateHandler.getCurState());
+        Assert.assertEquals(CallState.EARLY_MEDIA, callStateHandler.getCallBackResultByState(CallState.EARLY_NEGO_REQ, CallState.EARLY_MEDIA));
 
-        earlyNegoNegoStart();
+        Assert.assertEquals(CallState.NEGO_REQ, earlyNegoNegoStart());
         Assert.assertEquals(CallState.NEGO_REQ, callStateHandler.getCurState());
+        Assert.assertEquals(CallState.NEGO_REQ, callStateHandler.getCallBackResultByState(CallState.EARLY_MEDIA, CallState.NEGO_REQ));
 
-        activeStart();
+        Assert.assertEquals(CallState.ACTIVE, activeStart());
         Assert.assertEquals(CallState.ACTIVE, callStateHandler.getCurState());
+        Assert.assertEquals(CallState.ACTIVE, callStateHandler.getCallBackResultByState(CallState.NEGO_REQ, CallState.ACTIVE));
 
-        activeHangupStart();
+        Assert.assertEquals(CallState.HANGUP_REQ, activeHangupStart());
         Assert.assertEquals(CallState.HANGUP_REQ, callStateHandler.getCurState());
+        Assert.assertEquals(CallState.HANGUP_REQ, callStateHandler.getCallBackResultByState(CallState.ACTIVE, CallState.HANGUP_REQ));
 
-        callStopSuccess();
+        Assert.assertEquals(CallState.INIT, callStopSuccess());
         Assert.assertEquals(CallState.INIT, callStateHandler.getCurState());
+        Assert.assertEquals(CallState.INIT, callStateHandler.getCallBackResultByState(CallState.HANGUP_REQ, CallState.INIT));
 
         this.stopWatch.stop();
         logger.info("Done. (total time: {} s)", String.format("%.3f", ((double) this.stopWatch.getTime()) / 1000));
-
-/*        Assert.assertNotNull(callStateHandler.nextState(CallState.OFFER));
-        Assert.assertEquals(CallState.OFFER, callStateHandler.getCurState());
-
-        Assert.assertNull(callStateHandler.nextState(CallState.INACTIVE)); // 비정상 천이 > 정의되지 않은 상태로 천이
-        Assert.assertNull(callStateHandler.getCurState());
-
-        Assert.assertNotNull(callStateHandler.nextState(CallState.EARLY_NEGO_REQ));
-        Assert.assertEquals(CallState.EARLY_NEGO_REQ, callStateHandler.getCurState());
-
-        Assert.assertNotNull(callStateHandler.nextState(CallState.EARLY_MEDIA));
-        Assert.assertEquals(CallState.EARLY_MEDIA, callStateHandler.getCurState());
-
-        Assert.assertNotNull(callStateHandler.nextState(CallState.NEGO_REQ));
-        Assert.assertEquals(CallState.NEGO_REQ, callStateHandler.getCurState());
-
-        Assert.assertNotNull(callStateHandler.nextState(CallState.ACTIVE));
-        Assert.assertEquals(CallState.ACTIVE, callStateHandler.getCurState());
-
-        Assert.assertNull(callStateHandler.nextState(CallState.ACTIVE)); // 비정상 천이 > 동일 상태로 천이
-        Assert.assertNull(callStateHandler.getCurState());
-
-        Assert.assertNotNull(callStateHandler.nextState(CallState.HANGUP_REQ));
-        Assert.assertEquals(CallState.HANGUP_REQ, callStateHandler.getCurState());
-
-        Assert.assertNotNull(callStateHandler.nextState(CallState.INIT));
-        Assert.assertEquals(CallState.INIT, callStateHandler.getCurState());*/
-        ////////////////////////////////////////////////////////////////////////////////
-
-        ////////////////////////////////////////////////////////////////////////////////
-        // 4. 상태 삭제
-
-/*        Assert.assertTrue(callStateHandler.removeFromState(CallState.HANGUP_REQ));
-        Assert.assertFalse(callStateHandler.removeFromState(CallState.HANGUP_REQ));
-
-        Assert.assertTrue(CallState.NEGO_REQ, callStateHandler.removeToStateByFromState(CallState.EARLY_MEDIA));
-        Assert.assertFalse(CallState.NEGO_REQ, callStateHandler.removeToStateByFromState(CallState.EARLY_MEDIA));
-
-        Assert.assertNotNull(callStateHandler.nextState(CallState.OFFER));
-        Assert.assertNotNull(callStateHandler.nextState(CallState.EARLY_NEGO_REQ));
-        Assert.assertNotNull(callStateHandler.nextState(CallState.EARLY_MEDIA));
-        Assert.assertNull(callStateHandler.nextState(CallState.NEGO_REQ));
-
-        Assert.assertNull(callStateHandler.nextState(CallState.HANGUP_REQ));*/
-
         ////////////////////////////////////////////////////////////////////////////////
     }
 

@@ -194,6 +194,7 @@ public class StateContainer {
      * @brief 현재 상태에서 매개변수로 전달받은 다음 상태로 천이하는 함수
      * 이 함수에서 To state 와 연관된 CallBack 이 실행되며, CallBack 결과값이 StateContainer 에 저장됨
      * @param toState To state
+     * @param failState 천이 실패 시 반환될 State 이름
      * @return 성공 시 다음 상태값, 실패 시 정의된 실패값 반환
      */
     public String nextState (String toState, String failState) {

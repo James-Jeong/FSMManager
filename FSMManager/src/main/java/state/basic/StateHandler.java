@@ -1,14 +1,19 @@
 package state.basic;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import state.basic.event.StateEventManager;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @class public class StateHandler
  * @brief StateHandler class
  */
 public class StateHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(StateHandler.class);
 
     // StateContainer
     private final StateContainer stateContainer;
@@ -114,6 +119,15 @@ public class StateHandler {
     }
 
     /**
+     * @fn public List<String> getEventList ()
+     * @brief StateEventManager 에 정의된 모든 이벤트들을 새로운 리스트에 저장하여 반환하는 함수
+     * @return 성공 시 정의된 이벤트 리스트, 실패 시 null 반환
+     */
+    public List<String> getEventList () {
+        return stateEventManager.getAllEvents();
+    }
+
+    /**
      * @fn public String fire (String event)
      * @brief 정의된 State 천이를 위해 지정한 이벤트를 발생시키는 함수
      * @param event 발생할 이벤트 이름
@@ -135,15 +149,48 @@ public class StateHandler {
     }
 
     /**
-     * @fn public Object getCallBackResult (String fromState, String toState)
-     * @brief CallBack 결과를 반환하는 함수
+     * @fn public Object getCallBackResultByState (String fromState, String toState)
+     * @brief From state 와 To state 로 CallBack 결과를 반환하는 함수
      * @param fromState From state
      * @param toState To state
      * @return 성공 시 CallBack 결과값, 실패 시 null 반환
      */
-    public Object getCallBackResult (String fromState, String toState) {
+    public Object getCallBackResultByState(String fromState, String toState) {
         CallBack callBack = stateContainer.getCallBackByFromState(fromState, toState);
-        if (callBack == null) { return null; }
+        if (callBack == null) {
+            logger.warn("({}) Fail to get the callback result. CallBack is not defined. (fromState={}, toState={})", name, fromState, toState);
+            return null;
+        }
+
+        return callBack.getResult();
+    }
+
+    /**
+     * @fn public Object getCallBackResultByEvent (String event, String fromState)
+     * @brief Event 와 From state 로 CallBack 결과를 반환하는 함수
+     * @param event event
+     * @param fromState From state
+     * @return 성공 시 CallBack 결과값, 실패 시 null 반환
+     */
+    public Object getCallBackResultByEvent(String event, String fromState) {
+        Map<String, String> stateMap = stateEventManager.getStateMap(event);
+        if (stateMap == null) {
+            logger.warn("({}) Fail to get the callback result. Event is not defined. (event={}, fromState={})", name, event, fromState);
+            return null;
+        }
+
+        String toState = stateMap.get(fromState);
+        if (toState == null) {
+            logger.warn("({}) Fail to get the callback result. From state is not defined. (event={}, fromState={})", name, event, fromState);
+            return null;
+        }
+
+        CallBack callBack = stateContainer.getCallBackByFromState(fromState, toState);
+        if (callBack == null) {
+            logger.warn("({}) Fail to get the callback result. CallBack is not defined. (event={}, fromState={})", name, event, fromState);
+            return null;
+        }
+
         return callBack.getResult();
     }
 

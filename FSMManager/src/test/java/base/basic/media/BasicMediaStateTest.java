@@ -44,7 +44,7 @@ public class BasicMediaStateTest {
     @Test
     public void testStart () {
         normalTest();
-        timingTest();
+        //timingTest();
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -104,7 +104,8 @@ public class BasicMediaStateTest {
         Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_SUCCESS_EVENT, MediaState.IDLE_REQUEST, MediaState.IDLE_STATE, mediaDeleteSuccessCallBack));
         Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_FAIL_EVENT, MediaState.IDLE_REQUEST, MediaState.ACTIVE_STATE, mediaDeleteFailCallBack));
 
-        Assert.assertNotNull(mediaStateHandler.getStateList());
+        Assert.assertFalse(mediaStateHandler.getEventList().isEmpty());
+        Assert.assertFalse(mediaStateHandler.getStateList().isEmpty());
         ////////////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -114,24 +115,24 @@ public class BasicMediaStateTest {
 
         Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStart());
         Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStateHandler.getCurState());
-        Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStateHandler.getCallBackResult(MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST));
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStateHandler.getCallBackResultByState(MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST));
 
         // 상태 처리 실패 시 반환될 실패 상태값 정상 동작하는지 확인
         Assert.assertEquals(MediaState.ACTIVE_STATE, mediaStop());
         Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStateHandler.getCurState());
-        Assert.assertNull(mediaStateHandler.getCallBackResult(MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST));
+        Assert.assertNull(mediaStateHandler.getCallBackResultByState(MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST));
 
         Assert.assertEquals(MediaState.ACTIVE_STATE, mediaCreateSuccess());
         Assert.assertEquals(MediaState.ACTIVE_STATE, mediaStateHandler.getCurState());
-        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaStateHandler.getCallBackResult(MediaState.ACTIVE_REQUEST, MediaState.ACTIVE_STATE));
+        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaStateHandler.getCallBackResultByState(MediaState.ACTIVE_REQUEST, MediaState.ACTIVE_STATE));
 
         Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStop());
         Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStateHandler.getCurState());
-        Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStateHandler.getCallBackResult(MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST));
+        Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStateHandler.getCallBackResultByState(MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST));
 
         Assert.assertEquals(MediaState.IDLE_STATE, mediaDeleteSuccess());
         Assert.assertEquals(MediaState.IDLE_STATE, mediaStateHandler.getCurState());
-        Assert.assertEquals(MediaState.IDLE_STATE, mediaStateHandler.getCallBackResult(MediaState.IDLE_REQUEST, MediaState.IDLE_STATE));
+        Assert.assertEquals(MediaState.IDLE_STATE, mediaStateHandler.getCallBackResultByState(MediaState.IDLE_REQUEST, MediaState.IDLE_STATE));
 
         this.stopWatch.stop();
         logger.info("Done. (total time: {} s)", String.format("%.3f", ((double) this.stopWatch.getTime()) / 1000));
@@ -164,7 +165,8 @@ public class BasicMediaStateTest {
         Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_SUCCESS_EVENT, MediaState.IDLE_REQUEST, MediaState.IDLE_STATE, mediaDeleteSuccessCallBack));
         Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_FAIL_EVENT, MediaState.IDLE_REQUEST, MediaState.ACTIVE_STATE, mediaDeleteFailCallBack));
 
-        Assert.assertNotNull(mediaStateHandler.getStateList());
+        Assert.assertFalse(mediaStateHandler.getEventList().isEmpty());
+        Assert.assertFalse(mediaStateHandler.getStateList().isEmpty());
         ////////////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////////////
