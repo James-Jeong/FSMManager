@@ -84,4 +84,3 @@ FSMManager
 @param event : 발생할 이벤트 이름
 @param callback : 이벤트 발생 시 FSM 로직에서 실행할 callback 함수
   
-  
