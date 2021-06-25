@@ -1,7 +1,12 @@
 # FSMManager
 FSMManager
 
-## 구성도
+## FSM 종류
+### 1. Basic FSM
+### 2. Squirrel FSM
+### 3. Akka FSM
+
+## Basic FSM 구성도
 ### 상태 추가
 ![스크린샷 2021-06-18 오전 9 14 06](https://user-images.githubusercontent.com/37236920/122487505-665a8b80-d016-11eb-9e32-21edc122fa7d.png)
   
