@@ -20,6 +20,7 @@ public class StateEventManager {
 
     // stateEventCallBack
     private final StateEventCallBack stateEventCallBack;
+
     // Event Map
     private static final Map<String, Map<String, String>> eventMap = new ConcurrentHashMap<>();
 
@@ -78,6 +79,11 @@ public class StateEventManager {
         return result;
     }
 
+    /**
+     * @fn public boolean removeAllEvents()
+     * @brief 등록된 모든 이벤트들을 삭제하는 함수
+     * @return 성공 시 true, 실패 시 false 반환
+     */
     public boolean removeAllEvents() {
         boolean result = false;
 
@@ -121,6 +127,13 @@ public class StateEventManager {
         return new ArrayList<>(eventMap.keySet());
     }
 
+    /**
+     * @fn public String getToStateFromEvent (String event, String fromState)
+     * @brief 이벤트 이름과 From state 로 To state 를 반환하는 함수
+     * @param event 이벤트 이름
+     * @param fromState From state
+     * @return 성공 시 To state, 실패 시 null 반환
+     */
     public String getToStateFromEvent (String event, String fromState) {
         if (getStateMap(event) == null) { return null; }
         return getStateMap(event).get(fromState);

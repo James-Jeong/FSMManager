@@ -46,8 +46,8 @@ public class StateContainer {
      */
     public boolean addToStateByFromState(String fromState, String toState, CallBack callBack) {
         if (getCallBackByFromState(fromState, toState) != null) {
-            logger.warn("[{}] Duplicated state. (fromState={}, toState={})",
-                    ResultCode.DUPLICATED_STATE, fromState, toState
+            logger.warn("[{}] ({}) Duplicated state. (fromState={}, toState={})",
+                    ResultCode.DUPLICATED_STATE, name, fromState, toState
             );
             return false;
         }
@@ -79,6 +79,11 @@ public class StateContainer {
         return result;
     }
 
+    /**
+     * @fn public boolean removeAllStates()
+     * @brief 등록된 모든 상태들을 삭제하는 함수
+     * @return 성공 시 true, 실패 시 false 반환
+     */
     public boolean removeAllStates() {
         boolean result = false;
 
@@ -132,8 +137,8 @@ public class StateContainer {
      */
     public boolean removeToStateByFromState(String fromState, String toState) {
         if (getToStateMapByFromState(fromState) == null) {
-            logger.warn("[{}] Unknown state. (fromState={}, toState={})",
-                    ResultCode.UNKNOWN_STATE, fromState, toState
+            logger.warn("[{}] ({}) Unknown state. (fromState={}, toState={})",
+                    ResultCode.UNKNOWN_STATE, name, fromState, toState
             );
             return false;
         }
