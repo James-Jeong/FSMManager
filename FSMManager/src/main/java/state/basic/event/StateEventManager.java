@@ -2,6 +2,7 @@ package state.basic.event;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import state.basic.info.ResultCode;
 import state.basic.state.StateUnit;
 
 import java.util.ArrayList;
@@ -44,7 +45,9 @@ public class StateEventManager {
      */
     public boolean addEvent(String event, String fromState, String toState) {
         if (getToStateFromEvent(event, fromState) != null) {
-            logger.warn("Duplicated event. (event={}, fromState={}, toState={})", event, fromState, toState);
+            logger.warn("[{}] Duplicated event. (event={}, fromState={}, toState={})",
+                    ResultCode.DUPLICATED_EVENT, event, fromState, toState
+            );
             return false;
         }
 
@@ -56,13 +59,19 @@ public class StateEventManager {
 
         boolean result = eventMap.putIfAbsent(event, stateMap) == null;
         if (result) {
-            logger.info("Success to add state into event. (event={}, fromState={}, toState={})", event, fromState, toState);
+            logger.info("[{}] Success to add state into event. (event={}, fromState={}, toState={})",
+                    ResultCode.SUCCESS_ADD_STATE, event, fromState, toState
+            );
         } else {
             result = stateMap.putIfAbsent(fromState, toState) == null;
             if (result) {
-                logger.info("Success to add state into event. (event={}, fromState={}, toState={})", event, fromState, toState);
+                logger.info("[{}] Success to add state into event. (event={}, fromState={}, toState={})",
+                        ResultCode.SUCCESS_ADD_STATE, event, fromState, toState
+                );
             } else {
-                logger.warn("Fail to add state into event. (event={}, fromState={}, toState={})", event, fromState, toState);
+                logger.warn("[{}] Fail to add state into event. (event={}, fromState={}, toState={})",
+                        ResultCode.FAIL_ADD_STATE, event, fromState, toState
+                );
             }
         }
 
@@ -90,9 +99,13 @@ public class StateEventManager {
     public boolean removeFromState(String event) {
         boolean result = eventMap.remove(event) != null;
         if (result) {
-            logger.info("Success to remove the from state. (event={})", event);
+            logger.info("[{}] Success to remove the from state. (event={})",
+                    ResultCode.SUCCESS_REMOVE_STATE, event
+            );
         } else {
-            logger.info("Fail to remove the from state. (event={})", event);
+            logger.info("[{}] Fail to remove the from state. (event={})",
+                    ResultCode.FAIL_REMOVE_STATE, event
+            );
         }
 
         return result;

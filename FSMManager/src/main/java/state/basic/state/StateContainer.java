@@ -2,6 +2,7 @@ package state.basic.state;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import state.basic.info.ResultCode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +46,9 @@ public class StateContainer {
      */
     public boolean addToStateByFromState(String fromState, String toState, CallBack callBack) {
         if (getCallBackByFromState(fromState, toState) != null) {
-            logger.warn("Duplicated state. (fromState={}, toState={})", fromState, toState);
+            logger.warn("[{}] Duplicated state. (fromState={}, toState={})",
+                    ResultCode.DUPLICATED_STATE, fromState, toState
+            );
             return false;
         }
 
@@ -57,13 +60,19 @@ public class StateContainer {
 
         boolean result = stateMap.putIfAbsent(fromState, toStateMap) == null;
         if (result) {
-            logger.info("({}) Success to add state. (fromState={}, toState={})", name, fromState, toState);
+            logger.info("[{}] ({}) Success to add state. (fromState={}, toState={})",
+                    ResultCode.SUCCESS_ADD_STATE, name, fromState, toState
+            );
         } else {
             result = toStateMap.putIfAbsent(toState, callBack) == null;
             if (result) {
-                logger.info("({}) Success to add state. (fromState={}, toState={})", name, fromState, toState);
+                logger.info("[{}] ({}) Success to add state. (fromState={}, toState={})",
+                        ResultCode.SUCCESS_ADD_STATE, name, fromState, toState
+                );
             } else {
-                logger.warn("({}) Fail to add state. (fromState={}, toState={})", name, fromState, toState);
+                logger.warn("[{}] ({}) Fail to add state. (fromState={}, toState={})",
+                        ResultCode.FAIL_ADD_STATE, name, fromState, toState
+                );
             }
         }
 
@@ -101,9 +110,13 @@ public class StateContainer {
                 }
             }
 
-            logger.info("({}) Success to remove the from state. (fromState={})", name, fromState);
+            logger.info("[{}] ({}) Success to remove the from state. (fromState={})",
+                    ResultCode.SUCCESS_REMOVE_STATE, name, fromState
+            );
         } else {
-            logger.info("({}) Fail to remove the from state. (fromState={})", name, fromState);
+            logger.info("[{}] ({}) Fail to remove the from state. (fromState={})",
+                    ResultCode.FAIL_REMOVE_STATE, name, fromState
+            );
         }
 
         return result;
@@ -119,15 +132,21 @@ public class StateContainer {
      */
     public boolean removeToStateByFromState(String fromState, String toState) {
         if (getToStateMapByFromState(fromState) == null) {
-            logger.warn("Unknown state. (fromState={}, toState={})", fromState, toState);
+            logger.warn("[{}] Unknown state. (fromState={}, toState={})",
+                    ResultCode.UNKNOWN_STATE, fromState, toState
+            );
             return false;
         }
 
         boolean result = getToStateMapByFromState(fromState).remove(toState) != null;
         if (result) {
-            logger.info("({}) Success to remove the to state. (fromState={}, toState={})", name, fromState, toState);
+            logger.info("[{}] ({}) Success to remove the to state. (fromState={}, toState={})",
+                    ResultCode.SUCCESS_REMOVE_STATE, name, fromState, toState
+            );
         } else {
-            logger.info("({}) Fail to remove the to state. (fromState={}, toState={})", name, fromState, toState);
+            logger.info("[{}] ({}) Fail to remove the to state. (fromState={}, toState={})",
+                    ResultCode.FAIL_REMOVE_STATE, name, fromState, toState
+            );
         }
 
         return result;
@@ -177,14 +196,18 @@ public class StateContainer {
      */
     public String nextState (StateUnit stateUnit, String toState, String failState) {
         if (stateUnit == null) {
-            logger.warn("({}) Fail to transit. StateUnit is null. (stateUnit=null, nextState={})", name, toState);
+            logger.warn("[{}] ({}) Fail to transit. StateUnit is null. (stateUnit=null, nextState={})",
+                    ResultCode.FAIL_TRANSIT_STATE, name, toState
+            );
             return failState;
         }
 
         String fromState = stateUnit.getCurState();
         Map<String, CallBack> nextStateCallBackMap = getToStateMapByFromState(fromState);
         if (nextStateCallBackMap == null) {
-            logger.warn("({}) Fail to transit. Next state callBack is not defined. (fromState={}, toState={})", name, fromState, toState);
+            logger.warn("[{}] ({}) Fail to transit. To state is not defined. (fromState={}, toState={})",
+                    ResultCode.FAIL_GET_STATE, name, fromState, toState
+            );
             return failState;
         }
 
@@ -195,7 +218,9 @@ public class StateContainer {
         // 2) CallBack 함수 나중에 수행
         CallBack nextStateCallBack = nextStateCallBackMap.get(toState);
         if (nextStateCallBack == null) {
-            logger.warn("({}) Fail to get the next state's call back. Not defined. (fromState={}, toState={})", name, fromState, toState);
+            logger.warn("[{}] ({}) Fail to get the to state's call back. Not defined. (fromState={}, toState={})",
+                    ResultCode.FAIL_GET_CALLBACK, name, fromState, toState
+            );
             return failState;
         } else {
             stateUnit.setCallBackResult(nextStateCallBack.callBackFunc(toState));

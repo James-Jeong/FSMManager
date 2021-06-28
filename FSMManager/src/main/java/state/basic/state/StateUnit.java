@@ -2,6 +2,7 @@ package state.basic.state;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import state.basic.info.ResultCode;
 
 /**
  * @class public class StateUnit
@@ -41,7 +42,9 @@ public class StateUnit {
      * @param curState 현재 State 이름
      */
     public synchronized void setCurState(String curState) {
-        logger.info("({}) Cur State is changed. ([{}] > [{}])", name, getCurState(), curState);
+        logger.info("[{}] ({}) Cur State is changed. ([{}] > [{}])",
+                ResultCode.SUCCESS_TRANSIT_STATE, name, getCurState(), curState
+        );
         this.curState = curState;
     }
 
@@ -62,7 +65,9 @@ public class StateUnit {
      * @param prevState 이전 State 이름
      */
     public synchronized void setPrevState(String prevState) {
-        logger.info("({}) Prev State is changed. ([{}] > [{}])", name, getPrevState(), prevState);
+        logger.info("[{}] ({}) Prev State is changed. ([{}] > [{}])",
+                ResultCode.SUCCESS_TRANSIT_STATE, name, getPrevState(), prevState
+        );
         this.prevState = prevState;
     }
 

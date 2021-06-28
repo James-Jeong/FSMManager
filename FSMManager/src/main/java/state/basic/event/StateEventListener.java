@@ -3,6 +3,7 @@ package state.basic.event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.StateManager;
+import state.basic.info.ResultCode;
 import state.basic.state.StateHandler;
 import state.basic.state.StateUnit;
 
@@ -33,31 +34,39 @@ public class StateEventListener implements StateEventCallBack {
      */
     @Override
     public String onEvent(String handlerName, String event, StateUnit stateUnit, String failState) {
-         StateHandler stateHandler = StateManager.getInstance().getStateHandler(handlerName);
-        if (stateHandler == null) {
-            logger.warn("({}) Fail to find stateHandler. (event={}, stateUnit={})", handlerName, event, stateUnit);
+        if (stateUnit == null) {
+            logger.warn("[{}] ({}) StateUnit is null. (event={})",
+                    ResultCode.NULL_OBJECT, handlerName, event
+            );
             return failState;
         }
 
-        if (stateUnit == null) {
-            logger.warn("({}) StateUnit is null. (event={})", handlerName, event);
+        StateHandler stateHandler = StateManager.getInstance().getStateHandler(handlerName);
+        if (stateHandler == null) {
+            logger.warn("[{}] ({}) Fail to find stateHandler. (event={}, stateUnit={})",
+                    ResultCode.FAIL_GET_STATE_HANDLER, handlerName, event, stateUnit
+            );
             return failState;
         }
 
         String fromState = stateUnit.getCurState();
         if (fromState == null) {
-            logger.warn("({}) Fail to transit. From state is null. (fromState=null)", handlerName);
+            logger.warn("[{}] ({}) Fail to transit. From state is null. (fromState=null)",
+                    ResultCode.FAIL_TRANSIT_STATE, handlerName
+            );
             return failState;
         }
 
         String toState = stateHandler.findToStateFromEvent(event, fromState);
         if (toState == null) {
-            //logger.warn("({}) Fail to find To state. (event={}, fromState={})", handlerName, event, fromState);
+            //logger.warn("[{}] ({}) Fail to find To state. (event={}, fromState={})", ResultCode.FAIL_GET_STATE, handlerName, event, fromState);
             return failState;
         }
 
         if (fromState.equals(toState)) {
-            logger.warn("({}) Fail to transit. State is same. (curState={}, nextState={})", handlerName, fromState, toState);
+            logger.warn("[{}] ({}) Fail to transit. State is same. (curState={}, nextState={})",
+                    ResultCode.SAME_STATE, handlerName, fromState, toState
+            );
             return failState;
         }
 
