@@ -1,16 +1,17 @@
 package base.basic;
 
 import base.basic.call.base.CallCallBack;
+import base.basic.call.base.CallInfo;
+import base.basic.call.base.CallState;
 import base.basic.media.base.MediaCallBack;
-import base.squirrel.call.base.CallState;
-import base.squirrel.media.base.MediaState;
+import base.basic.media.base.MediaState;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.StateManager;
-import state.basic.StateHandler;
+import state.basic.state.StateHandler;
 
 /**
  * @class
@@ -61,139 +62,21 @@ public class BasicCallAndMediaStateTest {
 
     @Test
     public void testStart () {
-        stateManager.addStateHandler(CALL_STATE_NAME, CallState.INIT);
+        String callId = "Call";
+        CallInfo callInfo = new CallInfo(
+                callId,
+                "01012345678",
+                "01056781234"
+        );
+
+        stateManager.addStateUnit(callInfo.getSipStateUnitName(), CallState.INIT);
+        stateManager.addStateHandler(CALL_STATE_NAME);
         callStateHandler = stateManager.getStateHandler(CALL_STATE_NAME);
 
-        stateManager.addStateHandler(MEDIA_STATE_NAME, MediaState.IDLE_STATE);
+        stateManager.addStateUnit(callInfo.getMediaStateUnitName(), MediaState.IDLE_STATE);
+        stateManager.addStateHandler(MEDIA_STATE_NAME);
         mediaStateHandler = stateManager.getStateHandler(MEDIA_STATE_NAME);
 
-        normalTest();
-
-        stateManager.removeStateHandler(CALL_STATE_NAME);
-        stateManager.removeStateHandler(MEDIA_STATE_NAME);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////
-
-    public String callStart () {
-        logger.info("@ Call is started!");
-        return callStateHandler.fire(CALL_START_EVENT, CallState.INIT);
-    }
-
-    public String offerEarlyNegoStart() {
-        logger.info("@ Early Nego is started by offer!");
-
-        Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStart());
-        Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStateHandler.getCurState());
-        Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStateHandler.getCallBackResultByState(MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST));
-
-        return callStateHandler.fire(OFFER_EARLY_NEGO_START_EVENT, CallState.OFFER);
-    }
-
-    public String earlyMediaStart () {
-        logger.info("@ Early Media is started!");
-
-        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaCreateSuccess());
-        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaStateHandler.getCurState());
-        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaStateHandler.getCallBackResultByState(MediaState.ACTIVE_REQUEST, MediaState.ACTIVE_STATE));
-
-        return callStateHandler.fire(EARLY_MEDIA_START_EVENT, CallState.EARLY_NEGO_REQ);
-    }
-
-    public String activeStart () {
-        logger.info("@ Active is started!");
-        return callStateHandler.fire(ACTIVE_START_EVENT, CallState.NEGO_REQ);
-    }
-
-    public String earlyNegoInActiveStart () {
-        logger.info("@ InActive is started by early_nego!");
-        return callStateHandler.fire(EARLY_NEGO_INACTIVE_START_EVENT, CallState.EARLY_NEGO_REQ);
-    }
-
-    public String negoInActiveStart () {
-        logger.info("@ InActive is started by nego!");
-        return callStateHandler.fire(NEGO_INACTIVE_START_EVENT, CallState.NEGO_REQ);
-    }
-
-    public String offerNegoStart () {
-        logger.info("@ Nego is started by offer!");
-        return callStateHandler.fire(OFFER_NEGO_START_EVENT, CallState.OFFER);
-    }
-
-    public String earlyNegoNegoStart () {
-        logger.info("@ Nego is started by early_nego!");
-        return callStateHandler.fire(EARLY_NEGO_NEGO_START_EVENT, CallState.EARLY_NEGO_REQ);
-    }
-
-    public String offerHangupStart () {
-        logger.info("@ Hangup is started by offer!");
-        return callStateHandler.fire(OFFER_STOP_EVENT, CallState.OFFER);
-    }
-
-    public String earlyNegoHangupStart () {
-        logger.info("@ Hangup is started by early_nego!");
-        return callStateHandler.fire(EARLY_NEGO_STOP_EVENT, CallState.EARLY_NEGO_REQ);
-    }
-
-    public String activeHangupStart() {
-        logger.info("@ Hangup is started by nego!");
-
-        Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStop());
-        Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStateHandler.getCurState());
-        Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStateHandler.getCallBackResultByState(MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST));
-
-        return callStateHandler.fire(ACTIVE_STOP_EVENT, CallState.ACTIVE);
-    }
-
-    public String callStopSuccess () {
-        logger.info("@ Success to stop the call!");
-
-        Assert.assertEquals(MediaState.IDLE_STATE, mediaDeleteSuccess());
-        Assert.assertEquals(MediaState.IDLE_STATE, mediaStateHandler.getCurState());
-        Assert.assertEquals(MediaState.IDLE_STATE, mediaStateHandler.getCallBackResultByState(MediaState.IDLE_REQUEST, MediaState.IDLE_STATE));
-
-        return callStateHandler.fire(CALL_STOP_DONE_SUCCESS_EVENT, CallState.HANGUP_REQ);
-    }
-
-    public String callStopFail () {
-        logger.info("@ Fail to stop the call!");
-        return callStateHandler.fire(CALL_STOP_DONE_FAIL_EVENT, CallState.HANGUP_REQ);
-    }
-
-    public String mediaStart () {
-        //logger.info("@ Media is started!");
-        return mediaStateHandler.fire(MEDIA_START_EVENT, MediaState.IDLE_STATE);
-    }
-
-    public String mediaStop () {
-        //logger.info("@ Media is stopped!");
-        return mediaStateHandler.fire(MEDIA_STOP_EVENT, MediaState.ACTIVE_STATE);
-    }
-
-    public String mediaCreateSuccess () {
-        //logger.info("@ Success to create media!");
-        return mediaStateHandler.fire(MEDIA_CREATE_SUCCESS_EVENT, MediaState.ACTIVE_REQUEST);
-    }
-
-    public String mediaCreateFail () {
-        //logger.info("@ Fail to create media!");
-        return mediaStateHandler.fire(MEDIA_CREATE_FAIL_EVENT, MediaState.ACTIVE_REQUEST);
-    }
-
-    public String mediaDeleteSuccess () {
-        //logger.info("@ Success to delete media!");
-        return mediaStateHandler.fire(MEDIA_DELETE_SUCCESS_EVENT, MediaState.IDLE_REQUEST);
-    }
-
-    public String mediaDeleteFail () {
-        //logger.info("@ Fail to delete media!");
-        return mediaStateHandler.fire(MEDIA_DELETE_FAIL_EVENT, MediaState.IDLE_REQUEST);
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////
-
-    public void normalTest () {
         ////////////////////////////////////////////////////////////////////////////////
         // 1. CallBack 함수 정의
         CallCallBack callStartCallBack = new CallCallBack(CALL_START_EVENT);
@@ -250,41 +133,263 @@ public class BasicCallAndMediaStateTest {
         Assert.assertFalse(mediaStateHandler.getStateList().isEmpty());
         ////////////////////////////////////////////////////////////////////////////////
 
+        normalTest(callInfo);
+
+        stateManager.removeStateUnit(callInfo.getSipStateUnitName());
+        stateManager.removeStateUnit(callInfo.getMediaStateUnitName());
+        stateManager.removeStateHandler(CALL_STATE_NAME);
+        stateManager.removeStateHandler(MEDIA_STATE_NAME);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+
+    public String callStart (CallInfo callInfo) {
+        logger.info("@ Call is started!");
+        return callStateHandler.fire(
+                CALL_START_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.INIT
+        );
+    }
+
+    public String offerEarlyNegoStart(CallInfo callInfo) {
+        logger.info("@ Early Nego is started by offer!");
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStart(callInfo));
+        return callStateHandler.fire(
+                OFFER_EARLY_NEGO_START_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.OFFER
+        );
+    }
+
+    public String earlyMediaStart (CallInfo callInfo) {
+        logger.info("@ Early Media is started!");
+        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaCreateSuccess(callInfo));
+        return callStateHandler.fire(
+                EARLY_MEDIA_START_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.EARLY_NEGO_REQ
+        );
+    }
+
+    public String activeStart (CallInfo callInfo) {
+        logger.info("@ Active is started!");
+
+        if (!StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCurState().equals(MediaState.ACTIVE_STATE)) {
+            Assert.assertEquals(MediaState.ACTIVE_STATE, mediaCreateSuccess(callInfo));
+        }
+
+        return callStateHandler.fire(
+                ACTIVE_START_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.NEGO_REQ
+        );
+    }
+
+    public String earlyNegoInActiveStart (CallInfo callInfo) {
+        logger.info("@ InActive is started by early_nego!");
+        Assert.assertEquals(MediaState.IDLE_STATE, mediaCreateFail(callInfo));
+        return callStateHandler.fire(
+                EARLY_NEGO_INACTIVE_START_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.EARLY_NEGO_REQ
+        );
+    }
+
+    public String negoInActiveStart (CallInfo callInfo) {
+        logger.info("@ InActive is started by nego!");
+        Assert.assertEquals(MediaState.IDLE_STATE, mediaCreateFail(callInfo));
+        return callStateHandler.fire(
+                NEGO_INACTIVE_START_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.NEGO_REQ
+        );
+    }
+
+    public String offerNegoStart (CallInfo callInfo) {
+        logger.info("@ Nego is started by offer!");
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStart(callInfo));
+        return callStateHandler.fire(
+                OFFER_NEGO_START_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.OFFER
+        );
+    }
+
+    public String earlyNegoNegoStart (CallInfo callInfo) {
+        logger.info("@ Nego is started by early_nego!");
+        return callStateHandler.fire(
+                EARLY_NEGO_NEGO_START_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.EARLY_NEGO_REQ
+        );
+    }
+
+    public String offerHangupStart (CallInfo callInfo) {
+        logger.info("@ Hangup is started by offer!");
+        return callStateHandler.fire(
+                OFFER_STOP_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.OFFER
+        );
+    }
+
+    public String earlyNegoHangupStart (CallInfo callInfo) {
+        logger.info("@ Hangup is started by early_nego!");
+        Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStop(callInfo));
+        return callStateHandler.fire(
+                EARLY_NEGO_STOP_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.EARLY_NEGO_REQ
+        );
+    }
+
+    public String activeHangupStart(CallInfo callInfo) {
+        logger.info("@ Hangup is started by nego!");
+        Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStop(callInfo));
+        return callStateHandler.fire(
+                ACTIVE_STOP_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.ACTIVE
+        );
+    }
+
+    public String callStopSuccess (CallInfo callInfo) {
+        logger.info("@ Success to stop the call!");
+        Assert.assertEquals(MediaState.IDLE_STATE, mediaDeleteSuccess(callInfo));
+        return callStateHandler.fire(
+                CALL_STOP_DONE_SUCCESS_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.HANGUP_REQ
+        );
+    }
+
+    public String callStopFail (CallInfo callInfo) {
+        logger.info("@ Fail to stop the call!");
+        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaDeleteFail(callInfo));
+        return callStateHandler.fire(
+                CALL_STOP_DONE_FAIL_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.HANGUP_REQ
+        );
+    }
+
+    public String mediaStart (CallInfo callInfo) {
+        //logger.info("@ Media is started!");
+        return mediaStateHandler.fire(
+                MEDIA_START_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
+                MediaState.IDLE_STATE
+        );
+    }
+
+    public String mediaStop (CallInfo callInfo) {
+        //logger.info("@ Media is stopped!");
+        return mediaStateHandler.fire(
+                MEDIA_STOP_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
+                MediaState.ACTIVE_STATE
+        );
+    }
+
+    public String mediaCreateSuccess (CallInfo callInfo) {
+        //logger.info("@ Success to create media!");
+        return mediaStateHandler.fire(
+                MEDIA_CREATE_SUCCESS_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
+                MediaState.ACTIVE_REQUEST
+        );
+    }
+
+    public String mediaCreateFail (CallInfo callInfo) {
+        //logger.info("@ Fail to create media!");
+        return mediaStateHandler.fire(MEDIA_CREATE_FAIL_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
+                MediaState.ACTIVE_REQUEST
+        );
+    }
+
+    public String mediaDeleteSuccess (CallInfo callInfo) {
+        //logger.info("@ Success to delete media!");
+        return mediaStateHandler.fire(
+                MEDIA_DELETE_SUCCESS_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
+                MediaState.IDLE_REQUEST
+        );
+    }
+
+    public String mediaDeleteFail (CallInfo callInfo) {
+        //logger.info("@ Fail to delete media!");
+        return mediaStateHandler.fire(
+                MEDIA_DELETE_FAIL_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
+                MediaState.IDLE_REQUEST);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+
+    public void normalTest (CallInfo callInfo) {
         ////////////////////////////////////////////////////////////////////////////////
         // 3. 상태 천이
         this.stopWatch.start();
 
-        Assert.assertEquals(CallState.OFFER, callStart());
-        Assert.assertEquals(CallState.OFFER, callStateHandler.getCurState());
-        Assert.assertEquals(CallState.OFFER, callStateHandler.getCallBackResultByState(CallState.INIT, CallState.OFFER));
+        // 1) INIT > OFFER
+        Assert.assertEquals(CallState.OFFER, callStart(callInfo));
+        Assert.assertEquals(CallState.INIT, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getPrevState());
+        Assert.assertEquals(CallState.OFFER, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCurState());
+        Assert.assertEquals(CallState.OFFER, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCallBackResult());
 
-        Assert.assertEquals(CallState.EARLY_NEGO_REQ, offerEarlyNegoStart());
-        Assert.assertEquals(CallState.EARLY_NEGO_REQ, callStateHandler.getCurState());
-        Assert.assertEquals(CallState.EARLY_NEGO_REQ, callStateHandler.getCallBackResultByState(CallState.OFFER, CallState.EARLY_NEGO_REQ));
-        Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStateHandler.getCurState());
+        // 2) OFFER > EARLY_NEGO_REQ
+        Assert.assertEquals(CallState.EARLY_NEGO_REQ, offerEarlyNegoStart(callInfo));
+        Assert.assertEquals(CallState.OFFER, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getPrevState());
+        Assert.assertEquals(CallState.EARLY_NEGO_REQ, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCurState());
+        Assert.assertEquals(CallState.EARLY_NEGO_REQ, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCallBackResult());
 
-        Assert.assertEquals(CallState.EARLY_MEDIA, earlyMediaStart());
-        Assert.assertEquals(CallState.EARLY_MEDIA, callStateHandler.getCurState());
-        Assert.assertEquals(CallState.EARLY_MEDIA, callStateHandler.getCallBackResultByState(CallState.EARLY_NEGO_REQ, CallState.EARLY_MEDIA));
-        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaStateHandler.getCurState());
+        Assert.assertEquals(MediaState.IDLE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getPrevState());
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCurState());
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCallBackResult());
 
-        Assert.assertEquals(CallState.NEGO_REQ, earlyNegoNegoStart());
-        Assert.assertEquals(CallState.NEGO_REQ, callStateHandler.getCurState());
-        Assert.assertEquals(CallState.NEGO_REQ, callStateHandler.getCallBackResultByState(CallState.EARLY_MEDIA, CallState.NEGO_REQ));
+        // 3) EARLY_NEGO_REQ > EARLY_MEDIA
+        Assert.assertEquals(CallState.EARLY_MEDIA, earlyMediaStart(callInfo));
+        Assert.assertEquals(CallState.EARLY_NEGO_REQ, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getPrevState());
+        Assert.assertEquals(CallState.EARLY_MEDIA, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCurState());
+        Assert.assertEquals(CallState.EARLY_MEDIA, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCallBackResult());
 
-        Assert.assertEquals(CallState.ACTIVE, activeStart());
-        Assert.assertEquals(CallState.ACTIVE, callStateHandler.getCurState());
-        Assert.assertEquals(CallState.ACTIVE, callStateHandler.getCallBackResultByState(CallState.NEGO_REQ, CallState.ACTIVE));
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getPrevState());
+        Assert.assertEquals(MediaState.ACTIVE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCurState());
+        Assert.assertEquals(MediaState.ACTIVE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCallBackResult());
 
-        Assert.assertEquals(CallState.HANGUP_REQ, activeHangupStart());
-        Assert.assertEquals(CallState.HANGUP_REQ, callStateHandler.getCurState());
-        Assert.assertEquals(CallState.HANGUP_REQ, callStateHandler.getCallBackResultByState(CallState.ACTIVE, CallState.HANGUP_REQ));
-        Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStateHandler.getCurState());
+        // 4) EARLY_MEDIA > NEGO_REQ
+        Assert.assertEquals(CallState.NEGO_REQ, earlyNegoNegoStart(callInfo));
+        Assert.assertEquals(CallState.EARLY_MEDIA, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getPrevState());
+        Assert.assertEquals(CallState.NEGO_REQ, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCurState());
+        Assert.assertEquals(CallState.NEGO_REQ, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCallBackResult());
 
-        Assert.assertEquals(CallState.INIT, callStopSuccess());
-        Assert.assertEquals(CallState.INIT, callStateHandler.getCurState());
-        Assert.assertEquals(CallState.INIT, callStateHandler.getCallBackResultByState(CallState.HANGUP_REQ, CallState.INIT));
-        Assert.assertEquals(MediaState.IDLE_STATE, mediaStateHandler.getCurState());
+        // 5) NEGO_REQ > ACTIVE
+        Assert.assertEquals(CallState.ACTIVE, activeStart(callInfo));
+        Assert.assertEquals(CallState.NEGO_REQ, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getPrevState());
+        Assert.assertEquals(CallState.ACTIVE, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCurState());
+        Assert.assertEquals(CallState.ACTIVE, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCallBackResult());
+
+        // 6) ACTIVE > HANGUP_REQ
+        Assert.assertEquals(CallState.HANGUP_REQ, activeHangupStart(callInfo));
+        Assert.assertEquals(CallState.ACTIVE, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getPrevState());
+        Assert.assertEquals(CallState.HANGUP_REQ, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCurState());
+        Assert.assertEquals(CallState.HANGUP_REQ, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCallBackResult());
+
+        Assert.assertEquals(MediaState.ACTIVE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getPrevState());
+        Assert.assertEquals(MediaState.IDLE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCurState());
+        Assert.assertEquals(MediaState.IDLE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCallBackResult());
+
+        // 7) HANGUP_REQ > INIT
+        Assert.assertEquals(CallState.INIT, callStopSuccess(callInfo));
+        Assert.assertEquals(CallState.HANGUP_REQ, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getPrevState());
+        Assert.assertEquals(CallState.INIT, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCurState());
+        Assert.assertEquals(CallState.INIT, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCallBackResult());
+
+        Assert.assertEquals(MediaState.IDLE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getPrevState());
+        Assert.assertEquals(MediaState.IDLE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCurState());
+        Assert.assertEquals(MediaState.IDLE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCallBackResult());
 
         this.stopWatch.stop();
         logger.info("Done. (total time: {} s)", String.format("%.3f", ((double) this.stopWatch.getTime()) / 1000));

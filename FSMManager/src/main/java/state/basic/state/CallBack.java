@@ -1,4 +1,4 @@
-package state.basic;
+package state.basic.state;
 
 /**
  * @interface public class CallBack
@@ -7,14 +7,14 @@ package state.basic;
 public class CallBack {
 
     private String name;
-    private Object result = null;
 
     public CallBack(String name) {
         this.name = name;
     }
 
-    public void callBackFunc(Object... object) {
+    public Object callBackFunc(Object... object) {
         // Must embody this function.
+        return null;
     }
 
     public String getName() {
@@ -25,11 +25,4 @@ public class CallBack {
         this.name = name;
     }
 
-    public Object getResult() {
-        return result;
-    }
-
-    public void setResult(Object result) {
-        this.result = result;
-    }
 }

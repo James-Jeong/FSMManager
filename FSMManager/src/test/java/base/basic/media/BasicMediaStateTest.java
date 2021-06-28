@@ -1,14 +1,15 @@
 package base.basic.media;
 
+import base.basic.call.base.CallInfo;
 import base.basic.media.base.MediaCallBack;
-import base.squirrel.media.base.MediaState;
+import base.basic.media.base.MediaState;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.StateManager;
-import state.basic.StateHandler;
+import state.basic.state.StateHandler;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,46 +44,15 @@ public class BasicMediaStateTest {
 
     @Test
     public void testStart () {
-        normalTest();
-        //timingTest();
-    }
+        String callId = "Call";
+        CallInfo callInfo = new CallInfo(
+                callId,
+                "01012345678",
+                "01056781234"
+        );
 
-    ////////////////////////////////////////////////////////////////////////////////
-
-    public String mediaStart () {
-        //logger.info("@ Media is started!");
-        return mediaStateHandler.fire(MEDIA_START_EVENT, MediaState.IDLE_STATE);
-    }
-
-    public String mediaStop () {
-        //logger.info("@ Media is stopped!");
-        return mediaStateHandler.fire(MEDIA_STOP_EVENT, MediaState.ACTIVE_STATE);
-    }
-
-    public String mediaCreateSuccess () {
-        //logger.info("@ Success to create media!");
-        return mediaStateHandler.fire(MEDIA_CREATE_SUCCESS_EVENT, MediaState.ACTIVE_REQUEST);
-    }
-
-    public String mediaCreateFail () {
-        //logger.info("@ Fail to create media!");
-        return mediaStateHandler.fire(MEDIA_CREATE_FAIL_EVENT, MediaState.ACTIVE_REQUEST);
-    }
-
-    public String mediaDeleteSuccess () {
-        //logger.info("@ Success to delete media!");
-        return mediaStateHandler.fire(MEDIA_DELETE_SUCCESS_EVENT, MediaState.IDLE_REQUEST);
-    }
-
-    public String mediaDeleteFail () {
-        //logger.info("@ Fail to delete media!");
-        return mediaStateHandler.fire(MEDIA_DELETE_FAIL_EVENT, MediaState.IDLE_REQUEST);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////
-
-    public void normalTest () {
-        stateManager.addStateHandler(MEDIA_STATE_NAME, MediaState.IDLE_STATE);
+        stateManager.addStateUnit(callInfo.getMediaStateUnitName(), MediaState.IDLE_STATE);
+        stateManager.addStateHandler(MEDIA_STATE_NAME);
         mediaStateHandler = stateManager.getStateHandler(MEDIA_STATE_NAME);
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -108,67 +78,108 @@ public class BasicMediaStateTest {
         Assert.assertFalse(mediaStateHandler.getStateList().isEmpty());
         ////////////////////////////////////////////////////////////////////////////////
 
+        normalTest(callInfo);
+        timingTest(callInfo);
+
+        stateManager.removeStateUnit(callInfo.getMediaStateUnitName());
+        stateManager.removeStateHandler(MEDIA_STATE_NAME);
+        mediaStateHandler = null;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+
+    public String mediaStart (CallInfo callInfo) {
+        //logger.info("@ Media is started!");
+        return mediaStateHandler.fire(
+                MEDIA_START_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
+                MediaState.IDLE_STATE
+        );
+    }
+
+    public String mediaStop (CallInfo callInfo) {
+        //logger.info("@ Media is stopped!");
+        return mediaStateHandler.fire(
+                MEDIA_STOP_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
+                MediaState.ACTIVE_STATE
+        );
+    }
+
+    public String mediaCreateSuccess (CallInfo callInfo) {
+        //logger.info("@ Success to create media!");
+        return mediaStateHandler.fire(
+                MEDIA_CREATE_SUCCESS_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
+                MediaState.ACTIVE_REQUEST
+        );
+    }
+
+    public String mediaCreateFail (CallInfo callInfo) {
+        //logger.info("@ Fail to create media!");
+        return mediaStateHandler.fire(MEDIA_CREATE_FAIL_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
+                MediaState.ACTIVE_REQUEST
+        );
+    }
+
+    public String mediaDeleteSuccess (CallInfo callInfo) {
+        //logger.info("@ Success to delete media!");
+        return mediaStateHandler.fire(
+                MEDIA_DELETE_SUCCESS_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
+                MediaState.IDLE_REQUEST
+        );
+    }
+
+    public String mediaDeleteFail (CallInfo callInfo) {
+        //logger.info("@ Fail to delete media!");
+        return mediaStateHandler.fire(
+                MEDIA_DELETE_FAIL_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
+                MediaState.IDLE_REQUEST);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+
+    public void normalTest (CallInfo callInfo) {
         ////////////////////////////////////////////////////////////////////////////////
         // 3. 상태 천이
         this.stopWatch.reset();
         this.stopWatch.start();
 
-        Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStart());
-        Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStateHandler.getCurState());
-        Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStateHandler.getCallBackResultByState(MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST));
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStart(callInfo));
+        Assert.assertEquals(MediaState.IDLE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getPrevState());
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCurState());
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCallBackResult());
 
         // 상태 처리 실패 시 반환될 실패 상태값 정상 동작하는지 확인
-        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaStop());
-        Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStateHandler.getCurState());
-        Assert.assertNull(mediaStateHandler.getCallBackResultByState(MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST));
+        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaStop(callInfo));
+        Assert.assertEquals(MediaState.IDLE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getPrevState());
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCurState());
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCallBackResult());
 
-        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaCreateSuccess());
-        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaStateHandler.getCurState());
-        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaStateHandler.getCallBackResultByState(MediaState.ACTIVE_REQUEST, MediaState.ACTIVE_STATE));
+        Assert.assertEquals(MediaState.ACTIVE_STATE, mediaCreateSuccess(callInfo));
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getPrevState());
+        Assert.assertEquals(MediaState.ACTIVE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCurState());
+        Assert.assertEquals(MediaState.ACTIVE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCallBackResult());
 
-        Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStop());
-        Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStateHandler.getCurState());
-        Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStateHandler.getCallBackResultByState(MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST));
+        Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStop(callInfo));
+        Assert.assertEquals(MediaState.ACTIVE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getPrevState());
+        Assert.assertEquals(MediaState.IDLE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCurState());
+        Assert.assertEquals(MediaState.IDLE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCallBackResult());
 
-        Assert.assertEquals(MediaState.IDLE_STATE, mediaDeleteSuccess());
-        Assert.assertEquals(MediaState.IDLE_STATE, mediaStateHandler.getCurState());
-        Assert.assertEquals(MediaState.IDLE_STATE, mediaStateHandler.getCallBackResultByState(MediaState.IDLE_REQUEST, MediaState.IDLE_STATE));
+        Assert.assertEquals(MediaState.IDLE_STATE, mediaDeleteSuccess(callInfo));
+        Assert.assertEquals(MediaState.IDLE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getPrevState());
+        Assert.assertEquals(MediaState.IDLE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCurState());
+        Assert.assertEquals(MediaState.IDLE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCallBackResult());
 
         this.stopWatch.stop();
         logger.info("Done. (total time: {} s)", String.format("%.3f", ((double) this.stopWatch.getTime()) / 1000));
         ////////////////////////////////////////////////////////////////////////////////
-
-        stateManager.removeStateHandler(MEDIA_STATE_NAME);
-        mediaStateHandler = null;
     }
 
-    public void timingTest() {
-        stateManager.addStateHandler(MEDIA_STATE_NAME, MediaState.IDLE_STATE);
-        mediaStateHandler = stateManager.getStateHandler(MEDIA_STATE_NAME);
-
-        ////////////////////////////////////////////////////////////////////////////////
-        // 1. CallBack 함수 정의
-        MediaCallBack mediaStartCallBack = new MediaCallBack(MEDIA_START_EVENT);
-        MediaCallBack mediaCreateSuccessCallBack = new MediaCallBack(MEDIA_CREATE_SUCCESS_EVENT);
-        MediaCallBack mediaCreateFailCallBack = new MediaCallBack(MEDIA_CREATE_FAIL_EVENT);
-        MediaCallBack mediaStopCallBack = new MediaCallBack(MEDIA_STOP_EVENT);
-        MediaCallBack mediaDeleteSuccessCallBack = new MediaCallBack(MEDIA_DELETE_SUCCESS_EVENT);
-        MediaCallBack mediaDeleteFailCallBack = new MediaCallBack(MEDIA_DELETE_FAIL_EVENT);
-        ////////////////////////////////////////////////////////////////////////////////
-
-        ////////////////////////////////////////////////////////////////////////////////
-        // 2. 상태 정의
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_START_EVENT, MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST, mediaStartCallBack));
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_CREATE_SUCCESS_EVENT, MediaState.ACTIVE_REQUEST, MediaState.ACTIVE_STATE, mediaCreateSuccessCallBack));
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_CREATE_FAIL_EVENT, MediaState.ACTIVE_REQUEST, MediaState.IDLE_STATE, mediaCreateFailCallBack));
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_STOP_EVENT, MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST, mediaStopCallBack));
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_SUCCESS_EVENT, MediaState.IDLE_REQUEST, MediaState.IDLE_STATE, mediaDeleteSuccessCallBack));
-        Assert.assertTrue(mediaStateHandler.addState(MEDIA_DELETE_FAIL_EVENT, MediaState.IDLE_REQUEST, MediaState.ACTIVE_STATE, mediaDeleteFailCallBack));
-
-        Assert.assertFalse(mediaStateHandler.getEventList().isEmpty());
-        Assert.assertFalse(mediaStateHandler.getStateList().isEmpty());
-        ////////////////////////////////////////////////////////////////////////////////
-
+    public void timingTest(CallInfo callInfo) {
         ////////////////////////////////////////////////////////////////////////////////
         // 3. 상태 천이
         Map<String, ScheduledFuture<?>> taskMap = new ConcurrentHashMap<>();
@@ -184,7 +195,7 @@ public class BasicMediaStateTest {
             ScheduledFuture<?> scheduledFuture;
             try {
                 scheduledFuture = executor.scheduleAtFixedRate(
-                        this::mediaStart,
+                        () -> mediaStart(callInfo),
                         initDelayMs,
                         delayMs,
                         TimeUnit.MILLISECONDS
@@ -201,7 +212,7 @@ public class BasicMediaStateTest {
             ScheduledFuture<?> scheduledFuture;
             try {
                 scheduledFuture = executor.scheduleAtFixedRate(
-                        this::mediaCreateSuccess,
+                        () -> mediaCreateSuccess(callInfo),
                         initDelayMs,
                         delayMs,
                         TimeUnit.MILLISECONDS
@@ -218,7 +229,7 @@ public class BasicMediaStateTest {
             ScheduledFuture<?> scheduledFuture;
             try {
                 scheduledFuture = executor.scheduleAtFixedRate(
-                        this::mediaStop,
+                        () -> mediaStop(callInfo),
                         initDelayMs,
                         delayMs,
                         TimeUnit.MILLISECONDS
@@ -235,7 +246,7 @@ public class BasicMediaStateTest {
             ScheduledFuture<?> scheduledFuture;
             try {
                 scheduledFuture = executor.scheduleAtFixedRate(
-                        this::mediaDeleteSuccess,
+                        () -> mediaDeleteSuccess(callInfo),
                         initDelayMs,
                         delayMs,
                         TimeUnit.MILLISECONDS
@@ -259,9 +270,6 @@ public class BasicMediaStateTest {
 
         executor.shutdown();
         ////////////////////////////////////////////////////////////////////////////////
-
-        stateManager.removeStateHandler(MEDIA_STATE_NAME);
-        mediaStateHandler = null;
     }
 
 }

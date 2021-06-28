@@ -2,7 +2,7 @@ package base.basic.media.base;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import state.basic.CallBack;
+import state.basic.state.CallBack;
 
 /**
  * @class public class MediaCallBack implements CallBack
@@ -17,12 +17,14 @@ public class MediaCallBack extends CallBack {
     }
 
     @Override
-    public void callBackFunc(Object... object) {
-        if (object.length == 0) { return; }
+    public Object callBackFunc(Object... object) {
+        if (object.length == 0) {
+            return null;
+        }
 
         String stateName = (String) object[0];
         logger.info("({}) To state is {}", getName(), stateName);
-        setResult(stateName);
+        return stateName;
     }
 
 }

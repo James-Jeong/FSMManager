@@ -74,7 +74,7 @@ public class AkkaContainer {
                 if (throwable != null) {
                     logger.warn("Fail to complete the ask. (actorName={}, msg={})", name, o, throwable);
                 } else {
-                    logger.debug("Success to complete the ask. (actorName={}, msg={})", name, o);
+                    logger.info("Success to complete the ask. (actorName={}, msg={})", name, o);
                 }
             }
         }, actorSystem.dispatcher());

@@ -1,6 +1,8 @@
 package base.basic.call.base;
 
-import state.basic.CallBack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import state.basic.state.CallBack;
 
 /**
  * @class public class CallCallBack implements CallBack
@@ -8,16 +10,21 @@ import state.basic.CallBack;
  */
 public class CallCallBack extends CallBack {
 
+    private static final Logger logger = LoggerFactory.getLogger(CallCallBack.class);
+
     public CallCallBack(String name) {
         super(name);
     }
 
     @Override
-    public void callBackFunc(Object... object) {
-        if (object.length == 0) { return; }
+    public Object callBackFunc(Object... object) {
+        if (object.length == 0) {
+            return null;
+        }
 
         String stateName = (String) object[0];
-        setResult(stateName);
+        logger.info("({}) To state is {}", getName(), stateName);
+        return stateName;
     }
 
 }

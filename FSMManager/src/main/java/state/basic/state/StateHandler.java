@@ -1,11 +1,10 @@
-package state.basic;
+package state.basic.state;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.basic.event.StateEventManager;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @class public class StateHandler
@@ -24,14 +23,14 @@ public class StateHandler {
     private final String name;
 
     /**
-     * @fn public StateHandler(String name, String initState)
+     * @fn public StateHandler(String name)
      * @brief StateHandler 생성자 함수
      * @param name StateHandler 이름
      */
-    public StateHandler(String name, String initState) {
+    public StateHandler(String name) {
        this.name = name;
 
-        stateContainer = new StateContainer(name, initState);
+        stateContainer = new StateContainer(name);
         stateEventManager = new StateEventManager();
     }
 
@@ -91,22 +90,15 @@ public class StateHandler {
     }
 
     /**
-     * @fn public String getCurState ()
-     * @brief 현재 State 이름을 반환하는 함수
-     * @return 현재 State 이름
-     */
-    public String getCurState () {
-        return stateContainer.getCurState();
-    }
-
-    /**
-     * @fn public String nextState (String toState, String failState)
+     * @fn public String nextState (StateUnit stateUnit, String toState, String failState)
      * @brief 현재 상태에서 매개변수로 전달받은 다음 상태로 천이하는 함수
+     * @param stateUnit State unit
      * @param toState To state
+     * @param failState Fail state
      * @return 성공 시 다음 상태값, 실패 시 정의된 실패값 반환
      */
-    public String nextState (String toState, String failState) {
-        return stateContainer.nextState(toState, failState);
+    public String nextState (StateUnit stateUnit, String toState, String failState) {
+        return stateContainer.nextState(stateUnit, toState, failState);
     }
 
     /**
@@ -127,15 +119,17 @@ public class StateHandler {
         return stateEventManager.getAllEvents();
     }
 
+
     /**
-     * @fn public String fire (String event)
+     * @fn public String fire (String event, StateUnit stateUnit, String failState)
      * @brief 정의된 State 천이를 위해 지정한 이벤트를 발생시키는 함수
      * @param event 발생할 이벤트 이름
+     * @param stateUnit State unit
      * @param failState 천이 실패 시 반환될 State 이름
      * @return 성공 시 지정한 결과값 반환, 실패 시 failState 반환
      */
-    public String fire (String event, String failState) {
-        return stateEventManager.callEvent(name, event, getCurState(), failState);
+    public String fire (String event, StateUnit stateUnit, String failState) {
+        return stateEventManager.callEvent(name, event, stateUnit, failState);
     }
 
     /**
@@ -146,52 +140,6 @@ public class StateHandler {
      */
     public synchronized String findToStateFromEvent(String event, String fromState) {
         return stateEventManager.getToStateFromEvent(event, fromState);
-    }
-
-    /**
-     * @fn public Object getCallBackResultByState (String fromState, String toState)
-     * @brief From state 와 To state 로 CallBack 결과를 반환하는 함수
-     * @param fromState From state
-     * @param toState To state
-     * @return 성공 시 CallBack 결과값, 실패 시 null 반환
-     */
-    public Object getCallBackResultByState(String fromState, String toState) {
-        CallBack callBack = stateContainer.getCallBackByFromState(fromState, toState);
-        if (callBack == null) {
-            logger.warn("({}) Fail to get the callback result. CallBack is not defined. (fromState={}, toState={})", name, fromState, toState);
-            return null;
-        }
-
-        return callBack.getResult();
-    }
-
-    /**
-     * @fn public Object getCallBackResultByEvent (String event, String fromState)
-     * @brief Event 와 From state 로 CallBack 결과를 반환하는 함수
-     * @param event event
-     * @param fromState From state
-     * @return 성공 시 CallBack 결과값, 실패 시 null 반환
-     */
-    public Object getCallBackResultByEvent(String event, String fromState) {
-        Map<String, String> stateMap = stateEventManager.getStateMap(event);
-        if (stateMap == null) {
-            logger.warn("({}) Fail to get the callback result. Event is not defined. (event={}, fromState={})", name, event, fromState);
-            return null;
-        }
-
-        String toState = stateMap.get(fromState);
-        if (toState == null) {
-            logger.warn("({}) Fail to get the callback result. From state is not defined. (event={}, fromState={})", name, event, fromState);
-            return null;
-        }
-
-        CallBack callBack = stateContainer.getCallBackByFromState(fromState, toState);
-        if (callBack == null) {
-            logger.warn("({}) Fail to get the callback result. CallBack is not defined. (event={}, fromState={})", name, event, fromState);
-            return null;
-        }
-
-        return callBack.getResult();
     }
 
 }

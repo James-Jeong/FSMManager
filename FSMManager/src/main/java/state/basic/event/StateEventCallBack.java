@@ -1,11 +1,13 @@
 package state.basic.event;
 
+import state.basic.state.StateUnit;
+
 /**
  * @interface  public interface EventCallBack
  * @brief EventCallBack interface
  */
 public interface StateEventCallBack {
 
-    String onEvent (String handlerName, String event, String fromState, String failState);
+    String onEvent (String handlerName, String event, StateUnit stateUnit, String failState);
 
 }

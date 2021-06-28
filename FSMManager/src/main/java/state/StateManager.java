@@ -5,7 +5,8 @@ import org.squirrelframework.foundation.fsm.StateMachineBuilderFactory;
 import org.squirrelframework.foundation.fsm.StateMachineConfiguration;
 import org.squirrelframework.foundation.fsm.UntypedStateMachineBuilder;
 import state.akka.AkkaContainer;
-import state.basic.StateHandler;
+import state.basic.state.StateHandler;
+import state.basic.state.StateUnit;
 import state.squirrel.*;
 
 import java.util.Map;
@@ -25,6 +26,8 @@ public class StateManager {
 
     // StateHandler Map
     private final Map<String, StateHandler> stateHandlerMap = new ConcurrentHashMap<>();
+
+    private final Map<String, StateUnit> stateMap = new ConcurrentHashMap<>();
 
     // StateManager 싱글턴 인스턴스 변수
     private static StateManager stateManager;
@@ -156,14 +159,53 @@ public class StateManager {
     ////////////////////////////////////////////////////////////////////////////////
     // # Handmade FSM
 
+    ////////////////////////////////////////////////////////////////////////////////
+
     /**
-     * @fn public void addStateHandler (String name, String initState)
+     * @fn public void addStateUnit (String name, String initState)
+     * @brief StateUnit 을 새로 추가하는 함수
+     * @param name StateUnit 이름
+     * @param initState 초기 상태
+     */
+    public void addStateUnit (String name, String initState) {
+        if (stateMap.get(name) != null) { return; }
+        stateMap.putIfAbsent(name, new StateUnit(name, initState));
+    }
+
+    /**
+     * @fn public boolean removeStateUnit (String name)
+     * @brief 지정한 이름의 StateUnit 을 삭제하는 함수
+     * @param name StateUnit 이름
+     * @return 성공 시 true, 실패 시 false 반환
+     */
+    public boolean removeStateUnit (String name) {
+        StateUnit stateUnit = stateMap.get(name);
+        if (stateUnit == null) { return false; }
+
+        return stateMap.remove(name) != null;
+    }
+
+    /**
+     * @fn public StateHandler getStateUnit (String name)
+     * @brief 지정한 이름의 StateUnit 을 반환하는 함수
+     * @param name StateUnit 이름
+     * @return 성공 시 StateUnit 객체, 실패 시 null 반환
+     */
+    public StateUnit getStateUnit (String name) {
+        if (stateMap.get(name) == null) { return null; }
+        return stateMap.get(name);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * @fn public void addStateHandler (String name)
      * @brief StateHandler 를 새로 추가하는 함수
      * @param name StateHandler 이름
      */
-    public void addStateHandler (String name, String initState) {
+    public void addStateHandler (String name) {
         if (stateHandlerMap.get(name) != null) { return; }
-        stateHandlerMap.putIfAbsent(name, new StateHandler(name, initState));
+        stateHandlerMap.putIfAbsent(name, new StateHandler(name));
     }
 
     /**

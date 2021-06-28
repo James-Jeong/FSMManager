@@ -3,7 +3,8 @@ package state.basic.event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.StateManager;
-import state.basic.StateHandler;
+import state.basic.state.StateHandler;
+import state.basic.state.StateUnit;
 
 /**
  * @class public class EventListener implements EventCallBack
@@ -26,20 +27,26 @@ public class StateEventListener implements StateEventCallBack {
      * @brief 지정한 이벤트 발생 시 호출되는 함수
      * @param handlerName 이벤트를 발생시킨 StateHandler 이름
      * @param event 이벤트 이름
-     * @param fromState 천이 전 State 이름
+     * @param stateUnit State unit
      * @param failState 천이 실패 시 반환될 State 이름
      * @return 성공 시 다음 상태값, 실패 시 정의된 실패값 반환
      */
     @Override
-    public String onEvent(String handlerName, String event, String fromState, String failState) {
-        if (handlerName == null) {
-            logger.warn("(null) Handler name is null. (event={}, fromState={})", event, fromState);
+    public String onEvent(String handlerName, String event, StateUnit stateUnit, String failState) {
+         StateHandler stateHandler = StateManager.getInstance().getStateHandler(handlerName);
+        if (stateHandler == null) {
+            logger.warn("({}) Fail to find stateHandler. (event={}, stateUnit={})", handlerName, event, stateUnit);
             return failState;
         }
 
-        StateHandler stateHandler = StateManager.getInstance().getStateHandler(handlerName);
-        if (stateHandler == null) {
-            logger.warn("({}) Fail to find stateHandler. (event={}, fromState={})", handlerName, event, fromState);
+        if (stateUnit == null) {
+            logger.warn("({}) StateUnit is null. (event={})", handlerName, event);
+            return failState;
+        }
+
+        String fromState = stateUnit.getCurState();
+        if (fromState == null) {
+            logger.warn("({}) Fail to transit. From state is null. (fromState=null)", handlerName);
             return failState;
         }
 
@@ -49,6 +56,11 @@ public class StateEventListener implements StateEventCallBack {
             return failState;
         }
 
-        return stateHandler.nextState(toState, failState);
+        if (fromState.equals(toState)) {
+            logger.warn("({}) Fail to transit. State is same. (curState={}, nextState={})", handlerName, fromState, toState);
+            return failState;
+        }
+
+        return stateHandler.nextState(stateUnit, toState, failState);
     }
 }
