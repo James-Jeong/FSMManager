@@ -52,6 +52,13 @@ public class StateContainer {
             return false;
         }
 
+        if (callBack == null) {
+            logger.warn("[{}] ({}) CallBack is null. (fromState={}, toState={})",
+                    ResultCode.NULL_OBJECT, name, fromState, toState
+            );
+            return false;
+        }
+
         Map<String, CallBack> toStateMap = getToStateMapByFromState(fromState);
         if (toStateMap == null) {
             toStateMap = new ConcurrentHashMap<>();
