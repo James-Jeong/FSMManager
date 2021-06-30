@@ -1,6 +1,7 @@
 package base.basic.call;
 
 import base.basic.call.base.CallCallBack;
+import base.basic.call.base.CallEvent;
 import base.basic.call.base.CallInfo;
 import base.basic.call.base.CallState;
 import org.apache.commons.lang3.time.StopWatch;
@@ -21,28 +22,8 @@ public class BasicCallStateTest {
 
     private final StopWatch stopWatch = new StopWatch();
 
-    private static final String CALL_START_EVENT = "call_start";
-    private static final String CALL_FAIL_EVENT = "call_fail";
-
-    private static final String OFFER_STOP_EVENT = "offer_stop";
-    private static final String NEGO_STOP_EVENT = "nego_stop";
-    private static final String EARLY_NEGO_STOP_EVENT = "early_nego_stop";
-    private static final String ACTIVE_STOP_EVENT = "active_stop";
-    private static final String INACTIVE_STOP_EVENT = "inactive_stop";
-
-    private static final String CALL_STOP_DONE_SUCCESS_EVENT = "call_stop_done_success";
-    private static final String CALL_STOP_DONE_FAIL_EVENT = "call_stop_done_fail";
-    private static final String OFFER_EARLY_NEGO_START_EVENT = "early_nego_start";
-    private static final String EARLY_MEDIA_START_EVENT = "early_media_start";
-    private static final String OFFER_NEGO_START_EVENT = "nego_start";
-    private static final String EARLY_NEGO_NEGO_START_EVENT = "nego_start";
-    private static final String ACTIVE_START_EVENT = "active_start";
-    private static final String EARLY_NEGO_INACTIVE_START_EVENT = "early_nego_inactive_start";
-    private static final String NEGO_INACTIVE_START_EVENT = "nego_inactive_start";
-
     ////////////////////////////////////////////////////////////////////////////////
 
-    private static final String CALL_STATE_NAME = "call_state";
     private final StateManager stateManager = StateManager.getInstance();
     private StateHandler callStateHandler = null;
 
@@ -58,47 +39,47 @@ public class BasicCallStateTest {
         );
 
         stateManager.addStateUnit(callInfo.getSipStateUnitName(), CallState.INIT);
-        stateManager.addStateHandler(CALL_STATE_NAME);
-        callStateHandler = stateManager.getStateHandler(CALL_STATE_NAME);
+        stateManager.addStateHandler(CallState.CALL_STATE_NAME);
+        callStateHandler = stateManager.getStateHandler(CallState.CALL_STATE_NAME);
 
         ////////////////////////////////////////////////////////////////////////////////
         // 1. CallBack 함수 정의
-        CallCallBack callStartCallBack = new CallCallBack(CALL_START_EVENT);
-        CallCallBack callFailCallBack = new CallCallBack(CALL_FAIL_EVENT);
-        CallCallBack callOfferEarlyNegoStartCallBack = new CallCallBack(OFFER_EARLY_NEGO_START_EVENT);
-        CallCallBack callOfferNegoStartCallBack = new CallCallBack(OFFER_NEGO_START_EVENT);
-        CallCallBack callOfferStopCallBack = new CallCallBack(OFFER_STOP_EVENT);
-        CallCallBack callEarlyMediaStartCallBack = new CallCallBack(EARLY_MEDIA_START_EVENT);
-        CallCallBack callEarlyNegoInactiveStartCallBack = new CallCallBack(EARLY_NEGO_INACTIVE_START_EVENT);
-        CallCallBack callEarlyNegoNegoStartCallBack = new CallCallBack(EARLY_NEGO_NEGO_START_EVENT);
-        CallCallBack callEarlyNegoStopCallBack = new CallCallBack(EARLY_NEGO_STOP_EVENT);
-        CallCallBack callActiveStartCallBack = new CallCallBack(ACTIVE_START_EVENT);
-        CallCallBack callNegoInactiveStartCallBack = new CallCallBack(NEGO_INACTIVE_START_EVENT);
-        CallCallBack callNegoStopCallBack = new CallCallBack(NEGO_STOP_EVENT);
-        CallCallBack callActiveStopCallBack = new CallCallBack(ACTIVE_STOP_EVENT);
-        CallCallBack callInactiveStopCallBack = new CallCallBack(INACTIVE_STOP_EVENT);
-        CallCallBack callStopDoneSuccessCallBack = new CallCallBack(CALL_STOP_DONE_SUCCESS_EVENT);
-        CallCallBack callStopDoneFailCallBack = new CallCallBack(CALL_STOP_DONE_FAIL_EVENT);
+        CallCallBack callStartCallBack = new CallCallBack(CallEvent.CALL_START_EVENT);
+        CallCallBack callFailCallBack = new CallCallBack(CallEvent.CALL_FAIL_EVENT);
+        CallCallBack callOfferEarlyNegoStartCallBack = new CallCallBack(CallEvent.OFFER_EARLY_NEGO_START_EVENT);
+        CallCallBack callOfferNegoStartCallBack = new CallCallBack(CallEvent.OFFER_NEGO_START_EVENT);
+        CallCallBack callOfferStopCallBack = new CallCallBack(CallEvent.OFFER_STOP_EVENT);
+        CallCallBack callEarlyMediaStartCallBack = new CallCallBack(CallEvent.EARLY_MEDIA_START_EVENT);
+        CallCallBack callEarlyNegoInactiveStartCallBack = new CallCallBack(CallEvent.EARLY_NEGO_INACTIVE_START_EVENT);
+        CallCallBack callEarlyNegoNegoStartCallBack = new CallCallBack(CallEvent.EARLY_NEGO_NEGO_START_EVENT);
+        CallCallBack callEarlyNegoStopCallBack = new CallCallBack(CallEvent.EARLY_NEGO_STOP_EVENT);
+        CallCallBack callActiveStartCallBack = new CallCallBack(CallEvent.ACTIVE_START_EVENT);
+        CallCallBack callNegoInactiveStartCallBack = new CallCallBack(CallEvent.NEGO_INACTIVE_START_EVENT);
+        CallCallBack callNegoStopCallBack = new CallCallBack(CallEvent.NEGO_STOP_EVENT);
+        CallCallBack callActiveStopCallBack = new CallCallBack(CallEvent.ACTIVE_STOP_EVENT);
+        CallCallBack callInactiveStopCallBack = new CallCallBack(CallEvent.INACTIVE_STOP_EVENT);
+        CallCallBack callStopDoneSuccessCallBack = new CallCallBack(CallEvent.CALL_STOP_DONE_SUCCESS_EVENT);
+        CallCallBack callStopDoneFailCallBack = new CallCallBack(CallEvent.CALL_STOP_DONE_FAIL_EVENT);
         ////////////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////////////
         // 2. 상태 정의
-        Assert.assertTrue(callStateHandler.addState(CALL_START_EVENT, CallState.INIT, CallState.OFFER, callStartCallBack));
-        Assert.assertTrue(callStateHandler.addState(CALL_FAIL_EVENT, CallState.OFFER, CallState.INIT, callFailCallBack));
-        Assert.assertTrue(callStateHandler.addState(OFFER_EARLY_NEGO_START_EVENT, CallState.OFFER, CallState.EARLY_NEGO_REQ, callOfferEarlyNegoStartCallBack));
-        Assert.assertTrue(callStateHandler.addState(OFFER_NEGO_START_EVENT, CallState.OFFER, CallState.NEGO_REQ, callOfferNegoStartCallBack));
-        Assert.assertTrue(callStateHandler.addState(OFFER_STOP_EVENT, CallState.OFFER, CallState.HANGUP_REQ, callOfferStopCallBack));
-        Assert.assertTrue(callStateHandler.addState(EARLY_MEDIA_START_EVENT, CallState.EARLY_NEGO_REQ, CallState.EARLY_MEDIA, callEarlyMediaStartCallBack));
-        Assert.assertTrue(callStateHandler.addState(EARLY_NEGO_INACTIVE_START_EVENT, CallState.EARLY_NEGO_REQ, CallState.INACTIVE, callEarlyNegoInactiveStartCallBack));
-        Assert.assertTrue(callStateHandler.addState(EARLY_NEGO_NEGO_START_EVENT, CallState.EARLY_MEDIA, CallState.NEGO_REQ, callEarlyNegoNegoStartCallBack));
-        Assert.assertTrue(callStateHandler.addState(EARLY_NEGO_STOP_EVENT, CallState.EARLY_MEDIA, CallState.HANGUP_REQ, callEarlyNegoStopCallBack));
-        Assert.assertTrue(callStateHandler.addState(ACTIVE_START_EVENT, CallState.NEGO_REQ, CallState.ACTIVE, callActiveStartCallBack));
-        Assert.assertTrue(callStateHandler.addState(NEGO_INACTIVE_START_EVENT, CallState.NEGO_REQ, CallState.INACTIVE, callNegoInactiveStartCallBack));
-        Assert.assertTrue(callStateHandler.addState(NEGO_STOP_EVENT, CallState.NEGO_REQ, CallState.HANGUP_REQ, callNegoStopCallBack));
-        Assert.assertTrue(callStateHandler.addState(ACTIVE_STOP_EVENT, CallState.ACTIVE, CallState.HANGUP_REQ, callActiveStopCallBack));
-        Assert.assertTrue(callStateHandler.addState(INACTIVE_STOP_EVENT, CallState.INACTIVE, CallState.HANGUP_REQ, callInactiveStopCallBack));
-        Assert.assertTrue(callStateHandler.addState(CALL_STOP_DONE_SUCCESS_EVENT, CallState.HANGUP_REQ, CallState.INIT, callStopDoneSuccessCallBack));
-        Assert.assertTrue(callStateHandler.addState(CALL_STOP_DONE_FAIL_EVENT, CallState.HANGUP_REQ, CallState.IDLE, callStopDoneFailCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.CALL_START_EVENT, CallState.INIT, CallState.OFFER, callStartCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.CALL_FAIL_EVENT, CallState.OFFER, CallState.INIT, callFailCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.OFFER_EARLY_NEGO_START_EVENT, CallState.OFFER, CallState.EARLY_NEGO_REQ, callOfferEarlyNegoStartCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.OFFER_NEGO_START_EVENT, CallState.OFFER, CallState.NEGO_REQ, callOfferNegoStartCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.OFFER_STOP_EVENT, CallState.OFFER, CallState.HANGUP_REQ, callOfferStopCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_MEDIA_START_EVENT, CallState.EARLY_NEGO_REQ, CallState.EARLY_MEDIA, callEarlyMediaStartCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_NEGO_INACTIVE_START_EVENT, CallState.EARLY_NEGO_REQ, CallState.INACTIVE, callEarlyNegoInactiveStartCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_NEGO_NEGO_START_EVENT, CallState.EARLY_MEDIA, CallState.NEGO_REQ, callEarlyNegoNegoStartCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_NEGO_STOP_EVENT, CallState.EARLY_MEDIA, CallState.HANGUP_REQ, callEarlyNegoStopCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.ACTIVE_START_EVENT, CallState.NEGO_REQ, CallState.ACTIVE, callActiveStartCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.NEGO_INACTIVE_START_EVENT, CallState.NEGO_REQ, CallState.INACTIVE, callNegoInactiveStartCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.NEGO_STOP_EVENT, CallState.NEGO_REQ, CallState.HANGUP_REQ, callNegoStopCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.ACTIVE_STOP_EVENT, CallState.ACTIVE, CallState.HANGUP_REQ, callActiveStopCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.INACTIVE_STOP_EVENT, CallState.INACTIVE, CallState.HANGUP_REQ, callInactiveStopCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.CALL_STOP_DONE_SUCCESS_EVENT, CallState.HANGUP_REQ, CallState.INIT, callStopDoneSuccessCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.CALL_STOP_DONE_FAIL_EVENT, CallState.HANGUP_REQ, CallState.IDLE, callStopDoneFailCallBack));
 
         Assert.assertFalse(callStateHandler.getEventList().isEmpty());
         Assert.assertFalse(callStateHandler.getStateList().isEmpty());
@@ -107,125 +88,138 @@ public class BasicCallStateTest {
         normalTest(callInfo);
 
         stateManager.removeStateUnit(callId);
-        stateManager.removeStateHandler(CALL_STATE_NAME);
+        stateManager.removeStateHandler(CallState.CALL_STATE_NAME);
     }
 
     ////////////////////////////////////////////////////////////////////////////////
 
     public String callStart (CallInfo callInfo) {
-        logger.info("@ Call is started!");
+        logger.debug("@ Call is started!");
         return callStateHandler.fire(
-                CALL_START_EVENT,
+                CallEvent.CALL_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.INIT
+                CallState.INIT,
+                CallState.OFFER
         );
     }
 
     public String offerEarlyNegoStart(CallInfo callInfo) {
-        logger.info("@ Early Nego is started by offer!");
+        logger.debug("@ Early Nego is started by offer!");
         return callStateHandler.fire(
-                OFFER_EARLY_NEGO_START_EVENT,
+                CallEvent.OFFER_EARLY_NEGO_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.OFFER
+                CallState.OFFER,
+                CallState.EARLY_NEGO_REQ
         );
     }
 
     public String earlyMediaStart (CallInfo callInfo) {
-        logger.info("@ Early Media is started!");
+        logger.debug("@ Early Media is started!");
         return callStateHandler.fire(
-                EARLY_MEDIA_START_EVENT,
+                CallEvent.EARLY_MEDIA_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.EARLY_NEGO_REQ
+                CallState.EARLY_NEGO_REQ,
+                CallState.EARLY_MEDIA
         );
     }
 
     public String activeStart (CallInfo callInfo) {
-        logger.info("@ Active is started!");
+        logger.debug("@ Active is started!");
         return callStateHandler.fire(
-                ACTIVE_START_EVENT,
+                CallEvent.ACTIVE_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.NEGO_REQ
-        );
-    }
-
-    public String earlyNegoInActiveStart (CallInfo callInfo) {
-        logger.info("@ InActive is started by early_nego!");
-        return callStateHandler.fire(
-                EARLY_NEGO_INACTIVE_START_EVENT,
-                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.EARLY_NEGO_REQ
-        );
-    }
-
-    public String negoInActiveStart (CallInfo callInfo) {
-        logger.info("@ InActive is started by nego!");
-        return callStateHandler.fire(
-                NEGO_INACTIVE_START_EVENT,
-                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.NEGO_REQ
-        );
-    }
-
-    public String offerNegoStart (CallInfo callInfo) {
-        logger.info("@ Nego is started by offer!");
-        return callStateHandler.fire(
-                OFFER_NEGO_START_EVENT,
-                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.OFFER
-        );
-    }
-
-    public String earlyNegoNegoStart (CallInfo callInfo) {
-        logger.info("@ Nego is started by early_nego!");
-        return callStateHandler.fire(
-                EARLY_NEGO_NEGO_START_EVENT,
-                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.EARLY_NEGO_REQ
-        );
-    }
-
-    public String offerHangupStart (CallInfo callInfo) {
-        logger.info("@ Hangup is started by offer!");
-        return callStateHandler.fire(
-                OFFER_STOP_EVENT,
-                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.OFFER
-        );
-    }
-
-    public String earlyNegoHangupStart (CallInfo callInfo) {
-        logger.info("@ Hangup is started by early_nego!");
-        return callStateHandler.fire(
-                EARLY_NEGO_STOP_EVENT,
-                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.EARLY_NEGO_REQ
-        );
-    }
-
-    public String activeHangupStart(CallInfo callInfo) {
-        logger.info("@ Hangup is started by nego!");
-        return callStateHandler.fire(
-                ACTIVE_STOP_EVENT,
-                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.NEGO_REQ,
                 CallState.ACTIVE
         );
     }
 
-    public String callStopSuccess (CallInfo callInfo) {
-        logger.info("@ Success to stop the call!");
+    public String earlyNegoInActiveStart (CallInfo callInfo) {
+        logger.debug("@ InActive is started by early_nego!");
         return callStateHandler.fire(
-                CALL_STOP_DONE_SUCCESS_EVENT,
+                CallEvent.EARLY_NEGO_INACTIVE_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.EARLY_NEGO_REQ,
+                CallState.INACTIVE
+        );
+    }
+
+    public String negoInActiveStart (CallInfo callInfo) {
+        logger.debug("@ InActive is started by nego!");
+        return callStateHandler.fire(
+                CallEvent.NEGO_INACTIVE_START_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.NEGO_REQ,
+                CallState.INACTIVE
+        );
+    }
+
+    public String offerNegoStart (CallInfo callInfo) {
+        logger.debug("@ Nego is started by offer!");
+        return callStateHandler.fire(
+                CallEvent.OFFER_NEGO_START_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.OFFER,
+                CallState.NEGO_REQ
+        );
+    }
+
+    public String earlyNegoNegoStart (CallInfo callInfo) {
+        logger.debug("@ Nego is started by early_nego!");
+        return callStateHandler.fire(
+                CallEvent.EARLY_NEGO_NEGO_START_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.EARLY_NEGO_REQ,
+                CallState.NEGO_REQ
+        );
+    }
+
+    public String offerHangupStart (CallInfo callInfo) {
+        logger.debug("@ Hangup is started by offer!");
+        return callStateHandler.fire(
+                CallEvent.OFFER_STOP_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.OFFER,
                 CallState.HANGUP_REQ
         );
     }
 
-    public String callStopFail (CallInfo callInfo) {
-        logger.info("@ Fail to stop the call!");
+    public String earlyNegoHangupStart (CallInfo callInfo) {
+        logger.debug("@ Hangup is started by early_nego!");
         return callStateHandler.fire(
-                CALL_STOP_DONE_FAIL_EVENT,
+                CallEvent.EARLY_NEGO_STOP_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.EARLY_NEGO_REQ,
                 CallState.HANGUP_REQ
+        );
+    }
+
+    public String activeHangupStart(CallInfo callInfo) {
+        logger.debug("@ Hangup is started by nego!");
+        return callStateHandler.fire(
+                CallEvent.ACTIVE_STOP_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.ACTIVE,
+                CallState.HANGUP_REQ
+        );
+    }
+
+    public String callStopSuccess (CallInfo callInfo) {
+        logger.debug("@ Success to stop the call!");
+        return callStateHandler.fire(
+                CallEvent.CALL_STOP_DONE_SUCCESS_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.HANGUP_REQ,
+                CallState.INIT
+        );
+    }
+
+    public String callStopFail (CallInfo callInfo) {
+        logger.debug("@ Fail to stop the call!");
+        return callStateHandler.fire(
+                CallEvent.CALL_STOP_DONE_FAIL_EVENT,
+                StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
+                CallState.HANGUP_REQ,
+                CallState.ACTIVE
         );
     }
 
@@ -279,7 +273,7 @@ public class BasicCallStateTest {
         Assert.assertEquals(CallState.INIT, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCallBackResult());
 
         this.stopWatch.stop();
-        logger.info("Done. (total time: {} s)", String.format("%.3f", ((double) this.stopWatch.getTime()) / 1000));
+        logger.debug("Done. (total time: {} s)", String.format("%.3f", ((double) this.stopWatch.getTime()) / 1000));
         ////////////////////////////////////////////////////////////////////////////////
     }
 

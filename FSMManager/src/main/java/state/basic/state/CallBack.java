@@ -12,7 +12,7 @@ public class CallBack {
         this.name = name;
     }
 
-    public Object callBackFunc(Object... object) {
+    public Object callBackFunc(Object... objects) {
         // Must embody this function.
         return null;
     }

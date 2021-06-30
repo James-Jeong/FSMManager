@@ -151,16 +151,17 @@ public class StateEventManager {
     }
 
     /**
-     * @fn public String callEvent(String handlerName, String event, String fromState)
+     * @fn public String callEvent(String handlerName, String event, StateUnit stateUnit, String failState, Object... params)
      * @brief 지정한 이벤트를 호출하는 함수
      * @param handlerName 이벤트를 호출하는 StateHandler 이름
      * @param event 이벤트 이름
      * @param stateUnit State unit
      * @param failState 천이 실패 시 반환될 State 이름
+     * @param params CallBack 가변 매개변수
      * @return 성공 시 지정한 결과값 반환, 실패 시 null 반환
      */
-    public String callEvent(String handlerName, String event, StateUnit stateUnit, String failState) {
-        return stateEventCallBack.onEvent(handlerName, event, stateUnit, failState);
+    public String callEvent(String handlerName, String event, StateUnit stateUnit, String failState, Object... params) {
+        return stateEventCallBack.onEvent(handlerName, event, stateUnit, failState, params);
     }
 
 }

@@ -197,9 +197,10 @@ public class StateContainer {
      * @param stateUnit State Unit
      * @param toState To state
      * @param failState 천이 실패 시 반환될 State 이름
+     * @param params CallBack 가변 매개변수
      * @return 성공 시 다음 상태값, 실패 시 정의된 실패값 반환
      */
-    public String nextState (StateUnit stateUnit, String toState, String failState) {
+    public String nextState (StateUnit stateUnit, String toState, String failState, Object... params) {
         if (stateUnit == null) {
             logger.warn("[{}] ({}) Fail to transit. StateUnit is null. (stateUnit=null, nextState={})",
                     ResultCode.FAIL_TRANSIT_STATE, name, toState
@@ -228,7 +229,7 @@ public class StateContainer {
             );
             return failState;
         } else {
-            stateUnit.setCallBackResult(nextStateCallBack.callBackFunc(toState));
+            stateUnit.setCallBackResult(nextStateCallBack.callBackFunc(params));
         }
 
         // 3) 천이된 현재 상태를 반환

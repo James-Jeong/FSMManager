@@ -1,7 +1,5 @@
 package state.basic.state;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import state.basic.event.StateEventManager;
 
 import java.util.List;
@@ -11,8 +9,6 @@ import java.util.List;
  * @brief StateHandler class
  */
 public class StateHandler {
-
-    private static final Logger logger = LoggerFactory.getLogger(StateHandler.class);
 
     // StateContainer
     private final StateContainer stateContainer;
@@ -90,15 +86,16 @@ public class StateHandler {
     }
 
     /**
-     * @fn public String nextState (StateUnit stateUnit, String toState, String failState)
+     * @fn public String nextState (StateUnit stateUnit, String toState, String failState, Object... params)
      * @brief 현재 상태에서 매개변수로 전달받은 다음 상태로 천이하는 함수
      * @param stateUnit State unit
      * @param toState To state
      * @param failState Fail state
+     * @param params CallBack 가변 매개변수
      * @return 성공 시 다음 상태값, 실패 시 정의된 실패값 반환
      */
-    public String nextState (StateUnit stateUnit, String toState, String failState) {
-        return stateContainer.nextState(stateUnit, toState, failState);
+    public String nextState (StateUnit stateUnit, String toState, String failState, Object... params) {
+        return stateContainer.nextState(stateUnit, toState, failState, params);
     }
 
     /**
@@ -129,7 +126,20 @@ public class StateHandler {
      * @return 성공 시 지정한 결과값 반환, 실패 시 failState 반환
      */
     public String fire (String event, StateUnit stateUnit, String failState) {
-        return stateEventManager.callEvent(name, event, stateUnit, failState);
+        return stateEventManager.callEvent(name, event, stateUnit, failState, (Object) null);
+    }
+
+    /**
+     * @fn public String fire (String event, StateUnit stateUnit, String failState, Object... params)
+     * @brief 정의된 State 천이를 위해 지정한 이벤트를 발생시키는 함수
+     * @param event 발생할 이벤트 이름
+     * @param stateUnit State unit
+     * @param failState 천이 실패 시 반환될 State 이름
+     * @param params CallBack 가변 매개변수
+     * @return 성공 시 지정한 결과값 반환, 실패 시 failState 반환
+     */
+    public String fire (String event, StateUnit stateUnit, String failState, Object... params) {
+        return stateEventManager.callEvent(name, event, stateUnit, failState, params);
     }
 
     /**

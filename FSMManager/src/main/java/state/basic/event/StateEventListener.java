@@ -24,16 +24,17 @@ public class StateEventListener implements StateEventCallBack {
     }
 
     /**
-     * @fn public String onEvent(String handlerName, String event, String fromState)
+     * @fn public String onEvent(String handlerName, String event, String fromState, Object... objects)
      * @brief 지정한 이벤트 발생 시 호출되는 함수
      * @param handlerName 이벤트를 발생시킨 StateHandler 이름
      * @param event 이벤트 이름
      * @param stateUnit State unit
      * @param failState 천이 실패 시 반환될 State 이름
+     * @param objects CallBack 가변 매개변수
      * @return 성공 시 다음 상태값, 실패 시 정의된 실패값 반환
      */
     @Override
-    public String onEvent(String handlerName, String event, StateUnit stateUnit, String failState) {
+    public String onEvent(String handlerName, String event, StateUnit stateUnit, String failState, Object... objects) {
         if (stateUnit == null) {
             logger.warn("[{}] ({}) StateUnit is null. (event={})",
                     ResultCode.NULL_OBJECT, handlerName, event
@@ -70,6 +71,6 @@ public class StateEventListener implements StateEventCallBack {
             return failState;
         }
 
-        return stateHandler.nextState(stateUnit, toState, failState);
+        return stateHandler.nextState(stateUnit, toState, failState, objects);
     }
 }

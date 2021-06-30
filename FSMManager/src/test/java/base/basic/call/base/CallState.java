@@ -6,6 +6,8 @@ package base.basic.call.base;
  */
 public class CallState {
 
+    public static final String CALL_STATE_NAME = "call_state";
+
     public static final String INIT = "INIT";
     public static final String OFFER = "OFFER";
     public static final String EARLY_NEGO_REQ = "EARLY_NEGO_REQ";

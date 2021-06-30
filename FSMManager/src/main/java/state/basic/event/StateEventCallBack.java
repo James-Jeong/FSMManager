@@ -8,6 +8,6 @@ import state.basic.state.StateUnit;
  */
 public interface StateEventCallBack {
 
-    String onEvent (String handlerName, String event, StateUnit stateUnit, String failState);
+    String onEvent (String handlerName, String event, StateUnit stateUnit, String failState, Object... params);
 
 }
