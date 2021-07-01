@@ -208,13 +208,6 @@ public class StateContainer {
      * @return 성공 시 다음 상태값, 실패 시 정의된 실패값 반환
      */
     public String nextState (StateUnit stateUnit, String toState, String failState, Object... params) {
-        if (stateUnit == null) {
-            logger.warn("[{}] ({}) Fail to transit. StateUnit is null. (stateUnit=null, nextState={})",
-                    ResultCode.FAIL_TRANSIT_STATE, name, toState
-            );
-            return failState;
-        }
-
         String fromState = stateUnit.getCurState();
         Map<String, CallBack> nextStateCallBackMap = getToStateMapByFromState(fromState);
         if (nextStateCallBackMap == null) {
