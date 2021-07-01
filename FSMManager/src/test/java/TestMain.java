@@ -1,4 +1,4 @@
-import base.basic.BasicCallAndMediaStateTest;
+import base.basic.base.ServiceManager;
 import base.basic.call.BasicCallStateTest;
 import base.basic.media.BasicMediaStateTest;
 import org.junit.BeforeClass;
@@ -21,14 +21,17 @@ public class TestMain {
         ////////////////////////////////////////////////////////////////////////////////
         // # basic
 
+        ServiceManager serviceManager = ServiceManager.getInstance();
+
+        serviceManager.start();
+
         BasicCallStateTest basicCallStateTest = new BasicCallStateTest();
         basicCallStateTest.testStart();
 
         BasicMediaStateTest basicMediaStateTest = new BasicMediaStateTest();
         basicMediaStateTest.testStart();
 
-        BasicCallAndMediaStateTest basicCallAndMediaStateTest = new BasicCallAndMediaStateTest();
-        basicCallAndMediaStateTest.testStart();
+        serviceManager.stop();
 
         ////////////////////////////////////////////////////////////////////////////////
         // # Squirrel FSM

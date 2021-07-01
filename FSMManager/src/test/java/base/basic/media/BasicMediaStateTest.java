@@ -1,12 +1,11 @@
 package base.basic.media;
 
+import base.basic.base.SessionManager;
 import base.basic.call.base.CallInfo;
-import base.basic.media.base.MediaCallBack;
 import base.basic.media.base.MediaEvent;
 import base.basic.media.base.MediaState;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Assert;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.StateManager;
@@ -28,61 +27,27 @@ public class BasicMediaStateTest {
 
     private final StopWatch stopWatch = new StopWatch();
 
-    ////////////////////////////////////////////////////////////////////////////////
-
     private final StateManager stateManager = StateManager.getInstance();
-    private StateHandler mediaStateHandler = null;
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    @Test
     public void testStart () {
-        String callId = "Call";
-        CallInfo callInfo = new CallInfo(
-                callId,
-                "01012345678",
-                "01056781234"
-        );
-
-        stateManager.addStateUnit(callInfo.getMediaStateUnitName(), MediaState.IDLE_STATE);
-        stateManager.addStateHandler(MediaState.MEDIA_STATE_NAME);
-        mediaStateHandler = stateManager.getStateHandler(MediaState.MEDIA_STATE_NAME);
-
-        ////////////////////////////////////////////////////////////////////////////////
-        // 1. CallBack 함수 정의
-        MediaCallBack mediaStartCallBack = new MediaCallBack(MediaEvent.MEDIA_START_EVENT);
-        MediaCallBack mediaCreateSuccessCallBack = new MediaCallBack(MediaEvent.MEDIA_CREATE_SUCCESS_EVENT);
-        MediaCallBack mediaCreateFailCallBack = new MediaCallBack(MediaEvent.MEDIA_CREATE_FAIL_EVENT);
-        MediaCallBack mediaStopCallBack = new MediaCallBack(MediaEvent.MEDIA_STOP_EVENT);
-        MediaCallBack mediaDeleteSuccessCallBack = new MediaCallBack(MediaEvent.MEDIA_DELETE_SUCCESS_EVENT);
-        MediaCallBack mediaDeleteFailCallBack = new MediaCallBack(MediaEvent.MEDIA_DELETE_FAIL_EVENT);
-        ////////////////////////////////////////////////////////////////////////////////
-
-        ////////////////////////////////////////////////////////////////////////////////
-        // 2. 상태 정의
-        Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_START_EVENT, MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST, mediaStartCallBack));
-        Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_CREATE_SUCCESS_EVENT, MediaState.ACTIVE_REQUEST, MediaState.ACTIVE_STATE, mediaCreateSuccessCallBack));
-        Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_CREATE_FAIL_EVENT, MediaState.ACTIVE_REQUEST, MediaState.IDLE_STATE, mediaCreateFailCallBack));
-        Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_STOP_EVENT, MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST, mediaStopCallBack));
-        Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_DELETE_SUCCESS_EVENT, MediaState.IDLE_REQUEST, MediaState.IDLE_STATE, mediaDeleteSuccessCallBack));
-        Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_DELETE_FAIL_EVENT, MediaState.IDLE_REQUEST, MediaState.ACTIVE_STATE, mediaDeleteFailCallBack));
-
-        Assert.assertFalse(mediaStateHandler.getEventList().isEmpty());
-        Assert.assertFalse(mediaStateHandler.getStateList().isEmpty());
-        ////////////////////////////////////////////////////////////////////////////////
+        SessionManager sessionManager = SessionManager.getInstance();
+        sessionManager.createCall("Call", "01012345678", "01056781234");
+        CallInfo callInfo = sessionManager.getCall("Call");
 
         normalTest(callInfo);
         timingTest(callInfo);
 
-        stateManager.removeStateUnit(callInfo.getMediaStateUnitName());
-        stateManager.removeStateHandler(MediaState.MEDIA_STATE_NAME);
-        mediaStateHandler = null;
+        sessionManager.removeCall("Call");
     }
 
     ////////////////////////////////////////////////////////////////////////////////
 
     public String mediaStart (CallInfo callInfo) {
         //logger.debug("@ Media is started!");
+        StateHandler mediaStateHandler = stateManager.getStateHandler(MediaState.MEDIA_STATE_NAME);
+
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
@@ -93,6 +58,8 @@ public class BasicMediaStateTest {
 
     public String mediaStop (CallInfo callInfo) {
         //logger.debug("@ Media is stopped!");
+        StateHandler mediaStateHandler = stateManager.getStateHandler(MediaState.MEDIA_STATE_NAME);
+
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_STOP_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
@@ -103,6 +70,8 @@ public class BasicMediaStateTest {
 
     public String mediaCreateSuccess (CallInfo callInfo) {
         //logger.debug("@ Success to create media!");
+        StateHandler mediaStateHandler = stateManager.getStateHandler(MediaState.MEDIA_STATE_NAME);
+
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_CREATE_SUCCESS_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
@@ -113,6 +82,8 @@ public class BasicMediaStateTest {
 
     public String mediaCreateFail (CallInfo callInfo) {
         //logger.debug("@ Fail to create media!");
+        StateHandler mediaStateHandler = stateManager.getStateHandler(MediaState.MEDIA_STATE_NAME);
+
         return mediaStateHandler.fire(MediaEvent.MEDIA_CREATE_FAIL_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
                 MediaState.ACTIVE_REQUEST,
@@ -122,6 +93,8 @@ public class BasicMediaStateTest {
 
     public String mediaDeleteSuccess (CallInfo callInfo) {
         //logger.debug("@ Success to delete media!");
+        StateHandler mediaStateHandler = stateManager.getStateHandler(MediaState.MEDIA_STATE_NAME);
+
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_DELETE_SUCCESS_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
@@ -132,6 +105,8 @@ public class BasicMediaStateTest {
 
     public String mediaDeleteFail (CallInfo callInfo) {
         //logger.debug("@ Fail to delete media!");
+        StateHandler mediaStateHandler = stateManager.getStateHandler(MediaState.MEDIA_STATE_NAME);
+
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_DELETE_FAIL_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
