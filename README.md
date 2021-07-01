@@ -3,9 +3,18 @@ FSMManager
   
   
 ## 2) FSM 종류
-### 1. Basic FSM
-### 2. Squirrel FSM
-### 3. Akka FSM
+### 1. Basic FSM : 직접 만든 FSM
+### 2. Squirrel FSM : Squirrel Framework 를 사용한 FSM
+  <dependency>
+            <groupId>org.squirrelframework</groupId>  
+            <artifactId>squirrel-foundation</artifactId>  
+            <version>0.3.8</version>  
+  </dependency>
+### 3. Akka FSM : Akka Actor 를 사용한 FSM
+  <dependency>  
+            <groupId>com.typesafe.akka</groupId>  
+            <artifactId>akka-actor_${scala.binary.version}</artifactId>  
+  </dependency>
   
   
 ## 3) FSM 구성도
