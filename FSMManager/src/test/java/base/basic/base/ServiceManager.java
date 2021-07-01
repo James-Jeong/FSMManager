@@ -8,7 +8,7 @@ import base.basic.media.base.MediaEvent;
 import base.basic.media.base.MediaState;
 import org.junit.Assert;
 import state.StateManager;
-import state.basic.state.StateHandler;
+import state.basic.module.StateHandler;
 
 /**
  * @class public class ServiceManager

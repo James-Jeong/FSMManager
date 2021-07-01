@@ -1,0 +1,40 @@
+@startuml
+
+left to right direction
+
+package fsm <<Node>> {
+    class StateManager
+
+    package module <<Node>> {
+        class StateHandler
+    }
+
+    package unit <<Node>> {
+        class StateUnit
+    }
+
+    package state <<Node>> {
+        class StateContainer
+        class CallBack
+    }
+
+    package event <<Node>> {
+        class StateEventManager
+        class StateEventListener implements StateEventCallBack
+        interface StateEventCallBack
+    }
+
+    package info <<Node>> {
+        class ResultCode
+    }
+}
+
+StateManager <|-- StateHandler
+StateManager <|-- StateUnit
+
+StateHandler <|-- StateContainer
+StateHandler <|-- StateEventManager
+
+StateEventManager <|-- StateEventListener
+
+@enduml

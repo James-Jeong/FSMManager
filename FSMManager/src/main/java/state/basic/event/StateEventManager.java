@@ -3,7 +3,7 @@ package state.basic.event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.basic.info.ResultCode;
-import state.basic.state.StateUnit;
+import state.basic.unit.StateUnit;
 
 import java.util.ArrayList;
 import java.util.HashMap;

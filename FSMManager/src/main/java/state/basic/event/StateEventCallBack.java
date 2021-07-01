@@ -1,6 +1,6 @@
 package state.basic.event;
 
-import state.basic.state.StateUnit;
+import state.basic.unit.StateUnit;
 
 /**
  * @interface  public interface EventCallBack

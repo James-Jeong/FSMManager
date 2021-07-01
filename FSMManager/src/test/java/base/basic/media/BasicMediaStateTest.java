@@ -9,7 +9,7 @@ import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.StateManager;
-import state.basic.state.StateHandler;
+import state.basic.module.StateHandler;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
