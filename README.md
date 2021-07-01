@@ -17,6 +17,7 @@ FSMManager
 ## 3) FSM 구성도
 ### 1. Basic FSM
 #### 1] 클래스 구조
+![스크린샷 2021-07-02 오전 8 37 13](https://user-images.githubusercontent.com/37236920/124200956-9d9a6380-db11-11eb-8ff6-8467b1ee9606.png)
 ![스크린샷 2021-07-01 오전 9 04 30](https://user-images.githubusercontent.com/37236920/124046160-441c3100-da4c-11eb-960e-c858d3854452.png)
   
 #### 2] 호출 예시
@@ -41,6 +42,7 @@ FSMManager
   
 ## 4) API
 ### 1. Basic FSM
+  
   
 ### 2. Squirrel FSM
 #### 1] addFsmContainer (String name, AbstractFsm abstractFsm, AbstractState abstractState, AbstractEvent abstractEvent)
