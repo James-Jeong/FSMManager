@@ -22,7 +22,7 @@ FSMManager
 #### 2] 호출 예시
 ![스크린샷 2021-07-01 오전 9 04 50](https://user-images.githubusercontent.com/37236920/124046180-4f6f5c80-da4c-11eb-85be-9f04b321e455.png)
 ![스크린샷 2021-07-01 오후 3 24 54](https://user-images.githubusercontent.com/37236920/124076571-67150800-da81-11eb-818e-5581325b23e5.png)
-![스크린샷 2021-07-01 오후 4 10 59](https://user-images.githubusercontent.com/37236920/124082584-d68df600-da87-11eb-9820-9add08b424ba.png)
+![스크린샷 2021-07-01 오후 4 13 21](https://user-images.githubusercontent.com/37236920/124082866-2b317100-da88-11eb-9f3c-0f5ec7c46426.png)
   
 #### 3] 상태 추가
 ![스크린샷 2021-07-01 오전 9 06 42](https://user-images.githubusercontent.com/37236920/124046287-91989e00-da4c-11eb-9b44-727f36af40c2.png)
