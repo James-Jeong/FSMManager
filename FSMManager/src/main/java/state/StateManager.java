@@ -354,9 +354,6 @@ public class StateManager {
      */
     public StateUnit getStateUnit (String name) {
         synchronized (stateMap) {
-            if (stateMap.get(name) == null) {
-                return null;
-            }
             return stateMap.get(name);
         }
     }
@@ -402,7 +399,6 @@ public class StateManager {
      */
     public StateHandler getStateHandler (String name) {
         synchronized (stateHandlerMap) {
-            if (stateHandlerMap.get(name) == null) { return null; }
             return stateHandlerMap.get(name);
         }
     }

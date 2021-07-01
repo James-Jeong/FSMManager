@@ -182,7 +182,6 @@ public class StateContainer {
      */
     public List<String> getAllStates () {
         synchronized (stateMap) {
-            if (stateMap.isEmpty()) { return null; }
             return new ArrayList<>(stateMap.keySet());
         }
     }

@@ -127,9 +127,6 @@ public class StateEventManager {
      */
     public List<String> getAllEvents () {
         synchronized (eventMap) {
-            if (eventMap.isEmpty()) {
-                return null;
-            }
             return new ArrayList<>(eventMap.keySet());
         }
     }
