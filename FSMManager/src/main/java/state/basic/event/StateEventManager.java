@@ -45,7 +45,7 @@ public class StateEventManager {
      * @return 성공 시 true, 실패 시 false 반환
      */
     public boolean addEvent(String event, String fromState, String toState) {
-        if (getToStateFromEvent(event, fromState) != null) {
+        if (getToStateByEvent(event, fromState) != null) {
             logger.warn("[{}] Duplicated event. (event={}, fromState={}, toState={})",
                     ResultCode.DUPLICATED_EVENT, event, fromState, toState
             );
@@ -53,7 +53,7 @@ public class StateEventManager {
         }
 
         synchronized (eventMap) {
-            Map<String, String> stateMap = getStateMap(event);
+            Map<String, String> stateMap = getFromStateMapByEvent(event);
             if (stateMap == null) {
                 stateMap = new HashMap<>();
                 stateMap.putIfAbsent(fromState, toState);
@@ -99,6 +99,11 @@ public class StateEventManager {
      * @return 성공 시 true, 실패 시 false 반환
      */
     public boolean removeEvent(String event) {
+        Map<String, String> fromStateMap = getFromStateMapByEvent(event);
+        if (fromStateMap != null) {
+            fromStateMap.clear();
+        }
+
         synchronized (eventMap) {
             boolean result = eventMap.remove(event) != null;
             if (result) {
@@ -130,29 +135,28 @@ public class StateEventManager {
     }
 
     /**
-     * @fn public String getToStateFromEvent (String event, String fromState)
+     * @fn public String getFromStateMapByEvent (String event)
+     * @brief 이벤트 이름과 From state 로 To state 를 반환하는 함수
+     * @param event 이벤트 이름
+     * @return 성공 시 From state Map, 실패 시 null 반환
+     */
+    public Map<String, String> getFromStateMapByEvent(String event) {
+        synchronized (eventMap) {
+            return eventMap.get(event);
+        }
+    }
+
+    /**
+     * @fn public String getToStateByEvent (String event, String fromState)
      * @brief 이벤트 이름과 From state 로 To state 를 반환하는 함수
      * @param event 이벤트 이름
      * @param fromState From state
      * @return 성공 시 To state, 실패 시 null 반환
      */
-    public String getToStateFromEvent (String event, String fromState) {
-        Map<String, String> stateMap = getStateMap(event);
+    public String getToStateByEvent(String event, String fromState) {
+        Map<String, String> stateMap = getFromStateMapByEvent(event);
         if (stateMap == null) { return null; }
         return stateMap.get(fromState);
-    }
-
-    /**
-     * @fn public Map<String, String> getEventKeyMap(String event)
-     * @brief 지정한 이벤트에 등록된 State Map 을 반환하는 함수
-     * @param event 이벤트 이름
-     * @return 성공 시 State Map, 실패 시 null 반환
-     */
-    public Map<String, String> getStateMap(String event) {
-        synchronized (eventMap) {
-            if (eventMap.isEmpty()) { return null; }
-            return eventMap.get(event);
-        }
     }
 
     /**

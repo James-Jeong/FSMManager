@@ -158,7 +158,7 @@ public class StateHandler {
      * @return 성공 시 State Map, 실패 시 null 반환
      */
     public synchronized String findToStateFromEvent(String event, String fromState) {
-        return stateEventManager.getToStateFromEvent(event, fromState);
+        return stateEventManager.getToStateByEvent(event, fromState);
     }
 
 }

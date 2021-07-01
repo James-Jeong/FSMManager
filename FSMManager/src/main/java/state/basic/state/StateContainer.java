@@ -106,6 +106,11 @@ public class StateContainer {
      * @return 성공 시 true, 실패 시 false 반환
      */
     public boolean removeFromState(String fromState) {
+        Map<String, CallBack> toStateMap = getToStateMapByFromState(fromState);
+        if (toStateMap != null) {
+            toStateMap.clear();
+        }
+
         synchronized (stateMap) {
             boolean result = stateMap.remove(fromState) != null;
             if (result) {
