@@ -41,6 +41,8 @@ FSMManager
   
 ## 4) API
 ### 1. Basic FSM
+![umediafsm_uml](https://user-images.githubusercontent.com/37236920/124199600-3fb84c80-db0e-11eb-94e2-f27b4c52584c.png)
+  
   
 ### 2. Squirrel FSM
 #### 1] addFsmContainer (String name, AbstractFsm abstractFsm, AbstractState abstractState, AbstractEvent abstractEvent)
