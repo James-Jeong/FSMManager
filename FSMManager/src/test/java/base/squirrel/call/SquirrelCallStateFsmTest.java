@@ -98,6 +98,7 @@ public class SquirrelCallStateFsmTest {
 
         ////////////////////////////////////////////////////////////////////////////////
         // 3. 상태 천이
+        this.stopWatch.reset();
         this.stopWatch.start();
         Assert.assertTrue(stateManager.fireFsm(CallFsm.CALL_STATE_NAME, CallEvent.CALL_INIT_EVENT, futureCallback));
         Assert.assertEquals(CallState.INIT, stateManager.getFsmCurState(CallFsm.CALL_STATE_NAME));

@@ -1,6 +1,8 @@
 package state;
 
 import com.google.common.util.concurrent.FutureCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.squirrelframework.foundation.fsm.StateMachineBuilderFactory;
 import org.squirrelframework.foundation.fsm.StateMachineConfiguration;
 import org.squirrelframework.foundation.fsm.UntypedStateMachineBuilder;
@@ -9,8 +11,8 @@ import state.basic.state.StateHandler;
 import state.basic.state.StateUnit;
 import state.squirrel.*;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @class public class StateManager
@@ -18,17 +20,19 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class StateManager {
 
+    private static final Logger logger = LoggerFactory.getLogger(StateManager.class);
+
     // Akka Map
-    private final Map<String, AkkaContainer> akkaMap = new ConcurrentHashMap<>();
+    private final Map<String, AkkaContainer> akkaMap = new HashMap<>();
 
     // Squirrel FSM Map
-    private final Map<String, FsmContainer> fsmMap = new ConcurrentHashMap<>();
+    private final Map<String, FsmContainer> fsmMap = new HashMap<>();
 
     // StateHandler Map
-    private final Map<String, StateHandler> stateHandlerMap = new ConcurrentHashMap<>();
+    private final Map<String, StateHandler> stateHandlerMap = new HashMap<>();
 
     // StateUnit Map
-    private final Map<String, StateUnit> stateMap = new ConcurrentHashMap<>();
+    private final Map<String, StateUnit> stateMap = new HashMap<>();
 
     // StateManager 싱글턴 인스턴스 변수
     private static StateManager stateManager;
@@ -66,10 +70,13 @@ public class StateManager {
      */
     public void addAkkaContainer (String name) {
         if (getAkkaContainer(name) != null) { return; }
-        akkaMap.putIfAbsent(
-                name,
-                new AkkaContainer(name)
-        );
+
+        synchronized (akkaMap) {
+            akkaMap.putIfAbsent(
+                    name,
+                    new AkkaContainer(name)
+            );
+        }
     }
 
     /**
@@ -78,10 +85,13 @@ public class StateManager {
      * @param name AkkaContainer 이름
      */
     public void removeAkkaContainer (String name) {
-        if (getAkkaContainer(name) == null) { return; }
+        synchronized (akkaMap) {
+            AkkaContainer akkaContainer = akkaMap.get(name);
+            if (akkaContainer == null) { return; }
 
-        getAkkaContainer(name).removeAllActorRefs();
-        akkaMap.remove(name);
+            akkaContainer.removeAllActorRefs();
+            akkaMap.remove(name);
+        }
     }
 
     /**
@@ -91,7 +101,9 @@ public class StateManager {
      * @return 성공 시 AkkaContainer 객체, 실패 시 null 반환
      */
     public AkkaContainer getAkkaContainer (String name) {
-        return akkaMap.get(name);
+        synchronized (akkaMap) {
+            return akkaMap.get(name);
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -107,20 +119,22 @@ public class StateManager {
      *
      */
     public void addFsmContainer (String name,
-                                             AbstractFsm abstractFsm,
-                                             AbstractState abstractState,
-                                             AbstractEvent abstractEvent) {
-        if (fsmMap.get(name) != null) { return; }
+                                 AbstractFsm abstractFsm,
+                                 AbstractState abstractState,
+                                 AbstractEvent abstractEvent) {
+        if (getFsmContainer(name) != null) { return; }
 
-        FsmContainer fsmContainer = new FsmContainer(
-                StateMachineBuilderFactory.create(
-                abstractFsm.getClass(),
-                abstractState.getClass(),
-                abstractEvent.getClass(),
-                TransitionContext.class
-        ));
+        synchronized (fsmMap) {
+            FsmContainer fsmContainer = new FsmContainer(
+                    StateMachineBuilderFactory.create(
+                            abstractFsm.getClass(),
+                            abstractState.getClass(),
+                            abstractEvent.getClass(),
+                            TransitionContext.class
+                    ));
 
-        fsmMap.putIfAbsent(name, fsmContainer);
+            fsmMap.putIfAbsent(name, fsmContainer);
+        }
     }
 
     /**
@@ -129,8 +143,10 @@ public class StateManager {
      * @param name FsmContainer 이름
      */
     public void removeFsmContainer (String name) {
-        if (fsmMap.get(name) == null) { return; }
-        fsmMap.remove(name);
+        synchronized (fsmMap) {
+            if (fsmMap.get(name) == null) { return; }
+            fsmMap.remove(name);
+        }
     }
 
     /**
@@ -140,7 +156,9 @@ public class StateManager {
      * @return 성공 시 FsmContainer 객체, 실패 시 null 반환
      */
     public FsmContainer getFsmContainer (String name) {
-        return fsmMap.get(name);
+        synchronized (fsmMap) {
+            return fsmMap.get(name);
+        }
     }
 
     /**
@@ -150,7 +168,9 @@ public class StateManager {
      * @return 성공 시 FsmBuilder 객체, 실패 시 null 반환
      */
     private UntypedStateMachineBuilder getFsmBuilder (String name) {
-        return fsmMap.get(name).getUntypedStateMachineBuilder();
+        FsmContainer fsmContainer = getFsmContainer(name);
+        if (fsmContainer == null) { return null; }
+        return fsmContainer.getUntypedStateMachineBuilder();
     }
 
     /**
@@ -162,7 +182,15 @@ public class StateManager {
      * @param event 트리거될 이벤트 이름
      */
     public void setFsmCondition (String name, String from, String to, String event) {
-        getFsmBuilder(name).externalTransition().from(from).to(to).on(event);
+        UntypedStateMachineBuilder untypedStateMachineBuilder = getFsmBuilder(name);
+        if (untypedStateMachineBuilder == null) {
+            logger.warn("Fail to set fsm condition. (name={}, from={}, to={}, event={})",
+                    name, from, to, event
+            );
+            return;
+        }
+
+        untypedStateMachineBuilder.externalTransition().from(from).to(to).on(event);
     }
 
     /**
@@ -173,7 +201,15 @@ public class StateManager {
      * @param funcName 함수 이름
      */
     public void setFsmOnEntry (String name, String state, String funcName) {
-        getFsmBuilder(name).onEntry(state).callMethod(funcName);
+        UntypedStateMachineBuilder untypedStateMachineBuilder = getFsmBuilder(name);
+        if (untypedStateMachineBuilder == null) {
+            logger.warn("Fail to set fsm onEntry. (name={}, state={}, funcName={})",
+                    name, state, funcName
+            );
+            return;
+        }
+
+        untypedStateMachineBuilder.onEntry(state).callMethod(funcName);
     }
 
     /**
@@ -184,7 +220,15 @@ public class StateManager {
      * @param funcName 함수 이름
      */
     public void setFsmOnExit (String name, String state, String funcName) {
-        getFsmBuilder(name).onExit(state).callMethod(funcName);
+        UntypedStateMachineBuilder untypedStateMachineBuilder = getFsmBuilder(name);
+        if (untypedStateMachineBuilder == null) {
+            logger.warn("Fail to set fsm onExit. (name={}, state={}, funcName={})",
+                    name, state, funcName
+            );
+            return;
+        }
+
+        untypedStateMachineBuilder.onExit(state).callMethod(funcName);
     }
 
     /**
@@ -233,6 +277,7 @@ public class StateManager {
                                 StateMachineConfiguration.getInstance().enableDebugMode(isDebugMode)
                         )
         );
+
         getFsmContainer(name).getUntypedStateMachine().start();
     }
 
@@ -276,14 +321,12 @@ public class StateManager {
      * @param initState 초기 상태
      */
     public void addStateUnit (String name, String initState) {
-        if (stateMap.get(name) != null) { return; }
-        stateMap.putIfAbsent(
-                name,
-                new StateUnit(
-                        name,
-                        initState
-                )
-        );
+        synchronized (stateMap) {
+            if (stateMap.get(name) != null) {
+                return;
+            }
+            stateMap.putIfAbsent(name, new StateUnit(name, initState));
+        }
     }
 
     /**
@@ -293,10 +336,14 @@ public class StateManager {
      * @return 성공 시 true, 실패 시 false 반환
      */
     public boolean removeStateUnit (String name) {
-        StateUnit stateUnit = stateMap.get(name);
-        if (stateUnit == null) { return false; }
+        synchronized (stateMap) {
+            StateUnit stateUnit = stateMap.get(name);
+            if (stateUnit == null) {
+                return false;
+            }
 
-        return stateMap.remove(name) != null;
+            return stateMap.remove(name) != null;
+        }
     }
 
     /**
@@ -306,8 +353,12 @@ public class StateManager {
      * @return 성공 시 StateUnit 객체, 실패 시 null 반환
      */
     public StateUnit getStateUnit (String name) {
-        if (stateMap.get(name) == null) { return null; }
-        return stateMap.get(name);
+        synchronized (stateMap) {
+            if (stateMap.get(name) == null) {
+                return null;
+            }
+            return stateMap.get(name);
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -318,11 +369,10 @@ public class StateManager {
      * @param name StateHandler 이름
      */
     public void addStateHandler (String name) {
-        if (stateHandlerMap.get(name) != null) { return; }
-        stateHandlerMap.putIfAbsent(
-                name,
-                new StateHandler(name)
-        );
+        synchronized (stateHandlerMap) {
+            if (stateHandlerMap.get(name) != null) { return; }
+            stateHandlerMap.putIfAbsent(name, new StateHandler(name));
+        }
     }
 
     /**
@@ -332,12 +382,16 @@ public class StateManager {
      * @return 성공 시 true, 실패 시 false 반환
      */
     public boolean removeStateHandler (String name) {
-        StateHandler stateHandler = stateHandlerMap.get(name);
-        if (stateHandler == null) { return false; }
+        synchronized (stateHandlerMap) {
+            StateHandler stateHandler = stateHandlerMap.get(name);
+            if (stateHandler == null) {
+                return false;
+            }
 
-        return stateHandler.clearStateContainer() &&
-                stateHandler.clearStateEventManager() &&
-                stateHandlerMap.remove(name) != null;
+            stateHandler.clearStateContainer();
+            stateHandler.clearStateEventManager();
+            return stateHandlerMap.remove(name) != null;
+        }
     }
 
     /**
@@ -347,8 +401,10 @@ public class StateManager {
      * @return 성공 시 StateHandler 객체, 실패 시 null 반환
      */
     public StateHandler getStateHandler (String name) {
-        if (stateHandlerMap.get(name) == null) { return null; }
-        return stateHandlerMap.get(name);
+        synchronized (stateHandlerMap) {
+            if (stateHandlerMap.get(name) == null) { return null; }
+            return stateHandlerMap.get(name);
+        }
     }
 
 }

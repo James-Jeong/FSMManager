@@ -24,18 +24,18 @@ public class StateHandler {
      * @param name StateHandler 이름
      */
     public StateHandler(String name) {
-       this.name = name;
+        this.name = name;
 
         stateContainer = new StateContainer(name);
         stateEventManager = new StateEventManager();
     }
 
-    public boolean clearStateContainer() {
-        return stateContainer.removeAllStates();
+    public void clearStateContainer() {
+        stateContainer.removeAllStates();
     }
 
-    public boolean clearStateEventManager() {
-        return stateEventManager.removeAllEvents();
+    public void clearStateEventManager() {
+        stateEventManager.removeAllEvents();
     }
 
     /**
@@ -65,12 +65,21 @@ public class StateHandler {
     /**
      * @fn public boolean removeFromState(String fromState)
      * @brief From state 를 삭제하는 함수
-     * 다른 From state 와 To state 로 포함되어 있으면 다 삭제
      * @param fromState From state
      * @return 성공 시 true, 실패 시 false 반환
      */
     public boolean removeFromState (String fromState) {
-        return  stateContainer.removeFromState(fromState);
+        return stateContainer.removeFromState(fromState);
+    }
+
+    /**
+     * @fn public boolean removeEvent(String fromState)
+     * @brief Event 를 삭제하는 함수
+     * @param event 이벤트 이름
+     * @return 성공 시 true, 실패 시 false 반환
+     */
+    public boolean removeEvent (String event) {
+        return stateEventManager.removeEvent(event);
     }
 
     /**

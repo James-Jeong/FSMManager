@@ -6,9 +6,9 @@ import state.basic.info.ResultCode;
 import state.basic.state.StateUnit;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @class public class StateEventManager
@@ -22,7 +22,7 @@ public class StateEventManager {
     private final StateEventCallBack stateEventCallBack;
 
     // Event Map
-    private static final Map<String, Map<String, String>> eventMap = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, String>> eventMap = new HashMap<>();
 
     ////////////////////////////////////////////////////////////////////////////////
 
@@ -52,69 +52,67 @@ public class StateEventManager {
             return false;
         }
 
-        Map<String, String> stateMap = getStateMap(event);
-        if (stateMap == null) {
-            stateMap = new ConcurrentHashMap<>();
-            stateMap.putIfAbsent(fromState, toState);
-        }
+        synchronized (eventMap) {
+            Map<String, String> stateMap = getStateMap(event);
+            if (stateMap == null) {
+                stateMap = new HashMap<>();
+                stateMap.putIfAbsent(fromState, toState);
+            }
 
-        boolean result = eventMap.putIfAbsent(event, stateMap) == null;
-        if (result) {
-            logger.info("[{}] Success to add state into event. (event={}, fromState={}, toState={})",
-                    ResultCode.SUCCESS_ADD_STATE, event, fromState, toState
-            );
-        } else {
-            result = stateMap.putIfAbsent(fromState, toState) == null;
+            boolean result = eventMap.putIfAbsent(event, stateMap) == null;
             if (result) {
-                logger.info("[{}] Success to add state into event. (event={}, fromState={}, toState={})",
+                logger.debug("[{}] Success to add state into event. (event={}, fromState={}, toState={})",
                         ResultCode.SUCCESS_ADD_STATE, event, fromState, toState
                 );
             } else {
-                logger.warn("[{}] Fail to add state into event. (event={}, fromState={}, toState={})",
-                        ResultCode.FAIL_ADD_STATE, event, fromState, toState
-                );
+                result = stateMap.putIfAbsent(fromState, toState) == null;
+                if (result) {
+                    logger.debug("[{}] Success to add state into event. (event={}, fromState={}, toState={})",
+                            ResultCode.SUCCESS_ADD_STATE, event, fromState, toState
+                    );
+                } else {
+                    logger.warn("[{}] Fail to add state into event. (event={}, fromState={}, toState={})",
+                            ResultCode.FAIL_ADD_STATE, event, fromState, toState
+                    );
+                }
             }
-        }
 
-        return result;
+            return result;
+        }
     }
 
     /**
-     * @fn public boolean removeAllEvents()
+     * @fn public void removeAllEvents()
      * @brief 등록된 모든 이벤트들을 삭제하는 함수
-     * @return 성공 시 true, 실패 시 false 반환
      */
-    public boolean removeAllEvents() {
-        boolean result = false;
-
-        for (String event : eventMap.keySet()) {
-            result = removeFromState(event);
-            if (!result) { break; }
+    public void removeAllEvents() {
+        synchronized (eventMap) {
+            eventMap.clear();
         }
-
-        return result;
     }
 
     /**
-     * @fn public boolean removeFromState(String fromState)
+     * @fn public boolean removeEvent(String fromState)
      * @brief From state 를 Map 에서 삭제하는 함수
      * 다른 From state 와 To state 로 포함되어 있으면 다 삭제
      * @param event Event
      * @return 성공 시 true, 실패 시 false 반환
      */
-    public boolean removeFromState(String event) {
-        boolean result = eventMap.remove(event) != null;
-        if (result) {
-            logger.info("[{}] Success to remove the from state. (event={})",
-                    ResultCode.SUCCESS_REMOVE_STATE, event
-            );
-        } else {
-            logger.info("[{}] Fail to remove the from state. (event={})",
-                    ResultCode.FAIL_REMOVE_STATE, event
-            );
-        }
+    public boolean removeEvent(String event) {
+        synchronized (eventMap) {
+            boolean result = eventMap.remove(event) != null;
+            if (result) {
+                logger.debug("[{}] Success to remove the from state. (event={})",
+                        ResultCode.SUCCESS_REMOVE_STATE, event
+                );
+            } else {
+                logger.debug("[{}] Fail to remove the from state. (event={})",
+                        ResultCode.FAIL_REMOVE_STATE, event
+                );
+            }
 
-        return result;
+            return result;
+        }
     }
 
     /**
@@ -123,8 +121,12 @@ public class StateEventManager {
      * @return 성공 시 정의된 이벤트 리스트, 실패 시 null 반환
      */
     public List<String> getAllEvents () {
-        if (eventMap.isEmpty()) { return null; }
-        return new ArrayList<>(eventMap.keySet());
+        synchronized (eventMap) {
+            if (eventMap.isEmpty()) {
+                return null;
+            }
+            return new ArrayList<>(eventMap.keySet());
+        }
     }
 
     /**
@@ -135,8 +137,9 @@ public class StateEventManager {
      * @return 성공 시 To state, 실패 시 null 반환
      */
     public String getToStateFromEvent (String event, String fromState) {
-        if (getStateMap(event) == null) { return null; }
-        return getStateMap(event).get(fromState);
+        Map<String, String> stateMap = getStateMap(event);
+        if (stateMap == null) { return null; }
+        return stateMap.get(fromState);
     }
 
     /**
@@ -146,8 +149,10 @@ public class StateEventManager {
      * @return 성공 시 State Map, 실패 시 null 반환
      */
     public Map<String, String> getStateMap(String event) {
-        if (eventMap.isEmpty()) { return null; }
-        return eventMap.get(event);
+        synchronized (eventMap) {
+            if (eventMap.isEmpty()) { return null; }
+            return eventMap.get(event);
+        }
     }
 
     /**

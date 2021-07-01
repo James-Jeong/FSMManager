@@ -33,12 +33,15 @@ public class BasicMediaStateTest {
 
     public void testStart () {
         SessionManager sessionManager = SessionManager.getInstance();
+
         sessionManager.createCall("Call", "01012345678", "01056781234");
         CallInfo callInfo = sessionManager.getCall("Call");
-
-        normalTest(callInfo);
         timingTest(callInfo);
+        sessionManager.removeCall("Call");
 
+        sessionManager.createCall("Call", "01012345678", "01056781234");
+        callInfo = sessionManager.getCall("Call");
+        normalTest(callInfo);
         sessionManager.removeCall("Call");
     }
 
