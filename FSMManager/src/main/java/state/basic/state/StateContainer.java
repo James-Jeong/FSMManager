@@ -52,13 +52,6 @@ public class StateContainer {
             return false;
         }
 
-        if (callBack == null) {
-            logger.warn("[{}] ({}) CallBack is null. (fromState={}, toState={})",
-                    ResultCode.NULL_OBJECT, name, fromState, toState
-            );
-            return false;
-        }
-        
         synchronized (stateMap) {
             Map<String, CallBack> toStateMap = stateMap.get(fromState);
             if (toStateMap == null) {
@@ -220,12 +213,7 @@ public class StateContainer {
 
         // 2) CallBack 함수 나중에 수행
         CallBack nextStateCallBack = nextStateCallBackMap.get(toState);
-        if (nextStateCallBack == null) {
-            logger.warn("[{}] ({}) Fail to get the to state's call back. Not defined. (fromState={}, toState={})",
-                    ResultCode.FAIL_GET_CALLBACK, name, fromState, toState
-            );
-            return failState;
-        } else {
+        if (nextStateCallBack != null) {
             stateUnit.setCallBackResult(nextStateCallBack.callBackFunc(params));
         }
 
