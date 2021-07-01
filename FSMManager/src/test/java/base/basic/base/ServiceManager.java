@@ -1,9 +1,8 @@
 package base.basic.base;
 
-import base.basic.call.base.CallCallBack;
 import base.basic.call.base.CallEvent;
 import base.basic.call.base.CallState;
-import base.basic.call.base.OfferEarlyNegoCallBack;
+import base.basic.call.base.callback.*;
 import base.basic.media.base.MediaCallBack;
 import base.basic.media.base.MediaEvent;
 import base.basic.media.base.MediaState;
@@ -41,25 +40,26 @@ public class ServiceManager {
         StateHandler mediaStateHandler = stateManager.getStateHandler(MediaState.MEDIA_STATE_NAME);
         ////////////////////////////////////////////////////////////////////////////////
         // 1. CallBack 함수 정의
-        CallCallBack callStartCallBack = new CallCallBack(CallEvent.CALL_START_EVENT);
-        CallCallBack callFailCallBack = new CallCallBack(CallEvent.CALL_FAIL_EVENT);
+        CommonCallBack callStartCallBack = new CommonCallBack(CallEvent.CALL_START_EVENT);
+        CommonCallBack callFailCallBack = new CommonCallBack(CallEvent.CALL_FAIL_EVENT);
 
-        //CallCallBack callOfferEarlyNegoStartCallBack = new CallCallBack(CallEvent.OFFER_EARLY_NEGO_START_EVENT);
-        OfferEarlyNegoCallBack callOfferEarlyNegoStartCallBack = new OfferEarlyNegoCallBack(CallEvent.OFFER_EARLY_NEGO_START_EVENT);
+        OfferEarlyNegoCallBack offerEarlyNegoCallBack = new OfferEarlyNegoCallBack(CallEvent.OFFER_EARLY_NEGO_START_EVENT);
+        OfferNegoCallBack offerNegoCallBack = new OfferNegoCallBack(CallEvent.OFFER_NEGO_START_EVENT);
+        CommonCallBack callOfferStopCallBack = new CommonCallBack(CallEvent.OFFER_STOP_EVENT);
 
-        CallCallBack callOfferNegoStartCallBack = new CallCallBack(CallEvent.OFFER_NEGO_START_EVENT);
-        CallCallBack callOfferStopCallBack = new CallCallBack(CallEvent.OFFER_STOP_EVENT);
-        CallCallBack callEarlyMediaStartCallBack = new CallCallBack(CallEvent.EARLY_MEDIA_START_EVENT);
-        CallCallBack callEarlyNegoInactiveStartCallBack = new CallCallBack(CallEvent.EARLY_NEGO_INACTIVE_START_EVENT);
-        CallCallBack callEarlyNegoNegoStartCallBack = new CallCallBack(CallEvent.EARLY_NEGO_NEGO_START_EVENT);
-        CallCallBack callEarlyNegoStopCallBack = new CallCallBack(CallEvent.EARLY_NEGO_STOP_EVENT);
-        CallCallBack callActiveStartCallBack = new CallCallBack(CallEvent.ACTIVE_START_EVENT);
-        CallCallBack callNegoInactiveStartCallBack = new CallCallBack(CallEvent.NEGO_INACTIVE_START_EVENT);
-        CallCallBack callNegoStopCallBack = new CallCallBack(CallEvent.NEGO_STOP_EVENT);
-        CallCallBack callActiveStopCallBack = new CallCallBack(CallEvent.ACTIVE_STOP_EVENT);
-        CallCallBack callInactiveStopCallBack = new CallCallBack(CallEvent.INACTIVE_STOP_EVENT);
-        CallCallBack callStopDoneSuccessCallBack = new CallCallBack(CallEvent.CALL_STOP_DONE_SUCCESS_EVENT);
-        CallCallBack callStopDoneFailCallBack = new CallCallBack(CallEvent.CALL_STOP_DONE_FAIL_EVENT);
+        EarlyMediaStartCallBack earlyMediaStartCallBack = new EarlyMediaStartCallBack(CallEvent.EARLY_MEDIA_START_EVENT);
+        EarlyNegoInactiveStartCallBack earlyNegoInactiveStartCallBack = new EarlyNegoInactiveStartCallBack(CallEvent.EARLY_NEGO_INACTIVE_START_EVENT);
+
+        CommonCallBack callEarlyNegoNegoStartCallBack = new CommonCallBack(CallEvent.EARLY_MEDIA_NEGO_START_EVENT);
+        EarlyMediaStopCallBack earlyMediaStopCallBack = new EarlyMediaStopCallBack(CallEvent.EARLY_MEDIA_STOP_EVENT);
+
+        ActiveStartCallBack activeStartCallBack = new ActiveStartCallBack(CallEvent.ACTIVE_START_EVENT);
+        NegoInactiveStartCallBack negoInactiveStartCallBack = new NegoInactiveStartCallBack(CallEvent.NEGO_INACTIVE_START_EVENT);
+        ActiveStopCallBack activeStopCallBack = new ActiveStopCallBack(CallEvent.ACTIVE_STOP_EVENT);
+
+        CommonCallBack callInactiveStopCallBack = new CommonCallBack(CallEvent.INACTIVE_STOP_EVENT);
+        CallStopDoneSuccessCallBack callStopDoneSuccessCallBack = new CallStopDoneSuccessCallBack(CallEvent.CALL_STOP_DONE_SUCCESS_EVENT);
+        CallStopDoneFailCallBack callStopDoneFailCallBack = new CallStopDoneFailCallBack(CallEvent.CALL_STOP_DONE_FAIL_EVENT);
 
         MediaCallBack mediaStartCallBack = new MediaCallBack(MediaEvent.MEDIA_START_EVENT);
         MediaCallBack mediaCreateSuccessCallBack = new MediaCallBack(MediaEvent.MEDIA_CREATE_SUCCESS_EVENT);
@@ -73,17 +73,16 @@ public class ServiceManager {
         // 2. 상태 정의
         Assert.assertTrue(callStateHandler.addState(CallEvent.CALL_START_EVENT, CallState.INIT, CallState.OFFER, callStartCallBack));
         Assert.assertTrue(callStateHandler.addState(CallEvent.CALL_FAIL_EVENT, CallState.OFFER, CallState.INIT, callFailCallBack));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.OFFER_EARLY_NEGO_START_EVENT, CallState.OFFER, CallState.EARLY_NEGO_REQ, callOfferEarlyNegoStartCallBack));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.OFFER_NEGO_START_EVENT, CallState.OFFER, CallState.NEGO_REQ, callOfferNegoStartCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.OFFER_EARLY_NEGO_START_EVENT, CallState.OFFER, CallState.EARLY_NEGO_REQ, offerEarlyNegoCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.OFFER_NEGO_START_EVENT, CallState.OFFER, CallState.NEGO_REQ, offerNegoCallBack));
         Assert.assertTrue(callStateHandler.addState(CallEvent.OFFER_STOP_EVENT, CallState.OFFER, CallState.HANGUP_REQ, callOfferStopCallBack));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_MEDIA_START_EVENT, CallState.EARLY_NEGO_REQ, CallState.EARLY_MEDIA, callEarlyMediaStartCallBack));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_NEGO_INACTIVE_START_EVENT, CallState.EARLY_NEGO_REQ, CallState.INACTIVE, callEarlyNegoInactiveStartCallBack));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_NEGO_NEGO_START_EVENT, CallState.EARLY_MEDIA, CallState.NEGO_REQ, callEarlyNegoNegoStartCallBack));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_NEGO_STOP_EVENT, CallState.EARLY_MEDIA, CallState.HANGUP_REQ, callEarlyNegoStopCallBack));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.ACTIVE_START_EVENT, CallState.NEGO_REQ, CallState.ACTIVE, callActiveStartCallBack));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.NEGO_INACTIVE_START_EVENT, CallState.NEGO_REQ, CallState.INACTIVE, callNegoInactiveStartCallBack));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.NEGO_STOP_EVENT, CallState.NEGO_REQ, CallState.HANGUP_REQ, callNegoStopCallBack));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.ACTIVE_STOP_EVENT, CallState.ACTIVE, CallState.HANGUP_REQ, callActiveStopCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_MEDIA_START_EVENT, CallState.EARLY_NEGO_REQ, CallState.EARLY_MEDIA, earlyMediaStartCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_NEGO_INACTIVE_START_EVENT, CallState.EARLY_NEGO_REQ, CallState.INACTIVE, earlyNegoInactiveStartCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_MEDIA_NEGO_START_EVENT, CallState.EARLY_MEDIA, CallState.NEGO_REQ, callEarlyNegoNegoStartCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_MEDIA_STOP_EVENT, CallState.EARLY_MEDIA, CallState.HANGUP_REQ, earlyMediaStopCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.ACTIVE_START_EVENT, CallState.NEGO_REQ, CallState.ACTIVE, activeStartCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.NEGO_INACTIVE_START_EVENT, CallState.NEGO_REQ, CallState.INACTIVE, negoInactiveStartCallBack));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.ACTIVE_STOP_EVENT, CallState.ACTIVE, CallState.HANGUP_REQ, activeStopCallBack));
         Assert.assertTrue(callStateHandler.addState(CallEvent.INACTIVE_STOP_EVENT, CallState.INACTIVE, CallState.HANGUP_REQ, callInactiveStopCallBack));
         Assert.assertTrue(callStateHandler.addState(CallEvent.CALL_STOP_DONE_SUCCESS_EVENT, CallState.HANGUP_REQ, CallState.INIT, callStopDoneSuccessCallBack));
         Assert.assertTrue(callStateHandler.addState(CallEvent.CALL_STOP_DONE_FAIL_EVENT, CallState.HANGUP_REQ, CallState.IDLE, callStopDoneFailCallBack));

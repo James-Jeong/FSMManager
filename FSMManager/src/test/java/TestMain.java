@@ -29,11 +29,11 @@ public class TestMain {
 
         serviceManager.start();
 
-        BasicCallStateTest basicCallStateTest = new BasicCallStateTest();
-        basicCallStateTest.testStart();
-
         BasicMediaStateTest basicMediaStateTest = new BasicMediaStateTest();
         basicMediaStateTest.testStart();
+
+        BasicCallStateTest basicCallStateTest = new BasicCallStateTest();
+        basicCallStateTest.testStart();
 
         serviceManager.stop();
 

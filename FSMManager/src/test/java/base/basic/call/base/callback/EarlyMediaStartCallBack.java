@@ -1,5 +1,6 @@
-package base.basic.call.base;
+package base.basic.call.base.callback;
 
+import base.basic.call.base.CallInfo;
 import base.basic.media.base.MediaEvent;
 import base.basic.media.base.MediaState;
 import org.slf4j.Logger;
@@ -9,14 +10,14 @@ import state.basic.state.CallBack;
 import state.basic.state.StateHandler;
 
 /**
- * @class public class OfferEarlyNegoCallBack extends CallBack
- * @brief OfferEarlyNegoCallBack class
+ * @class public class EarlyMediaStartCallBack extends CallBack
+ * @brief EarlyMediaStartCallBack class
  */
-public class OfferEarlyNegoCallBack extends CallBack {
+public class EarlyMediaStartCallBack extends CallBack {
 
-    private static final Logger logger = LoggerFactory.getLogger(OfferEarlyNegoCallBack.class);
+    private static final Logger logger = LoggerFactory.getLogger(EarlyMediaStartCallBack.class);
 
-    public OfferEarlyNegoCallBack(String name) {
+    public EarlyMediaStartCallBack(String name) {
         super(name);
     }
 
@@ -33,13 +34,13 @@ public class OfferEarlyNegoCallBack extends CallBack {
         StateHandler mediaStateHandler = stateManager.getStateHandler(MediaState.MEDIA_STATE_NAME);
         if (mediaStateHandler == null) { return null; }
 
-        logger.debug("OfferEarlyNegoCallBack: callId={}, fromNo={}, toNo={}, mediaStateUnitName={}", callInfo.getCallId(), callInfo.getFromNo(), callInfo.getToNo(), callInfo.getMediaStateUnitName());
+        logger.debug("EarlyMediaStartCallBack: callId={}, fromNo={}, toNo={}, mediaStateUnitName={}", callInfo.getCallId(), callInfo.getFromNo(), callInfo.getToNo(), callInfo.getMediaStateUnitName());
 
         return mediaStateHandler.fire(
-                MediaEvent.MEDIA_START_EVENT,
+                MediaEvent.MEDIA_CREATE_SUCCESS_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                MediaState.IDLE_STATE,
-                MediaState.ACTIVE_REQUEST
+                MediaState.ACTIVE_REQUEST,
+                MediaState.ACTIVE_STATE
         );
     }
 
