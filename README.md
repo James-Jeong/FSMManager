@@ -20,7 +20,7 @@ FSMManager
 ![스크린샷 2021-07-01 오전 9 04 30](https://user-images.githubusercontent.com/37236920/124046160-441c3100-da4c-11eb-960e-c858d3854452.png)
   
 #### 2] 호출 예시
-![스크린샷 2021-07-01 오후 4 27 22](https://user-images.githubusercontent.com/37236920/124084599-2077db80-da8a-11eb-9205-80212f75e6de.png)
+![스크린샷 2021-07-01 오후 4 28 06](https://user-images.githubusercontent.com/37236920/124084704-3ab1b980-da8a-11eb-8cca-37879d9e2984.png)
 ![스크린샷 2021-07-01 오후 4 23 47](https://user-images.githubusercontent.com/37236920/124084116-a0517600-da89-11eb-8dd4-51dee55c7285.png)
 ![스크린샷 2021-07-01 오후 4 17 13](https://user-images.githubusercontent.com/37236920/124083335-b579d500-da88-11eb-860b-604908721f25.png)
   
