@@ -24,7 +24,7 @@ FSMManager
 ![스크린샷 2021-07-01 오전 9 07 02](https://user-images.githubusercontent.com/37236920/124046306-9d846000-da4c-11eb-8768-87ffe34c8adb.png)
   
 #### 5] 상태 천이
-![스크린샷 2021-07-01 오전 9 07 59](https://user-images.githubusercontent.com/37236920/124046370-bf7de280-da4c-11eb-9174-52a35b925fe0.png)
+![스크린샷 2021-07-01 오전 9 08 59](https://user-images.githubusercontent.com/37236920/124046410-e2a89200-da4c-11eb-9c6c-b46fd35419a0.png)
   
   
 ### 2. Squirrel 
