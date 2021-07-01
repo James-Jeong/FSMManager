@@ -19,6 +19,14 @@ FSMManager
 #### 3] 상태 천이
 ![스크린샷 2021-06-18 오전 9 16 39](https://user-images.githubusercontent.com/37236920/122487670-c18c7e00-d016-11eb-9ee7-449bfa547fa0.png)
   
+#### 4] 클래스 구조
+![스크린샷 2021-07-01 오전 9 04 30](https://user-images.githubusercontent.com/37236920/124046160-441c3100-da4c-11eb-960e-c858d3854452.png)
+  
+#### 5] 호출 예시
+![스크린샷 2021-07-01 오전 9 04 50](https://user-images.githubusercontent.com/37236920/124046180-4f6f5c80-da4c-11eb-85be-9f04b321e455.png)
+![스크린샷 2021-07-01 오전 9 05 18](https://user-images.githubusercontent.com/37236920/124046210-5eeea580-da4c-11eb-87f6-0133118b589c.png)
+  
+  
 ### 2. Squirrel 
 #### 1] 상태 천이
 ![스크린샷 2021-06-25 오후 4 16 02](https://user-images.githubusercontent.com/37236920/123386348-87e8e380-d5d1-11eb-827f-47df382f319e.png)
