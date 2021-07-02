@@ -29,7 +29,6 @@ public class AkkaMediaStateTest {
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    @Test
     public void testStart () {
         stateManager.addAkkaContainer(MEDIA_STATE_NAME);
 

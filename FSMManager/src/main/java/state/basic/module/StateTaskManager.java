@@ -2,7 +2,7 @@ package state.basic.module;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import state.basic.module.base.TaskUnit;
+import state.basic.module.base.StateTaskUnit;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,14 +12,14 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author jamesj
- * @class public class TaskManager
- * @brief Task Manager
+ * @class public class StateTaskManager
+ * @brief StateTaskManager class
  */
-public class TaskManager {
+public class StateTaskManager {
 
-    private static final Logger logger = LoggerFactory.getLogger(TaskManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(StateTaskManager.class);
 
-    private static TaskManager taskManager = null;
+    private static StateTaskManager taskManager = null;
 
     private final ScheduledThreadPoolExecutor executor;
 
@@ -27,13 +27,13 @@ public class TaskManager {
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    public TaskManager() {
+    public StateTaskManager() {
         executor = new ScheduledThreadPoolExecutor(10);
     }
 
-    public static TaskManager getInstance ( ) {
+    public static StateTaskManager getInstance ( ) {
         if (taskManager == null) {
-            taskManager = new TaskManager();
+            taskManager = new StateTaskManager();
         }
 
         return taskManager;
@@ -47,7 +47,7 @@ public class TaskManager {
         }
 
         executor.shutdown();
-        logger.debug("() () () Interval Task Manager ends.");
+        logger.info("() () () Interval Task Manager ends.");
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -56,7 +56,7 @@ public class TaskManager {
      * @fn public void addJob (String name, TaskUnit runner)
      * @brief TaskManager 에 새로운 Task 를 등록하는 함수
      */
-    public void addTask (String name, TaskUnit taskUnit) {
+    public void addTask (String name, StateTaskUnit taskUnit) {
         if (taskMap.get(name) != null) {
             logger.warn("() () () TaskManager: Hashmap Key duplication error.");
             return;
@@ -66,15 +66,15 @@ public class TaskManager {
         try {
             scheduledFuture = executor.scheduleAtFixedRate(
                     taskUnit,
-                    taskUnit.getInterval() - System.currentTimeMillis() % taskUnit.getInterval(),
-                    taskUnit.getInterval(),
+                    0,
+                    taskUnit.getDelay(),
                     TimeUnit.MILLISECONDS
             );
         } catch (Exception e) {
             logger.warn("() () () TaskManager.addTask.Exception", e);
         }
 
-        logger.debug("() () () [{}] is added.", name);
+        logger.info("() () () [{}] is added.", name);
         taskMap.put(name, scheduledFuture);
     }
 
@@ -95,11 +95,12 @@ public class TaskManager {
         if (scheduledFuture == null) {
             return;
         }
+
         try {
             scheduledFuture.cancel(true);
 
             taskMap.remove(name);
-            logger.debug("() () () [{}] is removed.", name);
+            logger.info("() () () [{}] is removed.", name);
         } catch (Exception e) {
             logger.warn("() () () TaskManager.addTask.Exception", e);
         }

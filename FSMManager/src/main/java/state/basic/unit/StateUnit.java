@@ -29,6 +29,10 @@ public class StateUnit {
         this.curState = curState;
     }
 
+    public String getName() {
+        return name;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////
 
     /**

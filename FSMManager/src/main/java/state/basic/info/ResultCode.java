@@ -12,6 +12,8 @@ public class ResultCode {
     public static final int SUCCESS_REMOVE_STATE = 1001;
     // 상태 천이 성공
     public static final int SUCCESS_TRANSIT_STATE = 1002;
+    // 실패 이벤트 예약 성공
+    public static final int SUCCESS_RESERVE_FAIL_STATE = 1010;
 
     // 상태 저장 실패
     public static final int FAIL_ADD_STATE = 2000;
@@ -25,6 +27,12 @@ public class ResultCode {
     public static final int FAIL_GET_CALLBACK = 2004;
     // 상태 처리자 조회 실패
     public static final int FAIL_GET_STATE_HANDLER = 2005;
+    // 이벤트 조회 실패
+    public static final int FAIL_GET_EVENT = 2006;
+    // 이벤트 저장 실패
+    public static final int FAIL_ADD_EVENT = 2007;
+    // 실패 이벤트 예약 실패
+    public static final int FAIL_RESERVE_FAIL_STATE = 2020;
 
     // 상태 중복
     public static final int DUPLICATED_STATE = 3000;

@@ -28,7 +28,6 @@ public class SquirrelCallAndMediaStateFsmTest {
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    @Test
     public void testStart () {
         stateManager.addFsmContainer(CallFsm.CALL_STATE_NAME,
                 new CallFsm(),

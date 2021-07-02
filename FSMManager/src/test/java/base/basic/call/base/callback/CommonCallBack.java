@@ -23,7 +23,7 @@ public class CommonCallBack extends CallBack {
         }
 
         String stateName = (String) object[0];
-        logger.debug("({}) To state is {}", getName(), stateName);
+        logger.info("({}) To state is {}", getName(), stateName);
         return stateName;
     }
 

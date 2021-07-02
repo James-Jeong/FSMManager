@@ -48,72 +48,66 @@ public class BasicMediaStateTest {
     ////////////////////////////////////////////////////////////////////////////////
 
     public String mediaStart (CallInfo callInfo) {
-        //logger.debug("@ Media is started!");
+        //logger.info("@ Media is started!");
         StateHandler mediaStateHandler = stateManager.getStateHandler(MediaState.MEDIA_STATE_NAME);
 
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                MediaState.IDLE_STATE,
                 MediaState.ACTIVE_REQUEST
         );
     }
 
     public String mediaStop (CallInfo callInfo) {
-        //logger.debug("@ Media is stopped!");
+        //logger.info("@ Media is stopped!");
         StateHandler mediaStateHandler = stateManager.getStateHandler(MediaState.MEDIA_STATE_NAME);
 
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_STOP_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                MediaState.ACTIVE_STATE,
                 MediaState.IDLE_REQUEST
         );
     }
 
     public String mediaCreateSuccess (CallInfo callInfo) {
-        //logger.debug("@ Success to create media!");
+        //logger.info("@ Success to create media!");
         StateHandler mediaStateHandler = stateManager.getStateHandler(MediaState.MEDIA_STATE_NAME);
 
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_CREATE_SUCCESS_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                MediaState.ACTIVE_REQUEST,
                 MediaState.ACTIVE_STATE
         );
     }
 
     public String mediaCreateFail (CallInfo callInfo) {
-        //logger.debug("@ Fail to create media!");
+        //logger.info("@ Fail to create media!");
         StateHandler mediaStateHandler = stateManager.getStateHandler(MediaState.MEDIA_STATE_NAME);
 
         return mediaStateHandler.fire(MediaEvent.MEDIA_CREATE_FAIL_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                MediaState.ACTIVE_REQUEST,
                 MediaState.IDLE_STATE
         );
     }
 
     public String mediaDeleteSuccess (CallInfo callInfo) {
-        //logger.debug("@ Success to delete media!");
+        //logger.info("@ Success to delete media!");
         StateHandler mediaStateHandler = stateManager.getStateHandler(MediaState.MEDIA_STATE_NAME);
 
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_DELETE_SUCCESS_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                MediaState.IDLE_REQUEST,
                 MediaState.IDLE_STATE
         );
     }
 
     public String mediaDeleteFail (CallInfo callInfo) {
-        //logger.debug("@ Fail to delete media!");
+        //logger.info("@ Fail to delete media!");
         StateHandler mediaStateHandler = stateManager.getStateHandler(MediaState.MEDIA_STATE_NAME);
 
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_DELETE_FAIL_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                MediaState.IDLE_REQUEST,
                 MediaState.ACTIVE_STATE
         );
     }
@@ -153,7 +147,7 @@ public class BasicMediaStateTest {
         Assert.assertEquals(MediaState.IDLE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCallBackResult());
 
         this.stopWatch.stop();
-        logger.debug("Done. (total time: {} s)", String.format("%.3f", ((double) this.stopWatch.getTime()) / 1000));
+        logger.info("Done. (total time: {} s)", String.format("%.3f", ((double) this.stopWatch.getTime()) / 1000));
         ////////////////////////////////////////////////////////////////////////////////
     }
 
@@ -178,7 +172,7 @@ public class BasicMediaStateTest {
                         delayMs,
                         TimeUnit.MILLISECONDS
                 );
-                logger.debug("mediaStart is scheduled.");
+                logger.info("mediaStart is scheduled.");
                 taskMap.putIfAbsent(String.valueOf(totalTaskCount), scheduledFuture);
             } catch (Exception e) {
                 logger.warn("() () () Schedule Exception", e);
@@ -195,7 +189,7 @@ public class BasicMediaStateTest {
                         delayMs,
                         TimeUnit.MILLISECONDS
                 );
-                logger.debug("mediaCreateSuccess is scheduled.");
+                logger.info("mediaCreateSuccess is scheduled.");
                 taskMap.putIfAbsent(String.valueOf(totalTaskCount), scheduledFuture);
             } catch (Exception e) {
                 logger.warn("() () () Schedule Exception", e);
@@ -212,7 +206,7 @@ public class BasicMediaStateTest {
                         delayMs,
                         TimeUnit.MILLISECONDS
                 );
-                logger.debug("mediaStop is scheduled.");
+                logger.info("mediaStop is scheduled.");
                 taskMap.putIfAbsent(String.valueOf(totalTaskCount), scheduledFuture);
             } catch (Exception e) {
                 logger.warn("() () () Schedule Exception", e);
@@ -229,7 +223,7 @@ public class BasicMediaStateTest {
                         delayMs,
                         TimeUnit.MILLISECONDS
                 );
-                logger.debug("mediaDeleteSuccess is scheduled.");
+                logger.info("mediaDeleteSuccess is scheduled.");
                 taskMap.putIfAbsent(String.valueOf(totalTaskCount), scheduledFuture);
             } catch (Exception e) {
                 logger.warn("() () () Schedule Exception", e);

@@ -1,6 +1,7 @@
 package state.basic.module;
 
 import state.basic.event.StateEventManager;
+import state.basic.event.base.StateEvent;
 import state.basic.state.CallBack;
 import state.basic.state.StateContainer;
 import state.basic.unit.StateUnit;
@@ -68,7 +69,7 @@ public class StateHandler {
      */
     public boolean addState (String event, String fromState, String toState, CallBack callBack, String failEvent, int delay) {
         // TODO
-        return stateEventManager.addEvent(event, fromState, toState) &&
+        return stateEventManager.addEvent(event, fromState, toState, failEvent, delay) &&
                 stateContainer.addToStateByFromState(fromState, toState, callBack);
     }
 
@@ -105,16 +106,15 @@ public class StateHandler {
     }
 
     /**
-     * @fn public String nextState (StateUnit stateUnit, String toState, String failState, Object... params)
+     * @fn public String nextState (StateUnit stateUnit, String toState, Object... params)
      * @brief 현재 상태에서 매개변수로 전달받은 다음 상태로 천이하는 함수
      * @param stateUnit State unit
      * @param toState To state
-     * @param failState Fail state
      * @param params CallBack 가변 매개변수
      * @return 성공 시 다음 상태값, 실패 시 정의된 실패값 반환
      */
-    public String nextState (StateUnit stateUnit, String toState, String failState, Object... params) {
-        return stateContainer.nextState(stateUnit, toState, failState, params);
+    public String nextState (StateUnit stateUnit, String toState, Object... params) {
+        return stateContainer.nextState(stateUnit, toState, params);
     }
 
     /**
@@ -137,38 +137,36 @@ public class StateHandler {
 
 
     /**
-     * @fn public String fire (String event, StateUnit stateUnit, String failState)
+     * @fn public String fire (String event, StateUnit stateUnit)
      * @brief 정의된 State 천이를 위해 지정한 이벤트를 발생시키는 함수
      * @param event 발생할 이벤트 이름
      * @param stateUnit State unit
-     * @param failState 천이 실패 시 반환될 State 이름
      * @return 성공 시 지정한 결과값 반환, 실패 시 failState 반환
      */
-    public String fire (String event, StateUnit stateUnit, String failState) {
-        return stateEventManager.callEvent(name, event, stateUnit, failState, (Object) null);
+    public String fire (String event, StateUnit stateUnit) {
+        return stateEventManager.callEvent(name, event, stateUnit, (Object) null);
     }
 
     /**
-     * @fn public String fire (String event, StateUnit stateUnit, String failState, Object... params)
+     * @fn public String fire (String event, StateUnit stateUnit, Object... params)
      * @brief 정의된 State 천이를 위해 지정한 이벤트를 발생시키는 함수
      * @param event 발생할 이벤트 이름
      * @param stateUnit State unit
-     * @param failState 천이 실패 시 반환될 State 이름
      * @param params CallBack 가변 매개변수
      * @return 성공 시 지정한 결과값 반환, 실패 시 failState 반환
      */
-    public String fire (String event, StateUnit stateUnit, String failState, Object... params) {
-        return stateEventManager.callEvent(name, event, stateUnit, failState, params);
+    public String fire (String event, StateUnit stateUnit, Object... params) {
+        return stateEventManager.callEvent(name, event, stateUnit, params);
     }
 
     /**
-     * @fn public Map<String, String> findToStateFromEvent (String event, String fromState)
-     * @brief 지정한 이벤트에 등록된 State Map 을 찾아서 반환하는 함수
+     * @fn public StateEvent findToStateFromEvent(String event)
+     * @brief 지정한 이벤트에 등록된 StateEvent 을 찾아서 반환하는 함수
      * @param event 이벤트 이름
-     * @return 성공 시 State Map, 실패 시 null 반환
+     * @return 성공 시 StateEvent, 실패 시 null 반환
      */
-    public synchronized String findToStateFromEvent(String event, String fromState) {
-        return stateEventManager.getToStateByEvent(event, fromState);
+    public StateEvent findStateEventFromEvent(String event) {
+        return stateEventManager.getStateEventByEvent(event);
     }
 
 }

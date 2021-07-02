@@ -4,23 +4,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.StateManager;
 import state.basic.module.StateHandler;
-import state.basic.module.TaskManager;
+import state.basic.module.StateTaskManager;
 import state.basic.unit.StateUnit;
 
 /**
- * @class public class TaskUnit extends AbstractTaskUnit
- * @brief TaskUnit class
+ * @class public class StateTaskUnit extends AbstractStateTaskUnit
+ * @brief StateTaskUnit class
  */
-public class TaskUnit extends AbstractTaskUnit {
+public class StateTaskUnit extends AbstractStateTaskUnit {
 
-    private static final Logger logger = LoggerFactory.getLogger(TaskUnit.class);
+    private static final Logger logger = LoggerFactory.getLogger(StateTaskUnit.class);
 
     private final String handlerName;
     private final String event;
     private final StateUnit stateUnit;
 
-    protected TaskUnit(String handlerName, String event, StateUnit stateUnit, int interval) {
-        super(interval);
+    public StateTaskUnit(String handlerName, String event, StateUnit stateUnit, int delay) {
+        super(delay);
 
         this.handlerName = handlerName;
         this.event = event;
@@ -36,10 +36,10 @@ public class TaskUnit extends AbstractTaskUnit {
             return;
         }
 
-        // TODO : 실패 상태 없애야함
-        stateHandler.fire(event, stateUnit, null, (Object) null);
+        logger.info("({}) StateTaskUnit is started. (event={}, stateUnit={})", handlerName, event, stateUnit);
+        stateHandler.fire(event, stateUnit, (Object) null);
 
-        TaskManager.getInstance().removeTask(TaskUnit.class.getSimpleName());
+        StateTaskManager.getInstance().removeTask(StateTaskUnit.class.getSimpleName());
     }
 
 }

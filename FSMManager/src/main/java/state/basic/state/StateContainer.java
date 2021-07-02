@@ -63,13 +63,13 @@ public class StateContainer {
             boolean result = stateMap.putIfAbsent(fromState, toStateMap) == null;
 
             if (result) {
-                logger.debug("[{}] ({}) Success to add state. (fromState={}, toState={})",
+                logger.info("[{}] ({}) Success to add state. (fromState={}, toState={})",
                         ResultCode.SUCCESS_ADD_STATE, name, fromState, toState
                 );
             } else {
                 result = toStateMap.putIfAbsent(toState, callBack) == null;
                 if (result) {
-                    logger.debug("[{}] ({}) Success to add state. (fromState={}, toState={})",
+                    logger.info("[{}] ({}) Success to add state. (fromState={}, toState={})",
                             ResultCode.SUCCESS_ADD_STATE, name, fromState, toState
                     );
                 } else {
@@ -108,11 +108,11 @@ public class StateContainer {
         synchronized (stateMap) {
             boolean result = stateMap.remove(fromState) != null;
             if (result) {
-                logger.debug("[{}] ({}) Success to remove the from state. (fromState={})",
+                logger.info("[{}] ({}) Success to remove the from state. (fromState={})",
                         ResultCode.SUCCESS_REMOVE_STATE, name, fromState
                 );
             } else {
-                logger.debug("[{}] ({}) Fail to remove the from state. (fromState={})",
+                logger.info("[{}] ({}) Fail to remove the from state. (fromState={})",
                         ResultCode.FAIL_REMOVE_STATE, name, fromState
                 );
             }
@@ -139,11 +139,11 @@ public class StateContainer {
 
         boolean result = getToStateMapByFromState(fromState).remove(toState) != null;
         if (result) {
-            logger.debug("[{}] ({}) Success to remove the to state. (fromState={}, toState={})",
+            logger.info("[{}] ({}) Success to remove the to state. (fromState={}, toState={})",
                     ResultCode.SUCCESS_REMOVE_STATE, name, fromState, toState
             );
         } else {
-            logger.debug("[{}] ({}) Fail to remove the to state. (fromState={}, toState={})",
+            logger.info("[{}] ({}) Fail to remove the to state. (fromState={}, toState={})",
                     ResultCode.FAIL_REMOVE_STATE, name, fromState, toState
             );
         }
@@ -188,23 +188,22 @@ public class StateContainer {
     }
 
     /**
-     * @fn public Object nextState (String toState)
+     * @fn public String nextState (StateUnit stateUnit, String toState, Object... params)
      * @brief 현재 상태에서 매개변수로 전달받은 다음 상태로 천이하는 함수
      * 이 함수에서 To state 와 연관된 CallBack 이 실행되며, CallBack 결과값이 StateContainer 에 저장됨
      * @param stateUnit State Unit
      * @param toState To state
-     * @param failState 천이 실패 시 반환될 State 이름
      * @param params CallBack 가변 매개변수
      * @return 성공 시 다음 상태값, 실패 시 정의된 실패값 반환
      */
-    public String nextState (StateUnit stateUnit, String toState, String failState, Object... params) {
+    public String nextState (StateUnit stateUnit, String toState, Object... params) {
         String fromState = stateUnit.getCurState();
         Map<String, CallBack> nextStateCallBackMap = getToStateMapByFromState(fromState);
         if (nextStateCallBackMap == null) {
             logger.warn("[{}] ({}) Fail to transit. To state is not defined. (fromState={}, toState={})",
                     ResultCode.FAIL_GET_STATE, name, fromState, toState
             );
-            return failState;
+            return null;
         }
 
         // 1) 상태 천이 먼저 수행 (이전 상태도 저장)

@@ -34,12 +34,11 @@ public class OfferNegoCallBack extends CallBack {
         StateHandler mediaStateHandler = stateManager.getStateHandler(MediaState.MEDIA_STATE_NAME);
         if (mediaStateHandler == null) { return null; }
 
-        logger.debug("OfferNegoCallBack: callId={}, fromNo={}, toNo={}, mediaStateUnitName={}", callInfo.getCallId(), callInfo.getFromNo(), callInfo.getToNo(), callInfo.getMediaStateUnitName());
+        logger.info("OfferNegoCallBack: callId={}, fromNo={}, toNo={}, mediaStateUnitName={}", callInfo.getCallId(), callInfo.getFromNo(), callInfo.getToNo(), callInfo.getMediaStateUnitName());
 
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                MediaState.IDLE_STATE,
                 MediaState.ACTIVE_REQUEST
         );
     }

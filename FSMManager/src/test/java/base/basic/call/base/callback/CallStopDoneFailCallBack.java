@@ -34,12 +34,11 @@ public class CallStopDoneFailCallBack extends CallBack {
         StateHandler mediaStateHandler = stateManager.getStateHandler(MediaState.MEDIA_STATE_NAME);
         if (mediaStateHandler == null) { return null; }
 
-        logger.debug("CallStopDoneFailCallBack: callId={}, fromNo={}, toNo={}, mediaStateUnitName={}", callInfo.getCallId(), callInfo.getFromNo(), callInfo.getToNo(), callInfo.getMediaStateUnitName());
+        logger.info("CallStopDoneFailCallBack: callId={}, fromNo={}, toNo={}, mediaStateUnitName={}", callInfo.getCallId(), callInfo.getFromNo(), callInfo.getToNo(), callInfo.getMediaStateUnitName());
 
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_DELETE_FAIL_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                MediaState.IDLE_REQUEST,
                 MediaState.ACTIVE_STATE
         );
     }

@@ -29,8 +29,8 @@ public class TestMain {
 
         serviceManager.start();
 
-        BasicMediaStateTest basicMediaStateTest = new BasicMediaStateTest();
-        basicMediaStateTest.testStart();
+        /*BasicMediaStateTest basicMediaStateTest = new BasicMediaStateTest();
+        basicMediaStateTest.testStart();*/
 
         BasicCallStateTest basicCallStateTest = new BasicCallStateTest();
         basicCallStateTest.testStart();
@@ -40,20 +40,20 @@ public class TestMain {
         ////////////////////////////////////////////////////////////////////////////////
         // # Squirrel FSM
 
-        SquirrelCallStateFsmTest squirrelCallStateFsmTest = new SquirrelCallStateFsmTest();
+        /*SquirrelCallStateFsmTest squirrelCallStateFsmTest = new SquirrelCallStateFsmTest();
         squirrelCallStateFsmTest.testStart();
 
         SquirrelMediaStateFsmTest squirrelMediaStateFsmTest = new SquirrelMediaStateFsmTest();
         squirrelCallStateFsmTest.testStart();
 
         SquirrelCallAndMediaStateFsmTest squirrelCallAndMediaStateFsmTest = new SquirrelCallAndMediaStateFsmTest();
-        squirrelCallAndMediaStateFsmTest.testStart();
+        squirrelCallAndMediaStateFsmTest.testStart();*/
 
         ////////////////////////////////////////////////////////////////////////////////
         // # Akka FSM
 
-        AkkaMediaStateTest akkaMediaStateTest = new AkkaMediaStateTest();
-        akkaMediaStateTest.testStart();
+        /*AkkaMediaStateTest akkaMediaStateTest = new AkkaMediaStateTest();
+        akkaMediaStateTest.testStart();*/
     }
 
 }

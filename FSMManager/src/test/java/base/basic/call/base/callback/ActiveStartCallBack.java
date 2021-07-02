@@ -34,12 +34,11 @@ public class ActiveStartCallBack extends CallBack {
         StateHandler mediaStateHandler = stateManager.getStateHandler(MediaState.MEDIA_STATE_NAME);
         if (mediaStateHandler == null) { return null; }
 
-        logger.debug("ActiveStartCallBack: callId={}, fromNo={}, toNo={}, mediaStateUnitName={}", callInfo.getCallId(), callInfo.getFromNo(), callInfo.getToNo(), callInfo.getMediaStateUnitName());
+        logger.info("ActiveStartCallBack: callId={}, fromNo={}, toNo={}, mediaStateUnitName={}", callInfo.getCallId(), callInfo.getFromNo(), callInfo.getToNo(), callInfo.getMediaStateUnitName());
 
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_CREATE_SUCCESS_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                MediaState.ACTIVE_STATE,
                 MediaState.ACTIVE_STATE
         );
     }

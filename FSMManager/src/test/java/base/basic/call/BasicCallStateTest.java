@@ -39,157 +39,144 @@ public class BasicCallStateTest {
     ////////////////////////////////////////////////////////////////////////////////
 
     public String callStart (CallInfo callInfo) {
-        logger.debug("@ Call is started!");
+        logger.info("@ Call is started!");
         StateHandler callStateHandler = stateManager.getStateHandler(CallState.CALL_STATE_NAME);
 
         return callStateHandler.fire(
                 CallEvent.CALL_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.INIT,
                 CallState.OFFER
         );
     }
 
     public String offerEarlyNegoStart(CallInfo callInfo) {
-        logger.debug("@ Early Nego is started by offer!");
+        logger.info("@ Early Nego is started by offer!");
         StateHandler callStateHandler = stateManager.getStateHandler(CallState.CALL_STATE_NAME);
 
         return callStateHandler.fire(
                 CallEvent.OFFER_EARLY_NEGO_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.OFFER,
                 callInfo
         );
     }
 
     public String earlyMediaStart (CallInfo callInfo) {
-        logger.debug("@ Early Media is started!");
+        logger.info("@ Early Media is started!");
         StateHandler callStateHandler = stateManager.getStateHandler(CallState.CALL_STATE_NAME);
 
         return callStateHandler.fire(
                 CallEvent.EARLY_MEDIA_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.EARLY_NEGO_REQ,
                 callInfo
         );
     }
 
     public String activeStart (CallInfo callInfo) {
-        logger.debug("@ Active is started!");
+        logger.info("@ Active is started!");
         StateHandler callStateHandler = stateManager.getStateHandler(CallState.CALL_STATE_NAME);
 
         return callStateHandler.fire(
                 CallEvent.ACTIVE_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.NEGO_REQ,
                 callInfo
         );
     }
 
     public String earlyNegoInActiveStart (CallInfo callInfo) {
-        logger.debug("@ InActive is started by early_nego!");
+        logger.info("@ InActive is started by early_nego!");
         StateHandler callStateHandler = stateManager.getStateHandler(CallState.CALL_STATE_NAME);
 
         return callStateHandler.fire(
                 CallEvent.EARLY_NEGO_INACTIVE_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.EARLY_NEGO_REQ,
                 callInfo
         );
     }
 
     public String negoInActiveStart (CallInfo callInfo) {
-        logger.debug("@ InActive is started by nego!");
+        logger.info("@ InActive is started by nego!");
         StateHandler callStateHandler = stateManager.getStateHandler(CallState.CALL_STATE_NAME);
 
         return callStateHandler.fire(
                 CallEvent.NEGO_INACTIVE_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.NEGO_REQ,
                 callInfo
         );
     }
 
     public String offerNegoStart (CallInfo callInfo) {
-        logger.debug("@ Nego is started by offer!");
+        logger.info("@ Nego is started by offer!");
         StateHandler callStateHandler = stateManager.getStateHandler(CallState.CALL_STATE_NAME);
 
         return callStateHandler.fire(
                 CallEvent.OFFER_NEGO_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.OFFER,
                 callInfo
         );
     }
 
     public String earlyMediaNegoStart(CallInfo callInfo) {
-        logger.debug("@ Nego is started by early_media!");
+        logger.info("@ Nego is started by early_media!");
         StateHandler callStateHandler = stateManager.getStateHandler(CallState.CALL_STATE_NAME);
 
         return callStateHandler.fire(
                 CallEvent.EARLY_MEDIA_NEGO_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.EARLY_MEDIA,
                 CallState.NEGO_REQ
         );
     }
 
     public String offerHangupStart (CallInfo callInfo) {
-        logger.debug("@ Hangup is started by offer!");
+        logger.info("@ Hangup is started by offer!");
         StateHandler callStateHandler = stateManager.getStateHandler(CallState.CALL_STATE_NAME);
 
         return callStateHandler.fire(
                 CallEvent.OFFER_STOP_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.OFFER,
                 CallState.HANGUP_REQ
         );
     }
 
     public String earlyNegoHangupStart (CallInfo callInfo) {
-        logger.debug("@ Hangup is started by early_nego!");
+        logger.info("@ Hangup is started by early_nego!");
         StateHandler callStateHandler = stateManager.getStateHandler(CallState.CALL_STATE_NAME);
 
         return callStateHandler.fire(
                 CallEvent.EARLY_MEDIA_STOP_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.EARLY_NEGO_REQ,
                 callInfo
         );
     }
 
     public String activeHangupStart(CallInfo callInfo) {
-        logger.debug("@ Hangup is started by nego!");
+        logger.info("@ Hangup is started by nego!");
         StateHandler callStateHandler = stateManager.getStateHandler(CallState.CALL_STATE_NAME);
 
         return callStateHandler.fire(
                 CallEvent.ACTIVE_STOP_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.ACTIVE,
                 callInfo
         );
     }
 
     public String callStopSuccess (CallInfo callInfo) {
-        logger.debug("@ Success to stop the call!");
+        logger.info("@ Success to stop the call!");
         StateHandler callStateHandler = stateManager.getStateHandler(CallState.CALL_STATE_NAME);
 
         return callStateHandler.fire(
                 CallEvent.CALL_STOP_DONE_SUCCESS_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.HANGUP_REQ,
                 callInfo
         );
     }
 
     public String callStopFail (CallInfo callInfo) {
-        logger.debug("@ Fail to stop the call!");
+        logger.info("@ Fail to stop the call!");
         StateHandler callStateHandler = stateManager.getStateHandler(CallState.CALL_STATE_NAME);
 
         return callStateHandler.fire(
                 CallEvent.CALL_STOP_DONE_FAIL_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                CallState.HANGUP_REQ,
                 callInfo
         );
     }
@@ -260,7 +247,7 @@ public class BasicCallStateTest {
         Assert.assertEquals(MediaState.IDLE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCallBackResult());
 
         this.stopWatch.stop();
-        logger.debug("Done. (total time: {} s)", String.format("%.3f", ((double) this.stopWatch.getTime()) / 1000));
+        logger.info("Done. (total time: {} s)", String.format("%.3f", ((double) this.stopWatch.getTime()) / 1000));
         ////////////////////////////////////////////////////////////////////////////////
     }
 }

@@ -1,5 +1,6 @@
 package state.basic.event;
 
+import state.basic.module.StateHandler;
 import state.basic.unit.StateUnit;
 
 /**
@@ -8,6 +9,6 @@ import state.basic.unit.StateUnit;
  */
 public interface StateEventCallBack {
 
-    String onEvent (String handlerName, String event, StateUnit stateUnit, String failState, Object... params);
+    String onEvent (StateHandler stateHandler, String event, StateUnit stateUnit, String fromState, String toState, Object... params);
 
 }

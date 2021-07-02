@@ -34,12 +34,11 @@ public class EarlyMediaStopCallBack extends CallBack {
         StateHandler mediaStateHandler = stateManager.getStateHandler(MediaState.MEDIA_STATE_NAME);
         if (mediaStateHandler == null) { return null; }
 
-        logger.debug("EarlyMediaStopCallBack: callId={}, fromNo={}, toNo={}, mediaStateUnitName={}", callInfo.getCallId(), callInfo.getFromNo(), callInfo.getToNo(), callInfo.getMediaStateUnitName());
+        logger.info("EarlyMediaStopCallBack: callId={}, fromNo={}, toNo={}, mediaStateUnitName={}", callInfo.getCallId(), callInfo.getFromNo(), callInfo.getToNo(), callInfo.getMediaStateUnitName());
 
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_STOP_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                MediaState.ACTIVE_STATE,
                 MediaState.IDLE_REQUEST
         );
     }
