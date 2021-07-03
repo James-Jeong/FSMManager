@@ -233,7 +233,7 @@ public class BasicMediaStateTest {
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.warn("() () () Thread.sleep.Exception", e);
         }
 
         for (ScheduledFuture<?> scheduledFuture : taskMap.values()) {

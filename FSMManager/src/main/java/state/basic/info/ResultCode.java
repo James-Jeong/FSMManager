@@ -14,6 +14,8 @@ public class ResultCode {
     public static final int SUCCESS_TRANSIT_STATE = 1002;
     // 실패 이벤트 예약 성공
     public static final int SUCCESS_RESERVE_FAIL_STATE = 1010;
+    // 실패 이벤트 삭제 성공
+    public static final int SUCCESS_REMOVE_FAIL_STATE = 1011;
 
     // 상태 저장 실패
     public static final int FAIL_ADD_STATE = 2000;

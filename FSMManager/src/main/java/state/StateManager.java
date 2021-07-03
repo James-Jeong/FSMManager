@@ -403,4 +403,17 @@ public class StateManager {
         }
     }
 
+    public int getTotalEventSize () {
+        synchronized (stateHandlerMap) {
+            int totalSize = 0;
+
+            for (StateHandler stateHandler : stateHandlerMap.values()) {
+                if (stateHandler == null) { continue; }
+                totalSize += stateHandler.getTotalEventSize();
+            }
+
+            return totalSize;
+        }
+    }
+
 }

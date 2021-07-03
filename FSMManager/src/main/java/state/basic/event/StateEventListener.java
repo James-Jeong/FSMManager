@@ -35,13 +35,6 @@ public class StateEventListener implements StateEventCallBack {
      */
     @Override
     public String onEvent (StateHandler stateHandler, String event, StateUnit stateUnit, String fromState, String toState, Object... params) {
-        if (stateUnit == null) {
-            logger.warn("[{}] ({}) StateUnit is null. (event={})",
-                    ResultCode.NULL_OBJECT, stateHandler.getName(), event
-            );
-            return null;
-        }
-
         if (fromState.equals(toState)) {
             logger.warn("[{}] ({}) Fail to transit. State is same. (curState={}, nextState={})",
                     ResultCode.SAME_STATE, stateHandler.getName(), fromState, toState

@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.basic.info.ResultCode;
 
+import java.util.UUID;
+
 /**
  * @class public class StateUnit
  * @brief StateUnit class
@@ -19,6 +21,8 @@ public class StateUnit {
     private String prevState = null;
     // 현재 상태
     private String curState;
+    // 천이 실패 시 실행될 이벤트 키
+    private String failEventKey = null;
     // CallBack 결과값
     private Object callBackResult = null;
 
@@ -31,6 +35,21 @@ public class StateUnit {
 
     public String getName() {
         return name;
+    }
+
+    public String getFailEventKey() {
+        return failEventKey;
+    }
+
+    public String setFailEventKey() {
+        this.failEventKey = makeFailEventKey();
+        return this.failEventKey;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+
+    private String makeFailEventKey () {
+        return name + ":" + curState + ":" + UUID.randomUUID();
     }
 
     ////////////////////////////////////////////////////////////////////////////////

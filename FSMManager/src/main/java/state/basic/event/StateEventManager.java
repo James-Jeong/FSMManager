@@ -166,10 +166,21 @@ public class StateEventManager {
             return null;
         }
 
+        if (stateUnit == null) {
+            logger.warn("[{}] ({}) StateUnit is null. (event={})",
+                    ResultCode.NULL_OBJECT, stateHandler.getName(), event
+            );
+            return null;
+        }
+
         String fromState = stateEvent.getFromState();
         String toState = stateEvent.getToState();
         String failEvent = stateEvent.getFailEvent();
         int delay = stateEvent.getDelay();
+
+        // 만약 현재 상태가 기대되는 상태 천이의 현재 상태이면
+        // 이전에 등록된 failEvent 를 취소시킨다.
+        StateTaskManager.getInstance().removeTask(stateUnit.getFailEventKey());
 
         String result = stateEventCallBack.onEvent(stateHandler, event, stateUnit, fromState, toState, params);
         if (failEvent != null) {
@@ -178,7 +189,7 @@ public class StateEventManager {
                 // 다음 상태에 대해 기대되는 상태 천이(또는 이벤트)가
                 // 일정 시간 이후에 발생하지 않을 경우 지정한 실패 이벤트를 발생시킨다.
                 StateTaskManager.getInstance().addTask(
-                        stateUnit.getName() + "_" + toState,
+                        stateUnit.setFailEventKey(),
                         new StateTaskUnit(
                                 handlerName,
                                 failEvent,
@@ -186,22 +197,11 @@ public class StateEventManager {
                                 delay
                         )
                 );
-
-                logger.info("[{}] ({}) FailEvent is reserved. (event={}, failEvent={}, delay={})",
-                        ResultCode.SUCCESS_RESERVE_FAIL_STATE, handlerName, event, failEvent, delay
-                );
             } else {
-                logger.warn("[{}] ({}) FailEvent is not reserved. Transition is failed. (event={})",
+                logger.warn("[{}] ({}) FailEvent is not reserved. Because the transition was failed. (event={})",
                         ResultCode.FAIL_RESERVE_FAIL_STATE, handlerName, event
                 );
             }
-        }
-
-        // 천이에 성공했을 때,
-        // 만약 현재 상태가 기대되는 상태 천이의 현재 상태이면
-        // 이전에 등록된 failEvent 를 취소시킨다.
-        if (result != null) {
-            StateTaskManager.getInstance().removeTask(stateUnit.getName() + "_" + fromState);
         }
 
         return result;

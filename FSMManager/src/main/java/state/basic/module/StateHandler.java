@@ -126,6 +126,10 @@ public class StateHandler {
         return stateContainer.getAllStates();
     }
 
+    public int getTotalStateSize () {
+        return stateContainer.getAllStates().size();
+    }
+
     /**
      * @fn public List<String> getEventList ()
      * @brief StateEventManager 에 정의된 모든 이벤트들을 새로운 리스트에 저장하여 반환하는 함수
@@ -135,6 +139,9 @@ public class StateHandler {
         return stateEventManager.getAllEvents();
     }
 
+    public int getTotalEventSize () {
+        return stateEventManager.getAllEvents().size();
+    }
 
     /**
      * @fn public String fire (String event, StateUnit stateUnit)

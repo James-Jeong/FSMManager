@@ -95,6 +95,7 @@ public class ServiceManager {
         Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_DELETE_FAIL_EVENT, MediaState.IDLE_REQUEST, MediaState.ACTIVE_STATE, mediaDeleteFailCallBack, null, 0));
 
         Assert.assertFalse(mediaStateHandler.getStateList().isEmpty());
+        Assert.assertFalse(mediaStateHandler.getEventList().isEmpty());
     }
 
     public void stop () {

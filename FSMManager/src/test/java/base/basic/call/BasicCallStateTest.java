@@ -5,6 +5,7 @@ import base.basic.call.base.CallEvent;
 import base.basic.call.base.CallInfo;
 import base.basic.call.base.CallState;
 import base.basic.media.base.MediaState;
+import ch.qos.logback.core.util.TimeUtil;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Assert;
 import org.slf4j.Logger;
@@ -28,12 +29,17 @@ public class BasicCallStateTest {
 
     public void testStart () {
         SessionManager sessionManager = SessionManager.getInstance();
-        sessionManager.createCall("Call", "01012345678", "01056781234");
-        CallInfo callInfo = sessionManager.getCall("Call");
 
-        normalTest(callInfo);
+        sessionManager.createCall("Call1", "01012345678", "01056781234");
+        CallInfo callInfo1 = sessionManager.getCall("Call1");
+        normalTest(callInfo1);
 
-        sessionManager.removeCall("Call");
+        sessionManager.createCall("Call2", "01056781234", "01012345678");
+        CallInfo callInfo2 = sessionManager.getCall("Call2");
+        failTest(callInfo2);
+
+        sessionManager.removeCall("Call1");
+        sessionManager.removeCall("Call2");
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -250,4 +256,21 @@ public class BasicCallStateTest {
         logger.info("Done. (total time: {} s)", String.format("%.3f", ((double) this.stopWatch.getTime()) / 1000));
         ////////////////////////////////////////////////////////////////////////////////
     }
+
+    public void failTest (CallInfo callInfo) {
+        Assert.assertEquals(CallState.OFFER, callStart(callInfo));
+        Assert.assertEquals(CallState.INIT, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getPrevState());
+        Assert.assertEquals(CallState.OFFER, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCurState());
+        Assert.assertEquals(CallState.OFFER, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCallBackResult());
+
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            logger.warn("() () () Thread.sleep.Exception", e);
+        }
+
+        Assert.assertEquals(CallState.OFFER, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getPrevState());
+        Assert.assertEquals(CallState.INIT, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCurState());
+    }
+
 }
