@@ -17,7 +17,7 @@ FSMManager
 ## 3) FSM 구성도
 ### 1. Basic FSM
 #### 1] 클래스 구조
-![스크린샷 2021-07-05 오후 2 04 26](https://user-images.githubusercontent.com/37236920/124420654-d7ca6600-dd9a-11eb-9b06-060d6c6b0093.png)
+![스크린샷 2021-07-05 오후 3 22 10](https://user-images.githubusercontent.com/37236920/124426938-b327bb80-dda5-11eb-8f24-9040047223cb.png)
 ![스크린샷 2021-07-05 오후 2 04 43](https://user-images.githubusercontent.com/37236920/124420676-e284fb00-dd9a-11eb-9d35-4b38e4a520fb.png)
   
 #### 2] 호출 예시
