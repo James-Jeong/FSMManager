@@ -17,13 +17,13 @@ FSMManager
 ## 3) FSM 구성도
 ### 1. Basic FSM
 #### 1] 클래스 구조
-![스크린샷 2021-07-02 오전 8 37 13](https://user-images.githubusercontent.com/37236920/124200956-9d9a6380-db11-11eb-8ff6-8467b1ee9606.png)
-![스크린샷 2021-07-01 오전 9 04 30](https://user-images.githubusercontent.com/37236920/124046160-441c3100-da4c-11eb-960e-c858d3854452.png)
+![스크린샷 2021-07-05 오후 2 04 26](https://user-images.githubusercontent.com/37236920/124420654-d7ca6600-dd9a-11eb-9b06-060d6c6b0093.png)
+![스크린샷 2021-07-05 오후 2 04 43](https://user-images.githubusercontent.com/37236920/124420676-e284fb00-dd9a-11eb-9d35-4b38e4a520fb.png)
   
 #### 2] 호출 예시
-![스크린샷 2021-07-01 오후 4 28 06](https://user-images.githubusercontent.com/37236920/124084704-3ab1b980-da8a-11eb-8cca-37879d9e2984.png)
-![스크린샷 2021-07-01 오후 4 23 47](https://user-images.githubusercontent.com/37236920/124084116-a0517600-da89-11eb-8dd4-51dee55c7285.png)
-![스크린샷 2021-07-01 오후 4 17 13](https://user-images.githubusercontent.com/37236920/124083335-b579d500-da88-11eb-860b-604908721f25.png)
+![스크린샷 2021-07-05 오후 2 05 55](https://user-images.githubusercontent.com/37236920/124420786-0c3e2200-dd9b-11eb-96fc-8a2f7a687203.png)
+![스크린샷 2021-07-05 오후 2 06 12](https://user-images.githubusercontent.com/37236920/124420800-16602080-dd9b-11eb-933f-d33698529511.png)
+![스크린샷 2021-07-05 오후 2 06 32](https://user-images.githubusercontent.com/37236920/124420819-224be280-dd9b-11eb-867c-67a35722b56a.png)
   
 #### 3] 상태 추가
 ![스크린샷 2021-07-01 오전 9 06 42](https://user-images.githubusercontent.com/37236920/124046287-91989e00-da4c-11eb-9b44-727f36af40c2.png)
