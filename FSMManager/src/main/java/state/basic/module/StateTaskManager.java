@@ -69,7 +69,7 @@ public class StateTaskManager {
                 );
             }
 
-            if (taskMap.put(name, executor) == null) {
+            if (executor != null && taskMap.put(name, executor) == null) {
                 logger.info("[{}] ({}) StateTaskUnit [{}] is added.",
                         ResultCode.SUCCESS_ADD_STATE_TASK_UNIT, handlerName, name
                 );
