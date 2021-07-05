@@ -1,9 +1,8 @@
 package state.basic.module;
 
 import state.basic.event.StateEventManager;
+import state.basic.event.base.CallBack;
 import state.basic.event.base.StateEvent;
-import state.basic.state.CallBack;
-import state.basic.state.StateContainer;
 import state.basic.unit.StateUnit;
 
 import java.util.List;
@@ -14,8 +13,7 @@ import java.util.List;
  */
 public class StateHandler {
 
-    // StateContainer
-    private final StateContainer stateContainer;
+
     // StateEventManager
     private final StateEventManager stateEventManager;
 
@@ -30,25 +28,7 @@ public class StateHandler {
     public StateHandler(String name) {
         this.name = name;
 
-        stateContainer = new StateContainer(name);
         stateEventManager = new StateEventManager();
-    }
-
-    public void clearStateContainer() {
-        stateContainer.removeAllStates();
-    }
-
-    public void clearStateEventManager() {
-        stateEventManager.removeAllEvents();
-    }
-
-    /**
-     * @fn public String getName()
-     * @brief StateHandler 이름을 반환하는 함수
-     * @return StateHandler 이름
-     */
-    public String getName() {
-        return name;
     }
 
     /**
@@ -65,22 +45,24 @@ public class StateHandler {
      * @param callBack 천이 성공 후 실행될 CallBack
      * @param failEvent 천이 실패 후 실행될 이벤트 이름
      * @param delay 천이 실패 후 실행될 이벤트가 실행되기 위한 Timeout 시간
+     * @param params 실패 후 실행될 이벤트의 CallBack 의 매개변수
      * @return 성공 시 true, 실패 시 false 반환
      */
-    public boolean addState (String event, String fromState, String toState, CallBack callBack, String failEvent, int delay) {
-        // TODO
-        return stateEventManager.addEvent(event, fromState, toState, failEvent, delay) &&
-                stateContainer.addToStateByFromState(fromState, toState, callBack);
+    public boolean addState (String event, String fromState, String toState, CallBack callBack, String failEvent, int delay, Object... params) {
+        return stateEventManager.addEvent(event, fromState, toState, callBack, failEvent, delay, params);
+    }
+
+    public void clearStateEventManager() {
+        stateEventManager.removeAllEvents();
     }
 
     /**
-     * @fn public boolean removeFromState(String fromState)
-     * @brief From state 를 삭제하는 함수
-     * @param fromState From state
-     * @return 성공 시 true, 실패 시 false 반환
+     * @fn public String getName()
+     * @brief StateHandler 이름을 반환하는 함수
+     * @return StateHandler 이름
      */
-    public boolean removeFromState (String fromState) {
-        return stateContainer.removeFromState(fromState);
+    public String getName() {
+        return name;
     }
 
     /**
@@ -91,43 +73,6 @@ public class StateHandler {
      */
     public boolean removeEvent (String event) {
         return stateEventManager.removeEvent(event);
-    }
-
-    /**
-     * @fn public boolean removeToStateByFromState(String fromState, String toState)
-     * @brief From state 와 연관된 To state 를 삭제
-     * From state 는 삭제되지 않고 To state 만 삭제
-     * @param fromState From state
-     * @param toState To state
-     * @return 성공 시 true, 실패 시 false 반환
-     */
-    public boolean removeToStateByFromState (String fromState, String toState) {
-        return stateContainer.removeToStateByFromState(fromState, toState);
-    }
-
-    /**
-     * @fn public String nextState (StateUnit stateUnit, String toState, Object... params)
-     * @brief 현재 상태에서 매개변수로 전달받은 다음 상태로 천이하는 함수
-     * @param stateUnit State unit
-     * @param toState To state
-     * @param params CallBack 가변 매개변수
-     * @return 성공 시 다음 상태값, 실패 시 정의된 실패값 반환
-     */
-    public String nextState (StateUnit stateUnit, String toState, Object... params) {
-        return stateContainer.nextState(stateUnit, toState, params);
-    }
-
-    /**
-     * @fn public List<String> getStateList ()
-     * @brief StateContainer 에 정의된 모든 상태들을 새로운 리스트에 저장하여 반환하는 함수
-     * @return 성공 시 정의된 상태 리스트, 실패 시 null 반환
-     */
-    public List<String> getStateList () {
-        return stateContainer.getAllStates();
-    }
-
-    public int getTotalStateSize () {
-        return stateContainer.getAllStates().size();
     }
 
     /**
@@ -151,7 +96,7 @@ public class StateHandler {
      * @return 성공 시 지정한 결과값 반환, 실패 시 failState 반환
      */
     public String fire (String event, StateUnit stateUnit) {
-        return stateEventManager.callEvent(name, event, stateUnit, (Object) null);
+        return stateEventManager.nextState(this, event, stateUnit, (Object) null);
     }
 
     /**
@@ -163,7 +108,7 @@ public class StateHandler {
      * @return 성공 시 지정한 결과값 반환, 실패 시 failState 반환
      */
     public String fire (String event, StateUnit stateUnit, Object... params) {
-        return stateEventManager.callEvent(name, event, stateUnit, params);
+        return stateEventManager.nextState(this, event, stateUnit, params);
     }
 
     /**

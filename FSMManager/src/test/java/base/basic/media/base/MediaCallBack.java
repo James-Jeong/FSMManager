@@ -2,7 +2,7 @@ package base.basic.media.base;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import state.basic.state.CallBack;
+import state.basic.event.base.CallBack;
 
 /**
  * @class public class MediaCallBack implements CallBack

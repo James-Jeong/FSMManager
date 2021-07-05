@@ -6,7 +6,7 @@ import base.basic.media.base.MediaState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.StateManager;
-import state.basic.state.CallBack;
+import state.basic.event.base.CallBack;
 import state.basic.module.StateHandler;
 
 /**

@@ -1,4 +1,4 @@
-package state.basic.state;
+package state.basic.event.base;
 
 /**
  * @interface public class CallBack

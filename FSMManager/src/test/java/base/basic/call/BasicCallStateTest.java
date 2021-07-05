@@ -5,7 +5,6 @@ import base.basic.call.base.CallEvent;
 import base.basic.call.base.CallInfo;
 import base.basic.call.base.CallState;
 import base.basic.media.base.MediaState;
-import ch.qos.logback.core.util.TimeUtil;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Assert;
 import org.slf4j.Logger;
@@ -264,7 +263,7 @@ public class BasicCallStateTest {
         Assert.assertEquals(CallState.OFFER, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCallBackResult());
 
         try {
-            Thread.sleep(3000);
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             logger.warn("() () () Thread.sleep.Exception", e);
         }

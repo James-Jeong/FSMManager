@@ -2,12 +2,11 @@ package state.basic.module;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import state.StateManager;
+import state.basic.info.ResultCode;
 import state.basic.module.base.StateTaskUnit;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -22,25 +21,12 @@ public class StateTaskManager {
 
     private static StateTaskManager taskManager = null;
 
-    private final ScheduledThreadPoolExecutor executor;
-
-    private final Map<String, ScheduledFuture<?>> taskMap = new HashMap<>();
+    private final Map<String, ScheduledThreadPoolExecutor> taskMap = new HashMap<>();
 
     ////////////////////////////////////////////////////////////////////////////////
 
     public StateTaskManager() {
-        int threadMaxCount;
-
-        StateManager stateManager = StateManager.getInstance();
-        int totalEventSize = stateManager.getTotalEventSize();
-        if (totalEventSize <= 0) {
-            threadMaxCount = 10;
-        } else {
-            threadMaxCount = totalEventSize;
-        }
-
-        logger.info("StateTaskManager thread max count: {}", threadMaxCount);
-        executor = new ScheduledThreadPoolExecutor(threadMaxCount);
+        // Nothing
     }
 
     public static StateTaskManager getInstance ( ) {
@@ -53,57 +39,51 @@ public class StateTaskManager {
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    public void stop ( ) {
-        synchronized (taskMap) {
-            for (ScheduledFuture<?> scheduledFuture : taskMap.values()) {
-                scheduledFuture.cancel(true);
-            }
-        }
-
-        executor.shutdown();
-        logger.info("StateTaskManager ends.");
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////
-
     /**
-     * @fn public void addTask (String name, StateTaskUnit stateTaskUnit)
+     * @fn public void addTask (String handlerName, String name, StateTaskUnit stateTaskUnit)
      * @brief StateTaskManager 에 새로운 StateTaskUnit 를 등록하는 함수
      */
-    public void addTask (String name, StateTaskUnit stateTaskUnit) {
+    public void addTask (String handlerName, String name, StateTaskUnit stateTaskUnit) {
         if (name == null || stateTaskUnit == null) { return; }
 
         synchronized (taskMap) {
             if (taskMap.get(name) != null) {
-                logger.warn("Hashmap Key duplication error. (name={})", name);
+                logger.warn("[{}] ({}) Hashmap Key duplication error. (name={})",
+                        ResultCode.DUPLICATED_KEY, handlerName, name
+                );
                 return;
             }
 
-            ScheduledFuture<?> scheduledFuture = null;
+            ScheduledThreadPoolExecutor executor = null;
             try {
-                scheduledFuture = executor.scheduleAtFixedRate(
+                executor = new ScheduledThreadPoolExecutor(1);
+                executor.scheduleAtFixedRate(
                         stateTaskUnit,
                         stateTaskUnit.getDelay(),
                         stateTaskUnit.getDelay(),
                         TimeUnit.MILLISECONDS
                 );
             } catch (Exception e) {
-                logger.warn("StateTaskManager.addTask.Exception", e);
+                logger.warn("[{}] ({}) StateTaskManager.addTask.Exception",
+                        ResultCode.FAIL_ADD_STATE_TASK_UNIT, handlerName, e
+                );
             }
 
-            if (taskMap.put(name, scheduledFuture) == null) {
-                logger.info("StateTaskUnit [{}] is added.", name);
+            if (taskMap.put(name, executor) == null) {
+                logger.info("[{}] ({}) StateTaskUnit [{}] is added.",
+                        ResultCode.SUCCESS_ADD_STATE_TASK_UNIT, handlerName, name
+                );
             }
         }
     }
 
     /**
-     * @fn public ScheduledFuture<?> findTask (String name)
+     * @fn private ScheduledThreadPoolExecutor findTask (String name)
      * @brief 지정한 이름의 StateTaskUnit 를 반환하는 함수
      * @param name StateTaskUnit 이름
      * @return 성공 시 StateTaskUnit, 실패 시 null 반환
      */
-    public ScheduledFuture<?> findTask (String name) {
+    private ScheduledThreadPoolExecutor findTask (String name) {
         if (name == null) { return null; }
 
         synchronized (taskMap) {
@@ -116,11 +96,12 @@ public class StateTaskManager {
     }
 
     /**
-     * @fn public void removeTask (String name)
+     * @fn public void removeTask (String handlerName, String name)
      * @brief 지정한 이름의 StateTaskUnit 를 삭제하는 함수
+     * @param handlerName StateHandler 이름
      * @param name StateTaskUnit 이름
      */
-    public void removeTask (String name) {
+    public void removeTask (String handlerName, String name) {
         if (name == null) { return; }
 
         synchronized (taskMap) {
@@ -128,20 +109,26 @@ public class StateTaskManager {
                 return;
             }
 
-            ScheduledFuture<?> scheduledFuture = findTask(name);
-            if (scheduledFuture == null) {
-                logger.warn("Fail to find the StateTaskUnit. (name={})", name);
+            ScheduledThreadPoolExecutor executor = findTask(name);
+            if (executor == null) {
+                logger.warn("[{}] ({}) Fail to find the StateTaskUnit. (name={})",
+                        ResultCode.FAIL_GET_STATE_TASK_UNIT, handlerName, name
+                );
                 return;
             }
 
             try {
-                scheduledFuture.cancel(true);
+                executor.shutdown();
 
                 if (taskMap.remove(name) != null) {
-                    logger.info("StateTaskUnit [{}] is removed.", name);
+                    logger.info("[{}] ({}) StateTaskUnit [{}] is removed.",
+                            ResultCode.SUCCESS_REMOVE_STATE_TASK_UNIT, handlerName, name
+                    );
                 }
             } catch (Exception e) {
-                logger.warn("StateTaskManager.addTask.Exception", e);
+                logger.warn("[{}] ({}) StateTaskManager.addTask.Exception",
+                        ResultCode.FAIL_REMOVE_STATE_TASK_UNIT, handlerName, e
+                );
             }
         }
     }

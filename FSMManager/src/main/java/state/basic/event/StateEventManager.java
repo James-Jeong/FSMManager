@@ -2,7 +2,7 @@ package state.basic.event;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import state.StateManager;
+import state.basic.event.base.CallBack;
 import state.basic.event.base.StateEvent;
 import state.basic.info.ResultCode;
 import state.basic.module.StateHandler;
@@ -23,9 +23,6 @@ public class StateEventManager {
 
     private static final Logger logger = LoggerFactory.getLogger(StateEventManager.class);
 
-    // stateEventCallBack
-    private final StateEventCallBack stateEventCallBack;
-
     // Event Map
     private final Map<String, StateEvent> eventMap = new HashMap<>();
 
@@ -36,22 +33,24 @@ public class StateEventManager {
      * @brief StateEventManager 생성자 함수
      */
     public StateEventManager() {
-        stateEventCallBack = new StateEventListener();
+        // Nothing
     }
 
     ////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @fn public boolean addEvent(String event, String fromState, String toState, String failEvent, int delay)
+     * @fn public boolean addEvent(String event, String fromState, String toState, CallBack callBack, String failEvent, int delay, Object... params)
      * @brief 새로운 이벤트를 생성하는 함수
      * @param event 이벤트 이름
      * @param fromState 천이 전 State 이름
      * @param toState 천이 후 State 이름
+     * @param callBack 천이 성공 후 실행될 CallBack
      * @param failEvent 천이 실패 후 실행될 이벤트 이름
      * @param delay 천이 실패 후 실행될 이벤트가 실행되기 위한 Timeout 시간
+     * @param params 실패 후 실행될 이벤트의 CallBack 의 매개변수
      * @return 성공 시 true, 실패 시 false 반환
      */
-    public boolean addEvent(String event, String fromState, String toState, String failEvent, int delay) {
+    public boolean addEvent(String event, String fromState, String toState, CallBack callBack, String failEvent, int delay, Object... params) {
         if (event == null || fromState == null || toState == null) {
             logger.warn("[{}] Fail to add event. (event={}, fromState={}, toState={})",
                     ResultCode.FAIL_ADD_EVENT, event, fromState, toState
@@ -68,13 +67,13 @@ public class StateEventManager {
         }
 
         synchronized (eventMap) {
-            boolean result = eventMap.putIfAbsent(event, new StateEvent(fromState, toState, failEvent, delay)) == null;
+            boolean result = eventMap.putIfAbsent(event, new StateEvent(fromState, toState, callBack, failEvent, delay, params)) == null;
             if (result) {
-                logger.info("[{}] Success to add state into event. (event={}, fromState={}, toState={})",
+                logger.info("[{}] Success to add state. (event={}, fromState={}, toState={})",
                         ResultCode.SUCCESS_ADD_STATE, event, fromState, toState
                 );
             } else {
-                logger.warn("[{}] Fail to add state into event. (event={}, fromState={}, toState={})",
+                logger.warn("[{}] Fail to add state. (event={}, fromState={}, toState={})",
                         ResultCode.FAIL_ADD_STATE, event, fromState, toState
                 );
             }
@@ -101,7 +100,7 @@ public class StateEventManager {
      * @return 성공 시 true, 실패 시 false 반환
      */
     public boolean removeEvent(String event) {
-          synchronized (eventMap) {
+        synchronized (eventMap) {
             boolean result = eventMap.remove(event) != null;
             if (result) {
                 logger.info("[{}] Success to remove the from state. (event={})",
@@ -141,27 +140,19 @@ public class StateEventManager {
     }
 
     /**
-     * @fn public String callEvent(String handlerName, String event, StateUnit stateUnit, Object... params)
-     * @brief 지정한 이벤트를 호출하는 함수
-     * @param handlerName 이벤트를 호출하는 StateHandler 이름
+     * @fn public String nextState(StateHandler stateHandler, String event, StateUnit stateUnit, Object... params)
+     * @brief 지정한 이벤트에 일치하는 상태 천이를 진행하는 함수
+     * @param stateHandler StateHandler
      * @param event 이벤트 이름
      * @param stateUnit State unit
      * @param params CallBack 가변 매개변수
      * @return 성공 시 지정한 결과값 반환, 실패 시 null 반환
      */
-    public String callEvent(String handlerName, String event, StateUnit stateUnit, Object... params) {
-        StateHandler stateHandler = StateManager.getInstance().getStateHandler(handlerName);
-        if (stateHandler == null) {
-            logger.warn("[{}] ({}) Fail to find the stateHandler. Must define the handler. (event={}, stateUnit={})",
-                    ResultCode.FAIL_GET_STATE_HANDLER, handlerName, event, stateUnit
-            );
-            return null;
-        }
-
+    public String nextState(StateHandler stateHandler, String event, StateUnit stateUnit, Object... params) {
         StateEvent stateEvent = stateHandler.findStateEventFromEvent(event);
         if (stateEvent == null) {
             logger.warn("[{}] ({}) Fail to find the event. Must define the event. (event={}, stateUnit={})",
-                    ResultCode.FAIL_GET_EVENT, handlerName, event, stateUnit
+                    ResultCode.FAIL_GET_EVENT, stateHandler.getName(), event, stateUnit
             );
             return null;
         }
@@ -178,33 +169,44 @@ public class StateEventManager {
         String failEvent = stateEvent.getFailEvent();
         int delay = stateEvent.getDelay();
 
-        // 만약 현재 상태가 기대되는 상태 천이의 현재 상태이면
-        // 이전에 등록된 failEvent 를 취소시킨다.
-        StateTaskManager.getInstance().removeTask(stateUnit.getFailEventKey());
-
-        String result = stateEventCallBack.onEvent(stateHandler, event, stateUnit, fromState, toState, params);
-        if (failEvent != null) {
-            if (result != null) {
-                // 천이에 성공했을 때,
-                // 다음 상태에 대해 기대되는 상태 천이(또는 이벤트)가
-                // 일정 시간 이후에 발생하지 않을 경우 지정한 실패 이벤트를 발생시킨다.
-                StateTaskManager.getInstance().addTask(
-                        stateUnit.setFailEventKey(),
-                        new StateTaskUnit(
-                                handlerName,
-                                failEvent,
-                                stateUnit,
-                                delay
-                        )
-                );
-            } else {
-                logger.warn("[{}] ({}) FailEvent is not reserved. Because the transition was failed. (event={})",
-                        ResultCode.FAIL_RESERVE_FAIL_STATE, handlerName, event
-                );
-            }
+        if (!fromState.equals(stateUnit.getCurState())) {
+            logger.warn("[{}] ({}) Fail to transit. From state is not matched. (event={}, fromState: cur={}, expected={})",
+                    ResultCode.FAIL_TRANSIT_STATE, stateHandler.getName(), event, stateUnit.getCurState(), fromState
+            );
+            return stateUnit.getCurState();
         }
 
-        return result;
+        // 1) 상태 천이
+        stateUnit.setPrevState(fromState);
+        stateUnit.setCurState(toState);
+
+        // 만약 현재 상태가 기대되는 상태 천이의 현재 상태이면
+        // 이전에 등록된 failEvent 를 취소시킨다.
+        StateTaskManager.getInstance().removeTask(stateHandler.getName(), stateUnit.getFailEventKey());
+
+        // 2) CallBack 실행
+        CallBack callBack = stateEvent.getCallBack();
+        if (callBack != null) {
+            stateUnit.setCallBackResult(callBack.callBackFunc(params));
+        }
+
+        if (failEvent != null) {
+            // 다음 상태에 대해 기대되는 상태 천이(또는 이벤트)가
+            // 일정 시간 이후에 발생하지 않을 경우 지정한 실패 이벤트를 발생시킨다.
+            StateTaskManager.getInstance().addTask(
+                    stateHandler.getName(),
+                    stateUnit.setFailEventKey(),
+                    new StateTaskUnit(
+                            stateHandler,
+                            failEvent,
+                            stateUnit,
+                            delay,
+                            stateEvent.getParams()
+                    )
+            );
+        }
+
+        return stateUnit.getCurState();
     }
 
 }

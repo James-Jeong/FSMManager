@@ -71,30 +71,29 @@ public class ServiceManager {
 
         ////////////////////////////////////////////////////////////////////////////////
         // 2. 상태 정의
-        Assert.assertTrue(callStateHandler.addState(CallEvent.CALL_START_EVENT, CallState.INIT, CallState.OFFER, callStartCallBack, CallEvent.CALL_FAIL_EVENT,  2000));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.CALL_START_EVENT, CallState.INIT, CallState.OFFER, callStartCallBack, CallEvent.CALL_FAIL_EVENT,  1000, CallState.INIT));
         Assert.assertTrue(callStateHandler.addState(CallEvent.CALL_FAIL_EVENT, CallState.OFFER, CallState.INIT, callFailCallBack, null, 0));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.OFFER_EARLY_NEGO_START_EVENT, CallState.OFFER, CallState.EARLY_NEGO_REQ, offerEarlyNegoCallBack, CallEvent.EARLY_NEGO_INACTIVE_START_EVENT, 2000));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.OFFER_NEGO_START_EVENT, CallState.OFFER, CallState.NEGO_REQ, offerNegoCallBack, CallEvent.NEGO_INACTIVE_START_EVENT, 2000));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.OFFER_EARLY_NEGO_START_EVENT, CallState.OFFER, CallState.EARLY_NEGO_REQ, offerEarlyNegoCallBack, CallEvent.EARLY_NEGO_INACTIVE_START_EVENT, 1000, CallState.OFFER));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.OFFER_NEGO_START_EVENT, CallState.OFFER, CallState.NEGO_REQ, offerNegoCallBack, CallEvent.NEGO_INACTIVE_START_EVENT, 1000, CallState.OFFER));
         Assert.assertTrue(callStateHandler.addState(CallEvent.OFFER_STOP_EVENT, CallState.OFFER, CallState.HANGUP_REQ, callOfferStopCallBack, null, 0));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_MEDIA_START_EVENT, CallState.EARLY_NEGO_REQ, CallState.EARLY_MEDIA, earlyMediaStartCallBack, CallEvent.EARLY_MEDIA_STOP_EVENT, 2000));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_MEDIA_START_EVENT, CallState.EARLY_NEGO_REQ, CallState.EARLY_MEDIA, earlyMediaStartCallBack, CallEvent.EARLY_MEDIA_STOP_EVENT, 1000, CallState.EARLY_NEGO_REQ));
         Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_NEGO_INACTIVE_START_EVENT, CallState.EARLY_NEGO_REQ, CallState.INACTIVE, earlyNegoInactiveStartCallBack, null, 0));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_MEDIA_NEGO_START_EVENT, CallState.EARLY_MEDIA, CallState.NEGO_REQ, callEarlyNegoNegoStartCallBack, CallEvent.NEGO_INACTIVE_START_EVENT, 2000));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_MEDIA_STOP_EVENT, CallState.EARLY_MEDIA, CallState.HANGUP_REQ, earlyMediaStopCallBack, CallEvent.CALL_STOP_DONE_FAIL_EVENT, 2000));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.ACTIVE_START_EVENT, CallState.NEGO_REQ, CallState.ACTIVE, activeStartCallBack, CallEvent.ACTIVE_STOP_EVENT, 2000));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.NEGO_INACTIVE_START_EVENT, CallState.NEGO_REQ, CallState.INACTIVE, negoInactiveStartCallBack, CallEvent.INACTIVE_STOP_EVENT, 2000));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.ACTIVE_STOP_EVENT, CallState.ACTIVE, CallState.HANGUP_REQ, activeStopCallBack, CallEvent.CALL_STOP_DONE_FAIL_EVENT, 2000));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.INACTIVE_STOP_EVENT, CallState.INACTIVE, CallState.HANGUP_REQ, callInactiveStopCallBack, CallEvent.CALL_STOP_DONE_FAIL_EVENT, 2000));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_MEDIA_NEGO_START_EVENT, CallState.EARLY_MEDIA, CallState.NEGO_REQ, callEarlyNegoNegoStartCallBack, CallEvent.NEGO_INACTIVE_START_EVENT, 1000, CallState.EARLY_MEDIA));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_MEDIA_STOP_EVENT, CallState.EARLY_MEDIA, CallState.HANGUP_REQ, earlyMediaStopCallBack, CallEvent.CALL_STOP_DONE_FAIL_EVENT, 1000, CallState.EARLY_MEDIA));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.ACTIVE_START_EVENT, CallState.NEGO_REQ, CallState.ACTIVE, activeStartCallBack, CallEvent.ACTIVE_STOP_EVENT, 1000, CallState.NEGO_REQ));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.NEGO_INACTIVE_START_EVENT, CallState.NEGO_REQ, CallState.INACTIVE, negoInactiveStartCallBack, CallEvent.INACTIVE_STOP_EVENT, 1000, CallState.NEGO_REQ));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.ACTIVE_STOP_EVENT, CallState.ACTIVE, CallState.HANGUP_REQ, activeStopCallBack, CallEvent.CALL_STOP_DONE_FAIL_EVENT, 1000, CallState.ACTIVE));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.INACTIVE_STOP_EVENT, CallState.INACTIVE, CallState.HANGUP_REQ, callInactiveStopCallBack, CallEvent.CALL_STOP_DONE_FAIL_EVENT, 1000, CallState.INACTIVE));
         Assert.assertTrue(callStateHandler.addState(CallEvent.CALL_STOP_DONE_SUCCESS_EVENT, CallState.HANGUP_REQ, CallState.INIT, callStopDoneSuccessCallBack, null, 0));
         Assert.assertTrue(callStateHandler.addState(CallEvent.CALL_STOP_DONE_FAIL_EVENT, CallState.HANGUP_REQ, CallState.IDLE, callStopDoneFailCallBack, null, 0));
 
-        Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_START_EVENT, MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST, mediaStartCallBack, MediaEvent.MEDIA_CREATE_FAIL_EVENT, 2000));
-        Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_CREATE_SUCCESS_EVENT, MediaState.ACTIVE_REQUEST, MediaState.ACTIVE_STATE, mediaCreateSuccessCallBack, MediaEvent.MEDIA_STOP_EVENT, 2000));
+        Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_START_EVENT, MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST, mediaStartCallBack, MediaEvent.MEDIA_CREATE_FAIL_EVENT, 1000, MediaState.IDLE_STATE));
+        Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_CREATE_SUCCESS_EVENT, MediaState.ACTIVE_REQUEST, MediaState.ACTIVE_STATE, mediaCreateSuccessCallBack, MediaEvent.MEDIA_STOP_EVENT, 1000, MediaState.ACTIVE_REQUEST));
         Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_CREATE_FAIL_EVENT, MediaState.ACTIVE_REQUEST, MediaState.IDLE_STATE, mediaCreateFailCallBack, null, 0));
-        Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_STOP_EVENT, MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST, mediaStopCallBack, MediaEvent.MEDIA_DELETE_FAIL_EVENT, 2000));
+        Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_STOP_EVENT, MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST, mediaStopCallBack, MediaEvent.MEDIA_DELETE_FAIL_EVENT, 1000, MediaState.ACTIVE_STATE));
         Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_DELETE_SUCCESS_EVENT, MediaState.IDLE_REQUEST, MediaState.IDLE_STATE, mediaDeleteSuccessCallBack, null, 0));
         Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_DELETE_FAIL_EVENT, MediaState.IDLE_REQUEST, MediaState.ACTIVE_STATE, mediaDeleteFailCallBack, null, 0));
 
-        Assert.assertFalse(mediaStateHandler.getStateList().isEmpty());
         Assert.assertFalse(mediaStateHandler.getEventList().isEmpty());
     }
 

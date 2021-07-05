@@ -385,7 +385,6 @@ public class StateManager {
                 return false;
             }
 
-            stateHandler.clearStateContainer();
             stateHandler.clearStateEventManager();
             return stateHandlerMap.remove(name) != null;
         }

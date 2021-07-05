@@ -16,6 +16,10 @@ public class ResultCode {
     public static final int SUCCESS_RESERVE_FAIL_STATE = 1010;
     // 실패 이벤트 삭제 성공
     public static final int SUCCESS_REMOVE_FAIL_STATE = 1011;
+    // StateTaskUnit 저장 성공
+    public static final int SUCCESS_ADD_STATE_TASK_UNIT = 1020;
+    // StateTaskUnit 삭제 성공
+    public static final int SUCCESS_REMOVE_STATE_TASK_UNIT = 1021;
 
     // 상태 저장 실패
     public static final int FAIL_ADD_STATE = 2000;
@@ -35,15 +39,25 @@ public class ResultCode {
     public static final int FAIL_ADD_EVENT = 2007;
     // 실패 이벤트 예약 실패
     public static final int FAIL_RESERVE_FAIL_STATE = 2020;
+    // StateTaskUnit 조회 실패
+    public static final int FAIL_GET_STATE_TASK_UNIT = 2030;
+    // StateTaskUnit 저장 실패
+    public static final int FAIL_ADD_STATE_TASK_UNIT = 2031;
+    // StateTaskUnit 삭제 실패
+    public static final int FAIL_REMOVE_STATE_TASK_UNIT = 2032;
 
     // 상태 중복
     public static final int DUPLICATED_STATE = 3000;
     // 이벤트 중복
     public static final int DUPLICATED_EVENT = 3001;
+    // Map key 중복
+    public static final int DUPLICATED_KEY = 3002;
     // 알 수 없는 상태
     public static final int UNKNOWN_STATE = 3010;
     // 같은 상태
     public static final int SAME_STATE = 3011;
     // NULL 객체
     public static final int NULL_OBJECT = 3100;
+    // Thread Exception
+    public static final int THREAD_EXCEPTION = 3200;
 }
