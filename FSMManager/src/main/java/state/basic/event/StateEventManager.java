@@ -39,20 +39,33 @@ public class StateEventManager {
     ////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @fn public boolean addEvent(String event, String fromState, String toState, CallBack callBack, String failEvent, int delay, Object... params)
+     * @fn public boolean addEvent(String event, String fromState, String toState, CallBack callBack, String nextEvent, int delay, Object... params)
      * @brief 새로운 이벤트를 생성하는 함수
      * @param event 이벤트 이름
      * @param fromState 천이 전 State 이름
      * @param toState 천이 후 State 이름
      * @param callBack 천이 성공 후 실행될 CallBack
-     * @param failEvent 천이 실패 후 실행될 이벤트 이름
+     * @param nextEvent 천이 실패 후 실행될 이벤트 이름
      * @param delay 천이 실패 후 실행될 이벤트가 실행되기 위한 Timeout 시간
-     * @param params 실패 후 실행될 이벤트의 CallBack 의 매개변수
+     * @param nextEventCallBackParams 실패 후 실행될 이벤트의 CallBack 의 매개변수
      * @return 성공 시 true, 실패 시 false 반환
      */
-    public boolean addEvent(String event, String fromState, String toState, CallBack callBack, String failEvent, int delay, Object... params) {
+    public boolean addEvent(String event,
+                            String fromState,
+                            String toState,
+                            CallBack callBack,
+                            String nextEvent,
+                            int delay,
+                            Object... nextEventCallBackParams) {
         if (event == null || fromState == null || toState == null) {
             logger.warn("[{}] Fail to add event. (event={}, fromState={}, toState={})",
+                    ResultCode.FAIL_ADD_EVENT, event, fromState, toState
+            );
+            return false;
+        }
+
+        if (fromState.equals(toState)) {
+            logger.warn("[{}] Fail to add event. (From == To) (event={}, fromState={}, toState={})",
                     ResultCode.FAIL_ADD_EVENT, event, fromState, toState
             );
             return false;
@@ -67,7 +80,15 @@ public class StateEventManager {
         }
 
         synchronized (eventMap) {
-            boolean result = eventMap.putIfAbsent(event, new StateEvent(fromState, toState, callBack, failEvent, delay, params)) == null;
+            boolean result = eventMap.putIfAbsent(event,
+                    new StateEvent(
+                            fromState,
+                            toState,
+                            callBack,
+                            nextEvent,
+                            delay,
+                            nextEventCallBackParams
+                    )) == null;
             if (result) {
                 logger.info("[{}] Success to add state. (event={}, fromState={}, toState={})",
                         ResultCode.SUCCESS_ADD_STATE, event, fromState, toState
@@ -146,10 +167,10 @@ public class StateEventManager {
      * @param event 이벤트 이름
      * @param stateUnit State unit
      * @param params CallBack 가변 매개변수
-     * @return 성공 시 지정한 결과값 반환, 실패 시 null 반환
+     * @return 성공 시 천이 후 상태값 반환, 실패 시 null 또는 천이 전 상태값 반환
      */
     public String nextState(StateHandler stateHandler, String event, StateUnit stateUnit, Object... params) {
-        StateEvent stateEvent = stateHandler.findStateEventFromEvent(event);
+        StateEvent stateEvent = getStateEventByEvent(event);
         if (stateEvent == null) {
             logger.warn("[{}] ({}) Fail to find the event. Must define the event. (event={}, stateUnit={})",
                     ResultCode.FAIL_GET_EVENT, stateHandler.getName(), event, stateUnit
@@ -166,9 +187,10 @@ public class StateEventManager {
 
         String fromState = stateEvent.getFromState();
         String toState = stateEvent.getToState();
-        String failEvent = stateEvent.getFailEvent();
+        String nextEvent = stateEvent.getNextEvent();
         int delay = stateEvent.getDelay();
 
+        // TODO
         if (!fromState.equals(stateUnit.getCurState())) {
             logger.warn("[{}] ({}) Fail to transit. From state is not matched. (event={}, fromState: cur={}, expected={})",
                     ResultCode.FAIL_TRANSIT_STATE, stateHandler.getName(), event, stateUnit.getCurState(), fromState
@@ -181,8 +203,8 @@ public class StateEventManager {
         stateUnit.setCurState(toState);
 
         // 만약 현재 상태가 기대되는 상태 천이의 현재 상태이면
-        // 이전에 등록된 failEvent 를 취소시킨다.
-        StateTaskManager.getInstance().removeTask(stateHandler.getName(), stateUnit.getFailEventKey());
+        // 이전에 등록된 nextEvent 를 취소시킨다.
+        StateTaskManager.getInstance().removeTask(stateHandler.getName(), stateUnit.getNextEventKey());
 
         // 2) CallBack 실행
         CallBack callBack = stateEvent.getCallBack();
@@ -190,18 +212,18 @@ public class StateEventManager {
             stateUnit.setCallBackResult(callBack.callBackFunc(params));
         }
 
-        if (failEvent != null) {
+        if (nextEvent != null) {
             // 다음 상태에 대해 기대되는 상태 천이(또는 이벤트)가
-            // 일정 시간 이후에 발생하지 않을 경우 지정한 실패 이벤트를 발생시킨다.
+            // 일정 시간 이후에 발생하지 않을 경우 지정한 다음 이벤트를 발생시킨다.
             StateTaskManager.getInstance().addTask(
                     stateHandler.getName(),
                     stateUnit.setFailEventKey(),
                     new StateTaskUnit(
                             stateHandler,
-                            failEvent,
+                            nextEvent,
                             stateUnit,
                             delay,
-                            stateEvent.getParams()
+                            stateEvent.getNextEventCallBackParams()
                     )
             );
         }

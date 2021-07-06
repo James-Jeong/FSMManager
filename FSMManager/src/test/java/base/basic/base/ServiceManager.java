@@ -9,6 +9,7 @@ import base.basic.media.base.MediaState;
 import org.junit.Assert;
 import state.StateManager;
 import state.basic.module.StateHandler;
+import state.basic.module.StateTaskManager;
 
 /**
  * @class public class ServiceManager
@@ -95,10 +96,16 @@ public class ServiceManager {
         Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_DELETE_FAIL_EVENT, MediaState.IDLE_REQUEST, MediaState.ACTIVE_STATE, mediaDeleteFailCallBack, null, 0));
 
         Assert.assertFalse(mediaStateHandler.getEventList().isEmpty());
+
+        stateManager.addFailEvent(CallEvent.INACTIVE_STOP_EVENT);
+        StateTaskManager.getInstance().addStateScheduler(callStateHandler, 1000);
     }
 
     public void stop () {
         StateManager stateManager = StateManager.getInstance();
+
+        StateTaskManager.getInstance().removeStateScheduler(CallState.CALL_STATE_NAME);
+
         stateManager.removeStateHandler(CallState.CALL_STATE_NAME);
         stateManager.removeStateHandler(MediaState.MEDIA_STATE_NAME);
     }

@@ -21,6 +21,8 @@ public class ResultCode {
     // StateTaskUnit 삭제 성공
     public static final int SUCCESS_REMOVE_STATE_TASK_UNIT = 1021;
 
+    ////////////////////////////////////////////////////////////////////////////////
+
     // 상태 저장 실패
     public static final int FAIL_ADD_STATE = 2000;
     // 상태 삭제 실패
@@ -45,6 +47,8 @@ public class ResultCode {
     public static final int FAIL_ADD_STATE_TASK_UNIT = 2031;
     // StateTaskUnit 삭제 실패
     public static final int FAIL_REMOVE_STATE_TASK_UNIT = 2032;
+
+    ////////////////////////////////////////////////////////////////////////////////
 
     // 상태 중복
     public static final int DUPLICATED_STATE = 3000;

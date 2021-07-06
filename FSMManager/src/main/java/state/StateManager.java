@@ -11,7 +11,9 @@ import state.basic.module.StateHandler;
 import state.basic.unit.StateUnit;
 import state.squirrel.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,7 +34,10 @@ public class StateManager {
     private final Map<String, StateHandler> stateHandlerMap = new HashMap<>();
 
     // StateUnit Map
-    private final Map<String, StateUnit> stateMap = new HashMap<>();
+    private final Map<String, StateUnit> stateUnitMap = new HashMap<>();
+
+    // FailEvent List
+    private final List<String> failEventList = new ArrayList<>();
 
     // StateManager 싱글턴 인스턴스 변수
     private static StateManager stateManager;
@@ -321,11 +326,11 @@ public class StateManager {
      * @param initState 초기 상태
      */
     public void addStateUnit (String name, String initState) {
-        synchronized (stateMap) {
-            if (stateMap.get(name) != null) {
+        synchronized (stateUnitMap) {
+            if (stateUnitMap.get(name) != null) {
                 return;
             }
-            stateMap.putIfAbsent(name, new StateUnit(name, initState));
+            stateUnitMap.putIfAbsent(name, new StateUnit(name, initState));
         }
     }
 
@@ -336,13 +341,13 @@ public class StateManager {
      * @return 성공 시 true, 실패 시 false 반환
      */
     public boolean removeStateUnit (String name) {
-        synchronized (stateMap) {
-            StateUnit stateUnit = stateMap.get(name);
+        synchronized (stateUnitMap) {
+            StateUnit stateUnit = stateUnitMap.get(name);
             if (stateUnit == null) {
                 return false;
             }
 
-            return stateMap.remove(name) != null;
+            return stateUnitMap.remove(name) != null;
         }
     }
 
@@ -353,9 +358,13 @@ public class StateManager {
      * @return 성공 시 StateUnit 객체, 실패 시 null 반환
      */
     public StateUnit getStateUnit (String name) {
-        synchronized (stateMap) {
-            return stateMap.get(name);
+        synchronized (stateUnitMap) {
+            return stateUnitMap.get(name);
         }
+    }
+
+    public Map<String, StateUnit> getStateUnitMap() {
+        return stateUnitMap;
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -415,4 +424,14 @@ public class StateManager {
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////
+
+    public void addFailEvent(String failEvent) {
+        if (failEventList.contains(failEvent)) { return; }
+        failEventList.add(failEvent);
+    }
+
+    public List<String> getFailEventList() {
+        return failEventList;
+    }
 }

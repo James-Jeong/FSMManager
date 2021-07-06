@@ -1,26 +1,39 @@
 package state.basic.event.base;
 
-
 public class StateEvent {
 
+    // From state
     private final String fromState;
+    // To state
     private final String toState;
-    private final String failEvent;
+    // Next event
+    private final String nextEvent;
+    // Delay for triggering the next event
     private final int delay;
+    // CallBack
     private final CallBack callBack;
-    private final Object[] params;
+    // Parameters for the callback
+    private final Object[] nextEventCallBackParams;
 
-    public StateEvent(String fromState, String toState, CallBack callBack, String failEvent, int delay, Object... params) {
+    ////////////////////////////////////////////////////////////////////////////////
+
+    public StateEvent(String fromState,
+                      String toState,
+                      CallBack callBack,
+                      String nextEvent,
+                      int delay,
+                      Object... nextEventCallBackParams) {
         this.fromState = fromState;
         this.toState = toState;
         this.callBack = callBack;
-        this.failEvent = failEvent;
+        this.nextEvent = nextEvent;
+        this.nextEventCallBackParams = nextEventCallBackParams;
 
         if (delay < 0) { delay = 0; }
         this.delay = delay;
-
-        this.params = params;
     }
+
+    ////////////////////////////////////////////////////////////////////////////////
 
     public String getFromState() {
         return fromState;
@@ -34,16 +47,15 @@ public class StateEvent {
         return callBack;
     }
 
-    public String getFailEvent() {
-        return failEvent;
+    public String getNextEvent() {
+        return nextEvent;
     }
 
     public int getDelay() {
         return delay;
     }
 
-    public Object[] getParams() {
-        return params;
+    public Object[] getNextEventCallBackParams() {
+        return nextEventCallBackParams;
     }
-
 }

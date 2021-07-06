@@ -14,10 +14,16 @@ public class StateTaskUnit extends AbstractStateTaskUnit {
 
     private static final Logger logger = LoggerFactory.getLogger(StateTaskUnit.class);
 
+    // StateHandler
     private final StateHandler stateHandler;
+    // Event
     private final String event;
+    // StateUnit
     private final StateUnit stateUnit;
+    // Parameters for the event
     private final Object[] params;
+
+    ////////////////////////////////////////////////////////////////////////////////
 
     public StateTaskUnit(StateHandler stateHandler, String event, StateUnit stateUnit, int delay, Object... params) {
         super(delay);
@@ -28,6 +34,8 @@ public class StateTaskUnit extends AbstractStateTaskUnit {
         this.params = params;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////
+
     @Override
     public void run() {
         logger.info("({}) StateTaskUnit is started. (event={}, stateUnit={}, delay={})",
@@ -35,7 +43,7 @@ public class StateTaskUnit extends AbstractStateTaskUnit {
         );
 
         stateHandler.fire(event, stateUnit, params);
-        StateTaskManager.getInstance().removeTask(stateHandler.getName(), stateUnit.getFailEventKey());
+        StateTaskManager.getInstance().removeTask(stateHandler.getName(), stateUnit.getNextEventKey());
     }
 
 }

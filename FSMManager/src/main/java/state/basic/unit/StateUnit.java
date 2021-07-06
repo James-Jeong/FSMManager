@@ -22,7 +22,7 @@ public class StateUnit {
     // 현재 상태
     private String curState;
     // 천이 실패 시 실행될 이벤트 키
-    private String failEventKey = null;
+    private String nextEventKey = null;
     // CallBack 결과값
     private Object callBackResult = null;
 
@@ -33,22 +33,42 @@ public class StateUnit {
         this.curState = curState;
     }
 
+    /**
+     * @fn public String getName()
+     * @brief StateUnit 이름을 반환하는 함수
+     * @return StateUnit 이름
+     */
     public String getName() {
         return name;
     }
 
-    public String getFailEventKey() {
-        return failEventKey;
+    /**
+     * @fn public String getNextEventKey()
+     * @brief nextEventKey 를 반환하는 함수
+     * @return 기존에 설정된 nextEventKey
+     */
+    public String getNextEventKey() {
+        return nextEventKey;
     }
 
+    /**
+     * @fn public String setFailEventKey()
+     * @brief nextEventKey 를 설정하고 반환하는 함수
+     * @return 새로 설정된 nextEventKey
+     */
     public String setFailEventKey() {
-        this.failEventKey = makeFailEventKey();
-        return this.failEventKey;
+        this.nextEventKey = makeNextEventKey();
+        return this.nextEventKey;
     }
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    private String makeFailEventKey () {
+    /**
+     * @fn private String makeNextEventKey()
+     * @brief nextEventKey 로 사용될 문자열을 생성하고 반환하는 함수
+     * @return 새로 생성된 nextEventKey
+     */
+    private String makeNextEventKey() {
         return name + ":" + curState + ":" + UUID.randomUUID();
     }
 
