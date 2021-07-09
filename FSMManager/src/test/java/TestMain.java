@@ -1,10 +1,7 @@
-import base.akka.media.AkkaMediaStateTest;
+import base.basic.atm.BasicAtmStateTest;
 import base.basic.base.ServiceManager;
 import base.basic.call.BasicCallStateTest;
 import base.basic.media.BasicMediaStateTest;
-import base.squirrel.SquirrelCallAndMediaStateFsmTest;
-import base.squirrel.call.SquirrelCallStateFsmTest;
-import base.squirrel.media.SquirrelMediaStateFsmTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -26,16 +23,21 @@ public class TestMain {
         // # basic
 
         ServiceManager serviceManager = ServiceManager.getInstance();
-
         serviceManager.start();
 
-        /*BasicMediaStateTest basicMediaStateTest = new BasicMediaStateTest();
-        basicMediaStateTest.testStart();*/
+        BasicMediaStateTest basicMediaStateTest = new BasicMediaStateTest();
+        basicMediaStateTest.testStart();
 
         BasicCallStateTest basicCallStateTest = new BasicCallStateTest();
         basicCallStateTest.testStart();
 
         serviceManager.stop();
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // # ATM state
+
+        BasicAtmStateTest basicAtmStateTest = new BasicAtmStateTest();
+        basicAtmStateTest.testStart();
 
         ////////////////////////////////////////////////////////////////////////////////
         // # Squirrel FSM

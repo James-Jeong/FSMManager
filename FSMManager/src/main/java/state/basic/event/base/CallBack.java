@@ -1,19 +1,28 @@
 package state.basic.event.base;
 
+
+import state.basic.unit.StateUnit;
+
 /**
- * @interface public class CallBack
+ * @class public abstract class CallBack
  * @brief CallBack class
  */
-public class CallBack {
+public abstract class CallBack {
 
-    private String name;
+    private final String name;
+    
+    private StateUnit curStateUnit = null;
 
-    public CallBack(String name) {
+    ////////////////////////////////////////////////////////////////////////////////
+
+    protected CallBack(String name) {
         this.name = name;
     }
 
-    public Object callBackFunc(Object... objects) {
-        // Must embody this function.
+    ////////////////////////////////////////////////////////////////////////////////
+
+    public Object callBackFunc(Object... params) {
+        // Must be implemented.
         return null;
     }
 
@@ -21,8 +30,11 @@ public class CallBack {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public StateUnit getCurStateUnit() {
+        return curStateUnit;
     }
 
+    public void setCurStateUnit(StateUnit curStateUnit) {
+        this.curStateUnit = curStateUnit;
+    }
 }

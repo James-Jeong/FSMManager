@@ -1,8 +1,8 @@
 package base.basic.call.base;
 
 /**
- * @class
- * @brief
+ * @class public class CallEvent
+ * @brief CallEvent class
  */
 public class CallEvent {
 
@@ -23,4 +23,5 @@ public class CallEvent {
     public static final String ACTIVE_START_EVENT = "active_start";
     public static final String EARLY_NEGO_INACTIVE_START_EVENT = "early_nego_inactive_start";
     public static final String NEGO_INACTIVE_START_EVENT = "nego_inactive_start";
+
 }

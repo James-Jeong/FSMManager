@@ -16,6 +16,8 @@ public class StateUnit {
 
     // StateUnit 식별 이름
     private final String name;
+    // StateHandler 이름
+    private final String handlerName;
 
     // 바로 이전 상태
     private String prevState = null;
@@ -26,11 +28,16 @@ public class StateUnit {
     // CallBack 결과값
     private Object callBackResult = null;
 
+    // Spare Data
+    private Object data;
+
     ////////////////////////////////////////////////////////////////////////////////
 
-    public StateUnit(String name, String curState) {
+    public StateUnit(String name, String handlerName, String curState, Object data) {
         this.name = name;
+        this.handlerName = handlerName;
         this.curState = curState;
+        this.data = data;
     }
 
     /**
@@ -43,6 +50,15 @@ public class StateUnit {
     }
 
     /**
+     * @fn public String getHandlerName()
+     * @brief StateHandler 이름을 반환하는 함수
+     * @return StateHandler 이름
+     */
+    public String getHandlerName() {
+        return handlerName;
+    }
+
+    /**
      * @fn public String getNextEventKey()
      * @brief nextEventKey 를 반환하는 함수
      * @return 기존에 설정된 nextEventKey
@@ -52,23 +68,39 @@ public class StateUnit {
     }
 
     /**
-     * @fn public String setFailEventKey()
+     * @fn public String setFailEventKey(String curState)
      * @brief nextEventKey 를 설정하고 반환하는 함수
+     * @param curState 현재 상태
      * @return 새로 설정된 nextEventKey
      */
-    public String setFailEventKey() {
-        this.nextEventKey = makeNextEventKey();
+    public String setNextEventKey(String curState) {
+        this.nextEventKey = makeNextEventKey(curState);
         return this.nextEventKey;
+    }
+
+    /**
+     * @fn public String getData()
+     * @brief StateUnit Spare data 를 반환하는 함수
+     * @return data
+     */
+    public Object getData() {
+        return data;
+    }
+
+    public void setData(Object data) {
+        this.data = data;
     }
 
     ////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @fn private String makeNextEventKey()
+     * @fn private String makeNextEventKey(String curState)
      * @brief nextEventKey 로 사용될 문자열을 생성하고 반환하는 함수
+     * @param curState 현재 상태
      * @return 새로 생성된 nextEventKey
      */
-    private String makeNextEventKey() {
+    private String makeNextEventKey(String curState) {
+        if (curState == null) { return null; }
         return name + ":" + curState + ":" + UUID.randomUUID();
     }
 
@@ -142,8 +174,10 @@ public class StateUnit {
     public String toString() {
         return "StateUnit{" +
                 "name='" + name + '\'' +
+                ", handlerName='" + handlerName + '\'' +
                 ", prevState='" + prevState + '\'' +
                 ", curState='" + curState + '\'' +
+                ", nextEventKey='" + nextEventKey + '\'' +
                 ", callBackResult=" + callBackResult +
                 '}';
     }

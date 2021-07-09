@@ -7,6 +7,7 @@ import state.basic.module.base.StateTaskUnit;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -19,27 +20,18 @@ public class StateTaskManager {
 
     private static final Logger logger = LoggerFactory.getLogger(StateTaskManager.class);
 
-    // StateTaskManager singleton object
-    private static StateTaskManager taskManager = null;
-
     // StateScheduler Map
     private final Map<String, ScheduledThreadPoolExecutor> stateSchedulerMap = new HashMap<>();
 
     // ScheduledThreadPoolExecutor Map
-    private final Map<String, ScheduledThreadPoolExecutor> taskMap = new HashMap<>();
+    private final Map<String, ScheduledFuture<?>> stateTaskUnitMap = new HashMap<>();
+
+    private final ScheduledThreadPoolExecutor executor;
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    public StateTaskManager() {
-        // Nothing
-    }
-
-    public static StateTaskManager getInstance ( ) {
-        if (taskManager == null) {
-            taskManager = new StateTaskManager();
-        }
-
-        return taskManager;
+    public StateTaskManager(int threadMaxSize) {
+        executor = new ScheduledThreadPoolExecutor(threadMaxSize);
     }
 
     /**
@@ -143,24 +135,23 @@ public class StateTaskManager {
     ////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @fn public void addTask (String handlerName, String name, StateTaskUnit stateTaskUnit)
+     * @fn public void addStateTaskUnit (String handlerName, String name, StateTaskUnit stateTaskUnit)
      * @brief StateTaskManager 에 새로운 StateTaskUnit 를 등록하는 함수
      */
-    public void addTask (String handlerName, String name, StateTaskUnit stateTaskUnit) {
+    public void addStateTaskUnit(String handlerName, String name, StateTaskUnit stateTaskUnit) {
         if (name == null || stateTaskUnit == null) { return; }
 
-        synchronized (taskMap) {
-            if (taskMap.get(name) != null) {
+        synchronized (stateTaskUnitMap) {
+            if (stateTaskUnitMap.get(name) != null) {
                 logger.warn("[{}] ({}) StateTaskUnit Hashmap Key duplication error. (name={})",
                         ResultCode.DUPLICATED_KEY, handlerName, name
                 );
                 return;
             }
 
-            ScheduledThreadPoolExecutor executor = null;
+            ScheduledFuture<?> scheduledFuture = null;
             try {
-                executor = new ScheduledThreadPoolExecutor(1);
-                executor.scheduleAtFixedRate(
+                scheduledFuture = executor.scheduleAtFixedRate(
                         stateTaskUnit,
                         stateTaskUnit.getDelay(),
                         stateTaskUnit.getDelay(),
@@ -172,8 +163,7 @@ public class StateTaskManager {
                 );
             }
 
-            if (executor != null &&
-                    taskMap.put(name, executor) == null) {
+            if (stateTaskUnitMap.put(name, scheduledFuture) == null) {
                 logger.info("[{}] ({}) StateTaskUnit [{}] is added.",
                         ResultCode.SUCCESS_ADD_STATE_TASK_UNIT, handlerName, name
                 );
@@ -182,51 +172,51 @@ public class StateTaskManager {
     }
 
     /**
-     * @fn private ScheduledThreadPoolExecutor findTask (String name)
+     * @fn private ScheduledFuture<?> findTask (String name)
      * @brief 지정한 이름의 StateTaskUnit 를 반환하는 함수
      * @param name StateTaskUnit 이름
      * @return 성공 시 StateTaskUnit, 실패 시 null 반환
      */
-    private ScheduledThreadPoolExecutor findTask (String name) {
+    private ScheduledFuture<?> findTask (String name) {
         if (name == null) { return null; }
 
-        synchronized (taskMap) {
-            if (taskMap.isEmpty()) {
+        synchronized (stateTaskUnitMap) {
+            if (stateTaskUnitMap.isEmpty()) {
                 return null;
             }
 
-            return taskMap.get(name);
+            return stateTaskUnitMap.get(name);
         }
     }
 
     /**
-     * @fn public void removeTask (String handlerName, String name)
+     * @fn public void removeStateTaskUnit (String handlerName, String name)
      * @brief 지정한 이름의 StateTaskUnit 를 삭제하는 함수
      * @param handlerName StateHandler 이름
-     * @param name StateTaskUnit 이름
+     * @param stateTaskUnitName StateTaskUnit 이름
      */
-    public void removeTask (String handlerName, String name) {
-        if (name == null) { return; }
+    public void removeStateTaskUnit(String handlerName, String stateTaskUnitName) {
+        if (stateTaskUnitName == null) { return; }
 
-        synchronized (taskMap) {
-            if (taskMap.isEmpty()) {
+        synchronized (stateTaskUnitMap) {
+            if (stateTaskUnitMap.isEmpty()) {
                 return;
             }
 
-            ScheduledThreadPoolExecutor executor = findTask(name);
-            if (executor == null) {
+            ScheduledFuture<?> scheduledFuture = findTask(stateTaskUnitName);
+            if (scheduledFuture == null) {
                 logger.warn("[{}] ({}) Fail to find the StateTaskUnit. (name={})",
-                        ResultCode.FAIL_GET_STATE_TASK_UNIT, handlerName, name
+                        ResultCode.FAIL_GET_STATE_TASK_UNIT, handlerName, stateTaskUnitName
                 );
                 return;
             }
 
             try {
-                executor.shutdown();
+                scheduledFuture.cancel(true);
 
-                if (taskMap.remove(name) != null) {
+                if (stateTaskUnitMap.remove(stateTaskUnitName) != null) {
                     logger.info("[{}] ({}) StateTaskUnit [{}] is removed.",
-                            ResultCode.SUCCESS_REMOVE_STATE_TASK_UNIT, handlerName, name
+                            ResultCode.SUCCESS_REMOVE_STATE_TASK_UNIT, handlerName, stateTaskUnitName
                     );
                 }
             } catch (Exception e) {
@@ -235,6 +225,15 @@ public class StateTaskManager {
                 );
             }
         }
+    }
+
+    public void stop ( ) {
+        for (ScheduledFuture<?> scheduledFuture : stateTaskUnitMap.values()) {
+            scheduledFuture.cancel(true);
+        }
+
+        executor.shutdown();
+        logger.info("() () () Interval Task Manager ends.");
     }
 
 }

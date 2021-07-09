@@ -2,11 +2,11 @@ package state.basic.event;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import state.StateManager;
 import state.basic.event.base.CallBack;
 import state.basic.event.base.StateEvent;
 import state.basic.info.ResultCode;
 import state.basic.module.StateHandler;
-import state.basic.module.StateTaskManager;
 import state.basic.module.base.StateTaskUnit;
 import state.basic.unit.StateUnit;
 
@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @class public class StateEventManager
@@ -25,6 +26,8 @@ public class StateEventManager {
 
     // Event Map
     private final Map<String, StateEvent> eventMap = new HashMap<>();
+
+    private final ReentrantLock stateLock = new ReentrantLock();
 
     ////////////////////////////////////////////////////////////////////////////////
 
@@ -80,22 +83,24 @@ public class StateEventManager {
         }
 
         synchronized (eventMap) {
-            boolean result = eventMap.putIfAbsent(event,
-                    new StateEvent(
-                            fromState,
-                            toState,
-                            callBack,
-                            nextEvent,
-                            delay,
-                            nextEventCallBackParams
-                    )) == null;
+            stateEvent = new StateEvent(
+                    event,
+                    fromState,
+                    toState,
+                    callBack,
+                    nextEvent,
+                    delay,
+                    nextEventCallBackParams
+            );
+
+            boolean result = eventMap.putIfAbsent(event, stateEvent) == null;
             if (result) {
                 logger.info("[{}] Success to add state. (event={}, fromState={}, toState={})",
-                        ResultCode.SUCCESS_ADD_STATE, event, fromState, toState
+                        ResultCode.SUCCESS_ADD_STATE, stateEvent, fromState, toState
                 );
             } else {
                 logger.warn("[{}] Fail to add state. (event={}, fromState={}, toState={})",
-                        ResultCode.FAIL_ADD_STATE, event, fromState, toState
+                        ResultCode.FAIL_ADD_STATE, stateEvent, fromState, toState
                 );
             }
 
@@ -185,47 +190,68 @@ public class StateEventManager {
             return null;
         }
 
-        String fromState = stateEvent.getFromState();
-        String toState = stateEvent.getToState();
-        String nextEvent = stateEvent.getNextEvent();
-        int delay = stateEvent.getDelay();
+        try {
+            stateLock.lock();
 
-        // TODO
-        if (!fromState.equals(stateUnit.getCurState())) {
-            logger.warn("[{}] ({}) Fail to transit. From state is not matched. (event={}, fromState: cur={}, expected={})",
-                    ResultCode.FAIL_TRANSIT_STATE, stateHandler.getName(), event, stateUnit.getCurState(), fromState
+            String fromState = stateEvent.getFromState();
+            String toState = stateEvent.getToState();
+            String nextEvent = stateEvent.getNextEvent();
+            int delay = stateEvent.getDelay();
+
+            if (!fromState.equals(stateUnit.getCurState())) {
+                logger.warn("[{}] ({}) Fail to transit. From state is not matched. (event={}, fromState: cur={}, expected={})",
+                        ResultCode.FAIL_TRANSIT_STATE, stateHandler.getName(), event, stateUnit.getCurState(), fromState
+                );
+                return stateUnit.getCurState();
+            }
+
+            // 1) 상태 천이
+            stateUnit.setPrevState(fromState);
+            stateUnit.setCurState(toState);
+
+            // 2) Prev Event 취소
+            // 만약 현재 상태가 기대되는 상태 천이의 현재 상태이면
+            // 이전에 등록된 nextEvent 를 취소시킨다.
+            if (stateUnit.getNextEventKey() != null) {
+                StateManager.getInstance().removeStateTaskUnit(
+                        stateHandler.getName(),
+                        stateUnit.getNextEventKey()
+                );
+
+                stateUnit.setNextEventKey(null);
+            }
+
+            // 3) Next Event 추가
+            if (nextEvent != null) {
+                // 다음 상태에 대해 기대되는 상태 천이(또는 이벤트)가
+                // 일정 시간 이후에 발생하지 않을 경우 지정한 다음 이벤트를 발생시킨다.
+                StateManager.getInstance().addStateTaskUnit(
+                        stateHandler.getName(),
+                        stateUnit.setNextEventKey(toState),
+                        new StateTaskUnit(
+                                stateHandler,
+                                nextEvent,
+                                stateUnit,
+                                delay,
+                                stateEvent.getNextEventCallBackParams()
+                        )
+                );
+            }
+
+            // 4) CallBack 실행
+            CallBack callBack = stateEvent.getCallBack();
+            if (callBack != null) {
+                callBack.setCurStateUnit(stateUnit);
+                stateUnit.setCallBackResult(
+                        callBack.callBackFunc(params)
+                );
+            }
+        } catch (Exception e) {
+            logger.warn("[{}] ({}) Fail to transit. StateEventManager.nextState.Exception (event={}, curState={})",
+                    ResultCode.FAIL_TRANSIT_STATE, stateHandler.getName(), event, stateUnit.getCurState(), e
             );
-            return stateUnit.getCurState();
-        }
-
-        // 1) 상태 천이
-        stateUnit.setPrevState(fromState);
-        stateUnit.setCurState(toState);
-
-        // 만약 현재 상태가 기대되는 상태 천이의 현재 상태이면
-        // 이전에 등록된 nextEvent 를 취소시킨다.
-        StateTaskManager.getInstance().removeTask(stateHandler.getName(), stateUnit.getNextEventKey());
-
-        // 2) CallBack 실행
-        CallBack callBack = stateEvent.getCallBack();
-        if (callBack != null) {
-            stateUnit.setCallBackResult(callBack.callBackFunc(params));
-        }
-
-        if (nextEvent != null) {
-            // 다음 상태에 대해 기대되는 상태 천이(또는 이벤트)가
-            // 일정 시간 이후에 발생하지 않을 경우 지정한 다음 이벤트를 발생시킨다.
-            StateTaskManager.getInstance().addTask(
-                    stateHandler.getName(),
-                    stateUnit.setFailEventKey(),
-                    new StateTaskUnit(
-                            stateHandler,
-                            nextEvent,
-                            stateUnit,
-                            delay,
-                            stateEvent.getNextEventCallBackParams()
-                    )
-            );
+        } finally {
+            stateLock.unlock();
         }
 
         return stateUnit.getCurState();

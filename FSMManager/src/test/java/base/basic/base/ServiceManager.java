@@ -3,13 +3,15 @@ package base.basic.base;
 import base.basic.call.base.CallEvent;
 import base.basic.call.base.CallState;
 import base.basic.call.base.callback.*;
+import base.basic.call.base.condition.CallStopDoneSuccessEventCondition;
+import base.basic.call.base.condition.InactiveStopEventCondition;
+import base.basic.call.base.condition.MediaDeleteSuccessEventCondition;
 import base.basic.media.base.MediaCallBack;
 import base.basic.media.base.MediaEvent;
 import base.basic.media.base.MediaState;
 import org.junit.Assert;
 import state.StateManager;
 import state.basic.module.StateHandler;
-import state.basic.module.StateTaskManager;
 
 /**
  * @class public class ServiceManager
@@ -33,6 +35,7 @@ public class ServiceManager {
 
     public void start () {
         StateManager stateManager = StateManager.getInstance();
+        stateManager.start(1000);
 
         stateManager.addStateHandler(CallState.CALL_STATE_NAME);
         stateManager.addStateHandler(MediaState.MEDIA_STATE_NAME);
@@ -72,7 +75,15 @@ public class ServiceManager {
 
         ////////////////////////////////////////////////////////////////////////////////
         // 2. 상태 정의
-        Assert.assertTrue(callStateHandler.addState(CallEvent.CALL_START_EVENT, CallState.INIT, CallState.OFFER, callStartCallBack, CallEvent.CALL_FAIL_EVENT,  1000, CallState.INIT));
+        Assert.assertTrue(
+                callStateHandler.addState(
+                        CallEvent.CALL_START_EVENT,
+                        CallState.INIT, CallState.OFFER,
+                        callStartCallBack,
+                        CallEvent.CALL_FAIL_EVENT,  1000, CallState.INIT
+                )
+        );
+
         Assert.assertTrue(callStateHandler.addState(CallEvent.CALL_FAIL_EVENT, CallState.OFFER, CallState.INIT, callFailCallBack, null, 0));
         Assert.assertTrue(callStateHandler.addState(CallEvent.OFFER_EARLY_NEGO_START_EVENT, CallState.OFFER, CallState.EARLY_NEGO_REQ, offerEarlyNegoCallBack, CallEvent.EARLY_NEGO_INACTIVE_START_EVENT, 1000, CallState.OFFER));
         Assert.assertTrue(callStateHandler.addState(CallEvent.OFFER_NEGO_START_EVENT, CallState.OFFER, CallState.NEGO_REQ, offerNegoCallBack, CallEvent.NEGO_INACTIVE_START_EVENT, 1000, CallState.OFFER));
@@ -82,7 +93,7 @@ public class ServiceManager {
         Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_MEDIA_NEGO_START_EVENT, CallState.EARLY_MEDIA, CallState.NEGO_REQ, callEarlyNegoNegoStartCallBack, CallEvent.NEGO_INACTIVE_START_EVENT, 1000, CallState.EARLY_MEDIA));
         Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_MEDIA_STOP_EVENT, CallState.EARLY_MEDIA, CallState.HANGUP_REQ, earlyMediaStopCallBack, CallEvent.CALL_STOP_DONE_FAIL_EVENT, 1000, CallState.EARLY_MEDIA));
         Assert.assertTrue(callStateHandler.addState(CallEvent.ACTIVE_START_EVENT, CallState.NEGO_REQ, CallState.ACTIVE, activeStartCallBack, CallEvent.ACTIVE_STOP_EVENT, 1000, CallState.NEGO_REQ));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.NEGO_INACTIVE_START_EVENT, CallState.NEGO_REQ, CallState.INACTIVE, negoInactiveStartCallBack, CallEvent.INACTIVE_STOP_EVENT, 1000, CallState.NEGO_REQ));
+        Assert.assertTrue(callStateHandler.addState(CallEvent.NEGO_INACTIVE_START_EVENT, CallState.NEGO_REQ, CallState.INACTIVE, negoInactiveStartCallBack, null, 0));
         Assert.assertTrue(callStateHandler.addState(CallEvent.ACTIVE_STOP_EVENT, CallState.ACTIVE, CallState.HANGUP_REQ, activeStopCallBack, CallEvent.CALL_STOP_DONE_FAIL_EVENT, 1000, CallState.ACTIVE));
         Assert.assertTrue(callStateHandler.addState(CallEvent.INACTIVE_STOP_EVENT, CallState.INACTIVE, CallState.HANGUP_REQ, callInactiveStopCallBack, CallEvent.CALL_STOP_DONE_FAIL_EVENT, 1000, CallState.INACTIVE));
         Assert.assertTrue(callStateHandler.addState(CallEvent.CALL_STOP_DONE_SUCCESS_EVENT, CallState.HANGUP_REQ, CallState.INIT, callStopDoneSuccessCallBack, null, 0));
@@ -97,17 +108,40 @@ public class ServiceManager {
 
         Assert.assertFalse(mediaStateHandler.getEventList().isEmpty());
 
-        stateManager.addFailEvent(CallEvent.INACTIVE_STOP_EVENT);
-        StateTaskManager.getInstance().addStateScheduler(callStateHandler, 1000);
+        ////////////////////////////////////////////////////////////////////////////
+
+        callStateHandler.addEventCondition(
+                new InactiveStopEventCondition(
+                        callStateHandler.getEvent(CallEvent.INACTIVE_STOP_EVENT)
+                )
+        );
+
+        callStateHandler.addEventCondition(
+                new CallStopDoneSuccessEventCondition(
+                        callStateHandler.getEvent(CallEvent.CALL_STOP_DONE_SUCCESS_EVENT)
+                )
+        );
+
+        mediaStateHandler.addEventCondition(
+                new MediaDeleteSuccessEventCondition(
+                        mediaStateHandler.getEvent(MediaEvent.MEDIA_DELETE_SUCCESS_EVENT)
+                )
+        );
+
+        StateManager.getInstance().addStateScheduler(callStateHandler, 100);
+        StateManager.getInstance().addStateScheduler(mediaStateHandler, 100);
     }
 
     public void stop () {
         StateManager stateManager = StateManager.getInstance();
 
-        StateTaskManager.getInstance().removeStateScheduler(CallState.CALL_STATE_NAME);
+        StateManager.getInstance().removeStateScheduler(CallState.CALL_STATE_NAME);
+        StateManager.getInstance().removeStateScheduler(MediaState.MEDIA_STATE_NAME);
 
         stateManager.removeStateHandler(CallState.CALL_STATE_NAME);
         stateManager.removeStateHandler(MediaState.MEDIA_STATE_NAME);
+
+        stateManager.stop();
     }
 
 }

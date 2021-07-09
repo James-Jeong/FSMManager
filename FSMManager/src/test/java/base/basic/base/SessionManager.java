@@ -34,8 +34,20 @@ public class SessionManager {
         synchronized (callInfoMap) {
             CallInfo callInfo = new CallInfo(callId, fromNo, toNo);
             StateManager stateManager = StateManager.getInstance();
-            stateManager.addStateUnit(callInfo.getSipStateUnitName(), CallState.INIT);
-            stateManager.addStateUnit(callInfo.getMediaStateUnitName(), MediaState.IDLE_STATE);
+
+            stateManager.addStateUnit(
+                    callInfo.getSipStateUnitName(),
+                    CallState.CALL_STATE_NAME,
+                    CallState.INIT,
+                    callInfo
+            );
+
+            stateManager.addStateUnit(
+                    callInfo.getMediaStateUnitName(),
+                    MediaState.MEDIA_STATE_NAME,
+                    MediaState.IDLE_STATE,
+                    callInfo
+            );
 
             callInfoMap.putIfAbsent(callId, callInfo);
         }
@@ -46,6 +58,7 @@ public class SessionManager {
             CallInfo callInfo = callInfoMap.get(callId);
             if (callInfo != null) {
                 StateManager stateManager = StateManager.getInstance();
+
                 stateManager.removeStateUnit(callInfo.getSipStateUnitName());
                 stateManager.removeStateUnit(callInfo.getMediaStateUnitName());
 

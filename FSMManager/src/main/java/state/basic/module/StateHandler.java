@@ -3,9 +3,12 @@ package state.basic.module;
 import state.basic.event.StateEventManager;
 import state.basic.event.base.CallBack;
 import state.basic.event.base.StateEvent;
+import state.basic.module.base.EventCondition;
 import state.basic.unit.StateUnit;
 
+import java.util.ArrayList;
 import java.util.List;
+
 /**
  * @class public class StateHandler
  * @brief StateHandler class
@@ -14,6 +17,9 @@ public class StateHandler {
 
     // StateEventManager
     private final StateEventManager stateEventManager;
+
+    // Scheduled event List
+    private final List<EventCondition> eventList = new ArrayList<>();
 
     // StateHandler 이름
     private final String name;
@@ -73,6 +79,10 @@ public class StateHandler {
         return name;
     }
 
+    public StateEvent getEvent (String event) {
+        return stateEventManager.getStateEventByEvent(event);
+    }
+
     /**
      * @fn public boolean removeState(String fromState)
      * @brief State 를 삭제하는 함수
@@ -127,6 +137,18 @@ public class StateHandler {
      */
     public StateEvent findStateEventByEvent(String event) {
         return stateEventManager.getStateEventByEvent(event);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+
+    public void addEventCondition(EventCondition eventCondition) {
+        if (eventList.contains(eventCondition)) { return; }
+
+        eventList.add(eventCondition);
+    }
+
+    public List<EventCondition> getEventConditionList() {
+        return eventList;
     }
 
 }

@@ -8,9 +8,11 @@ package fsm <<Node>> {
     package module <<Node>> {
         class StateHandler
         class StateTaskManager
+        class StateScheduler
 
         package module_base <<Node>> {
             class StateTaskUnit
+            class EventCondition
         }
     }
 
@@ -36,6 +38,9 @@ StateManager <|-- StateHandler
 StateManager <|-- StateUnit
 
 StateHandler <|-- StateEventManager
+StateHandler <|-- EventCondition
+
+StateTaskManager <|-- StateScheduler
 StateTaskManager <|-- StateTaskUnit
 StateEventManager <|-- StateEvent
 

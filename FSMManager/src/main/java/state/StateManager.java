@@ -8,6 +8,8 @@ import org.squirrelframework.foundation.fsm.StateMachineConfiguration;
 import org.squirrelframework.foundation.fsm.UntypedStateMachineBuilder;
 import state.akka.AkkaContainer;
 import state.basic.module.StateHandler;
+import state.basic.module.StateTaskManager;
+import state.basic.module.base.StateTaskUnit;
 import state.basic.unit.StateUnit;
 import state.squirrel.*;
 
@@ -42,6 +44,8 @@ public class StateManager {
     // StateManager 싱글턴 인스턴스 변수
     private static StateManager stateManager;
 
+    private StateTaskManager stateTaskManager = null;
+
     ////////////////////////////////////////////////////////////////////////////////
 
     /**
@@ -63,6 +67,17 @@ public class StateManager {
         }
 
         return stateManager;
+    }
+
+    public void start (int threadMaxCount) {
+        stateTaskManager = new StateTaskManager(threadMaxCount);
+    }
+
+    public void stop () {
+        if (stateTaskManager != null) {
+            stateTaskManager.stop();
+            stateTaskManager = null;
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -318,19 +333,18 @@ public class StateManager {
     // # Handmade FSM
 
     ////////////////////////////////////////////////////////////////////////////////
-
     /**
-     * @fn public void addStateUnit (String name, String initState)
+     * @fn public void addStateUnit (String name, String handlerName, String initState, Object data)
      * @brief StateUnit 을 새로 추가하는 함수
      * @param name StateUnit 이름
      * @param initState 초기 상태
      */
-    public void addStateUnit (String name, String initState) {
+    public void addStateUnit (String name, String handlerName, String initState, Object data) {
         synchronized (stateUnitMap) {
             if (stateUnitMap.get(name) != null) {
                 return;
             }
-            stateUnitMap.putIfAbsent(name, new StateUnit(name, initState));
+            stateUnitMap.putIfAbsent(name, new StateUnit(name, handlerName, initState, data));
         }
     }
 
@@ -426,12 +440,28 @@ public class StateManager {
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    public void addFailEvent(String failEvent) {
-        if (failEventList.contains(failEvent)) { return; }
-        failEventList.add(failEvent);
+    public void addStateScheduler (StateHandler stateHandler, int delay) {
+        if (stateTaskManager != null) {
+            stateTaskManager.addStateScheduler(stateHandler, delay);
+        }
     }
 
-    public List<String> getFailEventList() {
-        return failEventList;
+    public void removeStateScheduler (String handlerName) {
+        if (stateTaskManager != null) {
+            stateTaskManager.removeStateScheduler(handlerName);
+        }
     }
+
+    public void addStateTaskUnit (String handlerName, String name, StateTaskUnit stateTaskUnit) {
+        if (stateTaskManager != null) {
+            stateTaskManager.addStateTaskUnit(handlerName, name, stateTaskUnit);
+        }
+    }
+
+    public void removeStateTaskUnit (String handlerName, String stateTaskUnitName) {
+        if (stateTaskManager != null) {
+            stateTaskManager.removeStateTaskUnit(handlerName, stateTaskUnitName);
+        }
+    }
+
 }

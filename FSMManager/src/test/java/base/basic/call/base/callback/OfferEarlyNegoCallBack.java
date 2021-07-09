@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import state.StateManager;
 import state.basic.event.base.CallBack;
 import state.basic.module.StateHandler;
+import state.basic.unit.StateUnit;
 
 /**
  * @class public class OfferEarlyNegoCallBack extends CallBack
@@ -27,7 +28,13 @@ public class OfferEarlyNegoCallBack extends CallBack {
             return null;
         }
 
-        CallInfo callInfo = (CallInfo) object[0];
+        /*CallInfo callInfo = (CallInfo) object[0];
+        if (callInfo == null) { return null; }*/
+
+        StateUnit stateUnit = getCurStateUnit();
+        if (stateUnit == null) { return null; }
+
+        CallInfo callInfo = (CallInfo) stateUnit.getData();
         if (callInfo == null) { return null; }
 
         StateManager stateManager = StateManager.getInstance();

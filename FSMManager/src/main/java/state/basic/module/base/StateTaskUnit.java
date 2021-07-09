@@ -2,8 +2,8 @@ package state.basic.module.base;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import state.StateManager;
 import state.basic.module.StateHandler;
-import state.basic.module.StateTaskManager;
 import state.basic.unit.StateUnit;
 
 /**
@@ -22,6 +22,8 @@ public class StateTaskUnit extends AbstractStateTaskUnit {
     private final StateUnit stateUnit;
     // Parameters for the event
     private final Object[] params;
+    // Next event key
+    private final String nextEventKey;
 
     ////////////////////////////////////////////////////////////////////////////////
 
@@ -32,6 +34,7 @@ public class StateTaskUnit extends AbstractStateTaskUnit {
         this.event = event;
         this.stateUnit = stateUnit;
         this.params = params;
+        this.nextEventKey = stateUnit.getNextEventKey();
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -43,7 +46,7 @@ public class StateTaskUnit extends AbstractStateTaskUnit {
         );
 
         stateHandler.fire(event, stateUnit, params);
-        StateTaskManager.getInstance().removeTask(stateHandler.getName(), stateUnit.getNextEventKey());
+        StateManager.getInstance().removeStateTaskUnit(stateHandler.getName(), nextEventKey);
     }
 
 }
