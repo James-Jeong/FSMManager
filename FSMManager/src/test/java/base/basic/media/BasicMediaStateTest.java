@@ -56,6 +56,7 @@ public class BasicMediaStateTest {
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
+                false,
                 MediaState.ACTIVE_REQUEST
         );
     }
@@ -67,6 +68,7 @@ public class BasicMediaStateTest {
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_STOP_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
+                false,
                 MediaState.IDLE_REQUEST
         );
     }
@@ -78,6 +80,7 @@ public class BasicMediaStateTest {
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_CREATE_SUCCESS_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
+                false,
                 MediaState.ACTIVE_STATE
         );
     }
@@ -86,8 +89,10 @@ public class BasicMediaStateTest {
         //logger.info("@ Fail to create media!");
         StateHandler mediaStateHandler = stateManager.getStateHandler(MediaState.MEDIA_STATE_NAME);
 
-        return mediaStateHandler.fire(MediaEvent.MEDIA_CREATE_FAIL_EVENT,
+        return mediaStateHandler.fire(
+                MediaEvent.MEDIA_CREATE_FAIL_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
+                false,
                 MediaState.IDLE_STATE
         );
     }
@@ -99,6 +104,7 @@ public class BasicMediaStateTest {
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_DELETE_SUCCESS_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
+                false,
                 MediaState.IDLE_STATE
         );
     }
@@ -110,6 +116,7 @@ public class BasicMediaStateTest {
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_DELETE_FAIL_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
+                false,
                 MediaState.ACTIVE_STATE
         );
     }
@@ -125,28 +132,28 @@ public class BasicMediaStateTest {
         Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStart(callInfo));
         Assert.assertEquals(MediaState.IDLE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getPrevState());
         Assert.assertEquals(MediaState.ACTIVE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCurState());
-        Assert.assertEquals(MediaState.ACTIVE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCallBackResult());
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getSuccessCallBackResult());
 
         // 상태 처리 실패 시 반환될 실패 상태값 정상 동작하는지 확인
         Assert.assertEquals(MediaState.ACTIVE_REQUEST, mediaStop(callInfo));
         Assert.assertEquals(MediaState.IDLE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getPrevState());
         Assert.assertEquals(MediaState.ACTIVE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCurState());
-        Assert.assertEquals(MediaState.ACTIVE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCallBackResult());
+        Assert.assertEquals(MediaState.ACTIVE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getSuccessCallBackResult());
 
         Assert.assertEquals(MediaState.ACTIVE_STATE, mediaCreateSuccess(callInfo));
         Assert.assertEquals(MediaState.ACTIVE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getPrevState());
         Assert.assertEquals(MediaState.ACTIVE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCurState());
-        Assert.assertEquals(MediaState.ACTIVE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCallBackResult());
+        Assert.assertEquals(MediaState.ACTIVE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getSuccessCallBackResult());
 
         Assert.assertEquals(MediaState.IDLE_REQUEST, mediaStop(callInfo));
         Assert.assertEquals(MediaState.ACTIVE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getPrevState());
         Assert.assertEquals(MediaState.IDLE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCurState());
-        Assert.assertEquals(MediaState.IDLE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCallBackResult());
+        Assert.assertEquals(MediaState.IDLE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getSuccessCallBackResult());
 
         Assert.assertEquals(MediaState.IDLE_STATE, mediaDeleteSuccess(callInfo));
         Assert.assertEquals(MediaState.IDLE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getPrevState());
         Assert.assertEquals(MediaState.IDLE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCurState());
-        Assert.assertEquals(MediaState.IDLE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getCallBackResult());
+        Assert.assertEquals(MediaState.IDLE_STATE, StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()).getSuccessCallBackResult());
 
         this.stopWatch.stop();
         logger.info("Done. (total time: {} s)", String.format("%.3f", ((double) this.stopWatch.getTime()) / 1000));

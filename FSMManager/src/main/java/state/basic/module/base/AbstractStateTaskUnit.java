@@ -7,21 +7,21 @@ package state.basic.module.base;
  */
 public abstract class AbstractStateTaskUnit implements Runnable {
 
-    private int delay;
+    private int interval;
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    protected AbstractStateTaskUnit(int delay) {
-        this.delay = delay;
+    protected AbstractStateTaskUnit(int interval) {
+        this.interval = interval;
     }
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    public int getDelay( ) {
-        return delay;
+    public int getInterval( ) {
+        return interval;
     }
 
-    public void setDelay(int delay) {
-        this.delay = delay;
+    public void setInterval(int interval) {
+        this.interval = interval;
     }
 }

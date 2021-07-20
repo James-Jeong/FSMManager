@@ -1,11 +1,11 @@
 package state.basic.event.base;
 
-
 import state.basic.unit.StateUnit;
 
 /**
  * @class public abstract class CallBack
  * @brief CallBack class
+ * 이벤트 실행 시 사용자가 직접 정의 가능한 동작 클래스
  */
 public abstract class CallBack {
 
@@ -36,5 +36,13 @@ public abstract class CallBack {
 
     public void setCurStateUnit(StateUnit curStateUnit) {
         this.curStateUnit = curStateUnit;
+    }
+
+    @Override
+    public String toString() {
+        return "CallBack{" +
+                "name='" + name + '\'' +
+                ", curStateUnit=" + curStateUnit +
+                '}';
     }
 }

@@ -9,13 +9,10 @@ import org.squirrelframework.foundation.fsm.UntypedStateMachineBuilder;
 import state.akka.AkkaContainer;
 import state.basic.module.StateHandler;
 import state.basic.module.StateTaskManager;
-import state.basic.module.base.StateTaskUnit;
 import state.basic.unit.StateUnit;
 import state.squirrel.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,24 +24,21 @@ public class StateManager {
     private static final Logger logger = LoggerFactory.getLogger(StateManager.class);
 
     // Akka Map
-    private final Map<String, AkkaContainer> akkaMap = new HashMap<>();
+    private final HashMap<String, AkkaContainer> akkaMap = new HashMap<>();
 
     // Squirrel FSM Map
-    private final Map<String, FsmContainer> fsmMap = new HashMap<>();
+    private final HashMap<String, FsmContainer> fsmMap = new HashMap<>();
 
     // StateHandler Map
-    private final Map<String, StateHandler> stateHandlerMap = new HashMap<>();
+    private final HashMap<String, StateHandler> stateHandlerMap = new HashMap<>();
 
     // StateUnit Map
-    private final Map<String, StateUnit> stateUnitMap = new HashMap<>();
-
-    // FailEvent List
-    private final List<String> failEventList = new ArrayList<>();
+    private final HashMap<String, StateUnit> stateUnitMap = new HashMap<>();
 
     // StateManager 싱글턴 인스턴스 변수
     private static StateManager stateManager;
 
-    private StateTaskManager stateTaskManager = null;
+    private int taskThreadMaxCount = 1000;
 
     ////////////////////////////////////////////////////////////////////////////////
 
@@ -70,14 +64,15 @@ public class StateManager {
     }
 
     public void start (int threadMaxCount) {
-        stateTaskManager = new StateTaskManager(threadMaxCount);
+        if (threadMaxCount <= 0) {
+            threadMaxCount = 1000;
+        }
+
+        this.taskThreadMaxCount = threadMaxCount;
     }
 
     public void stop () {
-        if (stateTaskManager != null) {
-            stateTaskManager.stop();
-            stateTaskManager = null;
-        }
+        StateTaskManager.getInstance().stop();
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -344,7 +339,10 @@ public class StateManager {
             if (stateUnitMap.get(name) != null) {
                 return;
             }
-            stateUnitMap.putIfAbsent(name, new StateUnit(name, handlerName, initState, data));
+
+            StateUnit stateUnit = new StateUnit(name, handlerName, initState, data);
+            stateUnit.setIsAlive(true);
+            stateUnitMap.putIfAbsent(name, stateUnit);
         }
     }
 
@@ -361,6 +359,7 @@ public class StateManager {
                 return false;
             }
 
+            stateUnit.setIsAlive(false);
             return stateUnitMap.remove(name) != null;
         }
     }
@@ -377,8 +376,16 @@ public class StateManager {
         }
     }
 
-    public Map<String, StateUnit> getStateUnitMap() {
-        return stateUnitMap;
+    public Map<String, StateUnit> cloneStateUnitMap() {
+        HashMap<String, StateUnit> cloneMap;
+        synchronized (stateUnitMap) {
+            try {
+                cloneMap = (HashMap<String, StateUnit>) stateUnitMap.clone();
+            } catch (Exception e) {
+                cloneMap = stateUnitMap;
+            }
+        }
+        return cloneMap;
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -440,28 +447,8 @@ public class StateManager {
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    public void addStateScheduler (StateHandler stateHandler, int delay) {
-        if (stateTaskManager != null) {
-            stateTaskManager.addStateScheduler(stateHandler, delay);
-        }
-    }
-
-    public void removeStateScheduler (String handlerName) {
-        if (stateTaskManager != null) {
-            stateTaskManager.removeStateScheduler(handlerName);
-        }
-    }
-
-    public void addStateTaskUnit (String handlerName, String name, StateTaskUnit stateTaskUnit) {
-        if (stateTaskManager != null) {
-            stateTaskManager.addStateTaskUnit(handlerName, name, stateTaskUnit);
-        }
-    }
-
-    public void removeStateTaskUnit (String handlerName, String stateTaskUnitName) {
-        if (stateTaskManager != null) {
-            stateTaskManager.removeStateTaskUnit(handlerName, stateTaskUnitName);
-        }
+    public int getTaskThreadMaxCount() {
+        return taskThreadMaxCount;
     }
 
 }

@@ -1,5 +1,9 @@
 package base.basic.media.base;
 
+/**
+ * @class public class MediaState
+ * @brief MediaState class
+ */
 public class MediaState {
 
     public static final String MEDIA_STATE_NAME = "media_state";

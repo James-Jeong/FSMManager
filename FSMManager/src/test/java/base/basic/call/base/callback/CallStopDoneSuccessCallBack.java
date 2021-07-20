@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import state.StateManager;
 import state.basic.event.base.CallBack;
 import state.basic.module.StateHandler;
+import state.basic.unit.StateUnit;
 
 /**
  * @class public class CallStopDoneSuccessCallBack extends CallBack
@@ -23,11 +24,10 @@ public class CallStopDoneSuccessCallBack extends CallBack {
 
     @Override
     public Object callBackFunc(Object... object) {
-        if (object.length == 0) {
-            return null;
-        }
+        StateUnit stateUnit = getCurStateUnit();
+        if (stateUnit == null) { return null; }
 
-        CallInfo callInfo = (CallInfo) object[0];
+        CallInfo callInfo = (CallInfo) stateUnit.getData();
         if (callInfo == null) { return null; }
 
         StateManager stateManager = StateManager.getInstance();
@@ -39,6 +39,7 @@ public class CallStopDoneSuccessCallBack extends CallBack {
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_DELETE_SUCCESS_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
+                false,
                 MediaState.IDLE_STATE
         );
     }

@@ -6,11 +6,11 @@ package base.basic.call.base;
  */
 public class CallInfo {
 
-    String callId;
-    String fromNo;
-    String toNo;
-    String sipStateUnitName;
-    String mediaStateUnitName;
+    private final String callId;
+    private final String fromNo;
+    private final String toNo;
+    private final String sipStateUnitName;
+    private final String mediaStateUnitName;
 
     public CallInfo(String callId, String fromNo, String toNo) {
         this.callId = callId;
@@ -39,5 +39,16 @@ public class CallInfo {
 
     public String getMediaStateUnitName() {
         return mediaStateUnitName;
+    }
+
+    @Override
+    public String toString() {
+        return "CallInfo{" +
+                "callId='" + callId + '\'' +
+                ", fromNo='" + fromNo + '\'' +
+                ", toNo='" + toNo + '\'' +
+                ", sipStateUnitName='" + sipStateUnitName + '\'' +
+                ", mediaStateUnitName='" + mediaStateUnitName + '\'' +
+                '}';
     }
 }

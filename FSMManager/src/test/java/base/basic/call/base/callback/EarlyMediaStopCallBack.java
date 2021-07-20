@@ -23,10 +23,6 @@ public class EarlyMediaStopCallBack extends CallBack {
 
     @Override
     public Object callBackFunc(Object... object) {
-        if (object.length == 0) {
-            return null;
-        }
-
         CallInfo callInfo = (CallInfo) object[0];
         if (callInfo == null) { return null; }
 
@@ -39,6 +35,7 @@ public class EarlyMediaStopCallBack extends CallBack {
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_STOP_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
+                false,
                 MediaState.IDLE_REQUEST
         );
     }

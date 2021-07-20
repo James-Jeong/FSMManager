@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import state.basic.info.ResultCode;
 
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @class public class StateUnit
@@ -19,17 +21,31 @@ public class StateUnit {
     // StateHandler 이름
     private final String handlerName;
 
+    private final AtomicBoolean isAlive = new AtomicBoolean(false);
+
     // 바로 이전 상태
     private String prevState = null;
+    private final ReentrantLock prevStateLock = new ReentrantLock();
+
     // 현재 상태
     private String curState;
+    private final ReentrantLock curStateLock = new ReentrantLock();
+
     // 천이 실패 시 실행될 이벤트 키
     private String nextEventKey = null;
-    // CallBack 결과값
-    private Object callBackResult = null;
+    private final ReentrantLock nextEventKeyLock = new ReentrantLock();
+
+    // Success CallBack 결과값
+    private Object successCallBackResult = null;
+    private final ReentrantLock successCallBackResultLock = new ReentrantLock();
+
+    // Fail CallBack 결과값
+    private Object failCallBackResult = null;
+    private final ReentrantLock failCallBackResultLock = new ReentrantLock();
 
     // Spare Data
     private Object data;
+    private final ReentrantLock dataLock = new ReentrantLock();
 
     ////////////////////////////////////////////////////////////////////////////////
 
@@ -64,7 +80,12 @@ public class StateUnit {
      * @return 기존에 설정된 nextEventKey
      */
     public String getNextEventKey() {
-        return nextEventKey;
+        try {
+            nextEventKeyLock.lock();
+            return nextEventKey;
+        } finally {
+            nextEventKeyLock.unlock();
+        }
     }
 
     /**
@@ -74,24 +95,14 @@ public class StateUnit {
      * @return 새로 설정된 nextEventKey
      */
     public String setNextEventKey(String curState) {
-        this.nextEventKey = makeNextEventKey(curState);
-        return this.nextEventKey;
+        try {
+            nextEventKeyLock.lock();
+            this.nextEventKey = makeNextEventKey(curState);
+            return this.nextEventKey;
+        } finally {
+            nextEventKeyLock.unlock();
+        }
     }
-
-    /**
-     * @fn public String getData()
-     * @brief StateUnit Spare data 를 반환하는 함수
-     * @return data
-     */
-    public Object getData() {
-        return data;
-    }
-
-    public void setData(Object data) {
-        this.data = data;
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////
 
     /**
      * @fn private String makeNextEventKey(String curState)
@@ -107,68 +118,158 @@ public class StateUnit {
     ////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @fn public synchronized String getCurState ()
+     * @fn public String getData()
+     * @brief StateUnit Spare data 를 반환하는 함수
+     * @return data
+     */
+    public Object getData() {
+        try {
+            dataLock.lock();
+            return data;
+        } finally {
+            dataLock.unlock();
+        }
+    }
+
+    public void setData(Object data) {
+        try {
+            dataLock.lock();
+            this.data = data;
+        } finally {
+            dataLock.unlock();
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+
+    public void setState(String fromState, String toState) {
+        setPrevState(fromState);
+        setCurState(toState);
+    }
+
+    /**
+     * @fn public String getCurState ()
      * @brief 현재 State 이름을 반환하는 함수
      * @return 현재 State 이름
      */
-    public synchronized String getCurState() {
-        return curState;
+    public String getCurState() {
+        try {
+            curStateLock.lock();
+            return curState;
+        } finally {
+            curStateLock.unlock();
+        }
     }
 
     /**
-     * @fn private synchronized void setCurState (String state)
+     * @fn private void setCurState (String state)
      * @brief 현재 State 를 설정하는 함수
      * @param curState 현재 State 이름
      */
-    public synchronized void setCurState(String curState) {
-        logger.info("[{}] ({}) Cur State is changed. ([{}] > [{}])",
-                ResultCode.SUCCESS_TRANSIT_STATE, name, getCurState(), curState
-        );
-        this.curState = curState;
+    public void setCurState(String curState) {
+        try {
+            curStateLock.lock();
+            logger.info("[{}] ({}) Cur State is changed. ([{}] > [{}])",
+                    ResultCode.SUCCESS_TRANSIT_STATE, name, getCurState(), curState
+            );
+            this.curState = curState;
+        } finally {
+            curStateLock.unlock();
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @fn public synchronized String getPrevState ()
+     * @fn public String getPrevState ()
      * @brief 이전 State 이름을 반환하는 함수
      * @return 이전 State 이름
      */
-    public synchronized String getPrevState() {
-        return prevState;
+    public String getPrevState() {
+        try {
+            prevStateLock.lock();
+            return prevState;
+        } finally {
+            prevStateLock.unlock();
+        }
     }
 
     /**
-     * @fn private synchronized void setPrevState (String state)
+     * @fn private void setPrevState (String state)
      * @brief 이전 State 를 설정하는 함수
      * @param prevState 이전 State 이름
      */
-    public synchronized void setPrevState(String prevState) {
-        logger.info("[{}] ({}) Prev State is changed. ([{}] > [{}])",
-                ResultCode.SUCCESS_TRANSIT_STATE, name, getPrevState(), prevState
-        );
-        this.prevState = prevState;
+    public void setPrevState(String prevState) {
+        try {
+            prevStateLock.lock();
+            logger.info("[{}] ({}) Prev State is changed. ([{}] > [{}])",
+                    ResultCode.SUCCESS_TRANSIT_STATE, name, getPrevState(), prevState
+            );
+            this.prevState = prevState;
+        } finally {
+            prevStateLock.unlock();
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @fn public synchronized Object getCallBackResult()
+     * @fn public Object getCallBackResult()
      * @brief CallBack 실행 결과를 반환하는 함수
      * @return CallBack 결과값
      */
-    public synchronized Object getCallBackResult() {
-        return callBackResult;
+    public Object getSuccessCallBackResult() {
+        try {
+            successCallBackResultLock.lock();
+            return successCallBackResult;
+        } finally {
+            successCallBackResultLock.unlock();
+        }
     }
 
     /**
-     * @fn public synchronized void setCallBackResult(Object result)
+     * @fn public void setCallBackResult(Object result)
      * @brief CallBack 실행 결과를 저장하는 함수
      * @param result 저장할 CallBack 결과값
      */
-    public synchronized void setCallBackResult(Object result) {
-        this.callBackResult = result;
+    public void setSuccessCallBackResult(Object result) {
+        try {
+            successCallBackResultLock.lock();
+            this.successCallBackResult = result;
+        } finally {
+            successCallBackResultLock.unlock();
+        }
     }
+
+    public Object getFailCallBackResult() {
+        try {
+            failCallBackResultLock.lock();
+            return failCallBackResult;
+        } finally {
+            failCallBackResultLock.unlock();
+        }
+    }
+
+    public void setFailCallBackResult(Object failCallBackResult) {
+        try {
+            failCallBackResultLock.lock();
+            this.failCallBackResult = failCallBackResult;
+        } finally {
+            failCallBackResultLock.unlock();
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+
+    public void setIsAlive (boolean isAlive) {
+        this.isAlive.set(isAlive);
+    }
+
+    public boolean getIsAlive () {
+        return isAlive.get();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public String toString() {
@@ -178,7 +279,9 @@ public class StateUnit {
                 ", prevState='" + prevState + '\'' +
                 ", curState='" + curState + '\'' +
                 ", nextEventKey='" + nextEventKey + '\'' +
-                ", callBackResult=" + callBackResult +
+                ", successCallBackResult=" + successCallBackResult +
+                ", failCallBackResult=" + failCallBackResult +
+                ", data=" + data +
                 '}';
     }
 }

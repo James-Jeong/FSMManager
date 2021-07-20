@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import state.StateManager;
 import state.basic.module.StateHandler;
+import state.basic.module.StateTaskManager;
 
 /**
  * @class public class BasicProcessStateTest
@@ -52,7 +53,9 @@ public class BasicAtmStateTest {
                 AtmEvent.RUN,
                 AtmState.IDLE, AtmState.READY,
                 null,
-                AtmEvent.INSERT_CARD_FAIL, 1000
+                null,
+                0,
+                AtmEvent.INSERT_CARD_FAIL, 1000, 0
         );
 
         // RUN_FAIL
@@ -60,7 +63,9 @@ public class BasicAtmStateTest {
                 AtmEvent.RUN_FAIL,
                 AtmState.ERROR, AtmState.IDLE,
                 null,
-                null, 0
+                null,
+                0,
+                null, 0, 0
         );
 
         // INSERT_CARD
@@ -68,7 +73,9 @@ public class BasicAtmStateTest {
                 AtmEvent.INSERT_CARD,
                 AtmState.READY, AtmState.CARD_READ,
                 null,
-                AtmEvent.READ_CARD_FAIL, 1000
+                null,
+                0,
+                AtmEvent.READ_CARD_FAIL, 1000, 0
         );
 
         // INSERT_CARD_FAIL
@@ -76,7 +83,9 @@ public class BasicAtmStateTest {
                 AtmEvent.INSERT_CARD_FAIL,
                 AtmState.READY , AtmState.IDLE,
                 null,
-                null, 0
+                null,
+                0,
+                null, 0, 0
         );
 
         // READ_CARD
@@ -84,7 +93,9 @@ public class BasicAtmStateTest {
                 AtmEvent.READ_CARD,
                 AtmState.CARD_READ, AtmState.PIN_ENTRY,
                 null,
-                AtmEvent.INPUT_PIN_FAIL, 1000
+                null,
+                0,
+                AtmEvent.INPUT_PIN_FAIL, 1000, 0
         );
 
         // READ_CARD_FAIL
@@ -92,7 +103,9 @@ public class BasicAtmStateTest {
                 AtmEvent.READ_CARD_FAIL,
                 AtmState.CARD_READ , AtmState.ERROR,
                 null,
-                null, 0
+                null,
+                0,
+                null, 0, 0
         );
 
         // INPUT_PIN
@@ -100,7 +113,9 @@ public class BasicAtmStateTest {
                 AtmEvent.INPUT_PIN,
                 AtmState.PIN_ENTRY, AtmState.VERIFICATION,
                 new InputPinCallBack(InputPinCallBack.class.getSimpleName()),
-                AtmEvent.VERIFY_ACCOUNT_WRONG, 1000
+                null,
+                0,
+                AtmEvent.VERIFY_ACCOUNT_WRONG, 1000, 0
         );
 
         // INPUT_PIN_FAIL
@@ -108,7 +123,9 @@ public class BasicAtmStateTest {
                 AtmEvent.INPUT_PIN_FAIL,
                 AtmState.PIN_ENTRY , AtmState.ERROR,
                 null,
-                null, 0
+                null,
+                0,
+                null, 0, 0
         );
 
         // VERIFY_ACCOUNT_SUCCESS
@@ -116,7 +133,9 @@ public class BasicAtmStateTest {
                 AtmEvent.VERIFY_ACCOUNT_SUCCESS,
                 AtmState.VERIFICATION, AtmState.SESSION,
                 null,
-                null, 0
+                null,
+                0,
+                null, 0, 0
         );
 
         // VERIFY_ACCOUNT_WRONG
@@ -124,7 +143,9 @@ public class BasicAtmStateTest {
                 AtmEvent.VERIFY_ACCOUNT_WRONG,
                 AtmState.VERIFICATION , AtmState.PIN_ENTRY,
                 null,
-                null, 0
+                null,
+                0,
+                null, 0, 0
         );
 
         // VERIFY_ACCOUNT_FAIL
@@ -132,7 +153,9 @@ public class BasicAtmStateTest {
                 AtmEvent.VERIFY_ACCOUNT_FAIL,
                 AtmState.VERIFICATION , AtmState.ERROR,
                 null,
-                null, 0
+                null,
+                0,
+                null, 0, 0
         );
 
         // EXIT
@@ -140,7 +163,9 @@ public class BasicAtmStateTest {
                 AtmEvent.EXIT,
                 AtmState.SESSION , AtmState.IDLE,
                 null,
-                null, 0
+                null,
+                0,
+                null, 0, 0
         );
 
         Assert.assertFalse(atmStateHandler.getEventList().isEmpty());
@@ -165,7 +190,7 @@ public class BasicAtmStateTest {
                 )
         );
 
-        StateManager.getInstance().addStateScheduler(atmStateHandler, 100);
+        StateTaskManager.getInstance().addStateScheduler(atmStateHandler, 100);
     }
 
     public void stop () {
@@ -368,7 +393,8 @@ public class BasicAtmStateTest {
 
         return callStateHandler.fire(
                 AtmEvent.RUN,
-                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId())
+                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()),
+                false
         );
     }
 
@@ -378,7 +404,8 @@ public class BasicAtmStateTest {
 
         return callStateHandler.fire(
                 AtmEvent.INSERT_CARD,
-                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId())
+                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()),
+                false
         );
     }
 
@@ -388,7 +415,8 @@ public class BasicAtmStateTest {
 
         return callStateHandler.fire(
                 AtmEvent.READ_CARD,
-                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId())
+                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()),
+                false
         );
     }
 
@@ -399,6 +427,7 @@ public class BasicAtmStateTest {
         return callStateHandler.fire(
                 AtmEvent.INPUT_PIN,
                 StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()),
+                false,
                 pinString
         );
     }
@@ -409,7 +438,8 @@ public class BasicAtmStateTest {
 
         return callStateHandler.fire(
                 AtmEvent.VERIFY_ACCOUNT_SUCCESS,
-                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId())
+                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()),
+                false
         );
     }
 
@@ -419,7 +449,8 @@ public class BasicAtmStateTest {
 
         return callStateHandler.fire(
                 AtmEvent.VERIFY_ACCOUNT_WRONG,
-                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId())
+                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()),
+                false
         );
     }
 
@@ -429,7 +460,8 @@ public class BasicAtmStateTest {
 
         return callStateHandler.fire(
                 AtmEvent.VERIFY_ACCOUNT_FAIL,
-                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId())
+                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()),
+                false
         );
     }
 
@@ -439,7 +471,8 @@ public class BasicAtmStateTest {
 
         return callStateHandler.fire(
                 AtmEvent.EXIT,
-                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId())
+                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()),
+                false
         );
     }
 

@@ -8,10 +8,12 @@ import state.basic.unit.StateUnit;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @class public class StateHandler
  * @brief StateHandler class
+ * FSM 시나리오 전체를 운용하는 클래스
  */
 public class StateHandler {
 
@@ -40,30 +42,42 @@ public class StateHandler {
     ////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @fn public boolean addState (String event, String fromState, String toState, CallBack callBack, String nextEvent, int delay, Object... params)
+     * @fn public boolean addState (String event, String fromState, String toState, CallBack successCallBack, CallBack, failCallBack, String nextEvent, int delay, Object... params)
      * @brief 새로운 State 를 추가하는 함수
      * fromState 가 toState 로 천이되기 위한 trigger 이벤트와 천이 후에 실행될 CallBack 을 정의한다.
      *
-     * 1) 천이 성공 시 CallBack 실행 (CallBack)
-     * 2) 천이 실패 시 timeout 후 event 실행 (TaskUnit 필요)
+     * 1) 천이 성공 시 지정한 CallBack 실행
+     * 2) 천이 실패 시 지정한 CallBack 실행
+     * 3) 천이 실패 시 timeout 후 event 실행 (TaskUnit 필요)
      *
      * @param event Trigger 될 이벤트 이름
      * @param fromState 천이 전 State 이름
      * @param toState 천이 후 State 이름
-     * @param callBack 천이 성공 후 실행될 CallBack
+     * @param successCallBack 천이 성공 후 실행될 CallBack
+     * @param failCallBack 천이 실패 후 실행될 CallBack
+     * @param eventRetryCount 천이 실패 후 해당 이벤트 재시도 횟수
      * @param nextEvent 천이 후 다음에 실행될 이벤트 이름
      * @param delay 천이 실패 후 실행될 이벤트가 실행되기 위한 Timeout 시간
+     * @param nextEventRetryCount 천이 실패 후 실행될 이벤트 재시도 횟수
      * @param nextEventCallBackParams 실패 후 실행될 이벤트의 CallBack 의 매개변수
      * @return 성공 시 true, 실패 시 false 반환
      */
     public boolean addState (String event,
                              String fromState,
                              String toState,
-                             CallBack callBack,
+                             CallBack successCallBack,
+                             CallBack failCallBack,
+                             int eventRetryCount,
                              String nextEvent,
                              int delay,
+                             int nextEventRetryCount,
                              Object... nextEventCallBackParams) {
-        return stateEventManager.addEvent(event, fromState, toState, callBack, nextEvent, delay, nextEventCallBackParams);
+        return stateEventManager.addEvent(
+                event,
+                fromState, toState, successCallBack,
+                failCallBack, eventRetryCount,
+                nextEvent, delay, nextEventRetryCount, nextEventCallBackParams
+        );
     }
 
     public void clearStateEventManager() {
@@ -102,6 +116,10 @@ public class StateHandler {
         return stateEventManager.getAllEvents();
     }
 
+    public Map<String, StateEvent> cloneEventMap () {
+        return stateEventManager.cloneEventMap();
+    }
+
     public int getTotalEventSize () {
         return stateEventManager.getAllEvents().size();
     }
@@ -111,10 +129,11 @@ public class StateHandler {
      * @brief 정의된 State 천이를 위해 지정한 이벤트를 발생시키는 함수
      * @param event 발생할 이벤트 이름
      * @param stateUnit State unit
+     * @param isScheduled 스케줄링되어 발생한 이벤트 여부
      * @return 성공 시 천이 후 상태값 반환, 실패 시 null 또는 천이 전 상태값 반환
      */
-    public String fire (String event, StateUnit stateUnit) {
-        return stateEventManager.nextState(this, event, stateUnit, (Object) null);
+    public String fire (String event, StateUnit stateUnit, boolean isScheduled) {
+        return stateEventManager.nextState(this, event, stateUnit, isScheduled, (Object) null);
     }
 
     /**
@@ -122,11 +141,12 @@ public class StateHandler {
      * @brief 정의된 State 천이를 위해 지정한 이벤트를 발생시키는 함수
      * @param event 발생할 이벤트 이름
      * @param stateUnit State unit
+     * @param isScheduled 스케줄링되어 발생한 이벤트 여부
      * @param params CallBack 가변 매개변수
      * @return 성공 시 천이 후 상태값 반환, 실패 시 null 또는 천이 전 상태값 반환
      */
-    public String fire (String event, StateUnit stateUnit, Object... params) {
-        return stateEventManager.nextState(this, event, stateUnit, params);
+    public String fire (String event, StateUnit stateUnit, boolean isScheduled, Object... params) {
+        return stateEventManager.nextState(this, event, stateUnit, isScheduled, params);
     }
 
     /**

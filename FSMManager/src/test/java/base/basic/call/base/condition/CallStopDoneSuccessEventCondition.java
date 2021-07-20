@@ -4,8 +4,8 @@ import state.basic.event.base.StateEvent;
 import state.basic.module.base.EventCondition;
 
 /**
- * @class public class InactiveStopEventCondition extends EventCondition
- * @brief InactiveStopEventCondition class
+ * @class public class CallStopDoneSuccessEventCondition extends EventCondition
+ * @brief CallStopDoneSuccessEventCondition class
  */
 public class CallStopDoneSuccessEventCondition extends EventCondition {
 

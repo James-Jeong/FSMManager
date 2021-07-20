@@ -14,6 +14,7 @@ import java.util.Map;
 /**
  * @class public class StateScheduler
  * @brief StateScheduler class
+ * 주기적으로 이벤트 실행시키는 클래스
  */
 public class StateScheduler extends AbstractStateTaskUnit {
 
@@ -44,22 +45,20 @@ public class StateScheduler extends AbstractStateTaskUnit {
                 return;
             }
 
-            // 2) 현재 StateManager 에 등록된 StateUnit Map 을 가져온다.
-            Map<String, StateUnit> stateUnitMap = stateManager.getStateUnitMap();
-            if (stateUnitMap.isEmpty()) {
-                return;
-            }
-
             // 3) 등록한 각각의 이벤트의 From state 가 개별적인 StateUnit 의 From state 와 같으면, 등록한 이벤트를 실행한다.
             for (EventCondition eventCondition : eventConditionList) {
                 if (eventCondition == null) { continue; }
 
                 StateEvent stateEvent = eventCondition.getStateEvent();
                 if (stateEvent == null) { continue; }
-
                 String fromState = stateEvent.getFromState();
+
+                // 2) 현재 StateManager 에 등록된 StateUnit Map 을 가져온다.
+                Map<String, StateUnit> stateUnitMap = stateManager.cloneStateUnitMap();
+                if (stateUnitMap.isEmpty()) { continue; }
+
                 for (StateUnit stateUnit : stateUnitMap.values()) {
-                    if (stateUnit == null) { continue; }
+                    if (stateUnit == null || !stateUnit.getIsAlive()) { continue; }
 
                     // StateUnit 의 StateHandler 이름과 다르면 다른 StateUnit 검색
                     if (!stateUnit.getHandlerName().equals(handlerName)) { continue; }
@@ -72,7 +71,8 @@ public class StateScheduler extends AbstractStateTaskUnit {
 
                         stateHandler.fire(
                                 stateEvent.getName(),
-                                stateUnit
+                                stateUnit,
+                                false
                         );
                     }
                 }

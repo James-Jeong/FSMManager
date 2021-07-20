@@ -1,7 +1,4 @@
 import base.basic.atm.BasicAtmStateTest;
-import base.basic.base.ServiceManager;
-import base.basic.call.BasicCallStateTest;
-import base.basic.media.BasicMediaStateTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -22,16 +19,16 @@ public class TestMain {
         ////////////////////////////////////////////////////////////////////////////////
         // # basic
 
-        ServiceManager serviceManager = ServiceManager.getInstance();
-        serviceManager.start();
+        //ServiceManager serviceManager = ServiceManager.getInstance();
+        //serviceManager.start();
 
-        BasicMediaStateTest basicMediaStateTest = new BasicMediaStateTest();
-        basicMediaStateTest.testStart();
+        //BasicMediaStateTest basicMediaStateTest = new BasicMediaStateTest();
+        //basicMediaStateTest.testStart();
 
-        BasicCallStateTest basicCallStateTest = new BasicCallStateTest();
-        basicCallStateTest.testStart();
+        //BasicCallStateTest basicCallStateTest = new BasicCallStateTest();
+        //basicCallStateTest.testStart();
 
-        serviceManager.stop();
+        //serviceManager.stop();
 
         ////////////////////////////////////////////////////////////////////////////////
         // # ATM state

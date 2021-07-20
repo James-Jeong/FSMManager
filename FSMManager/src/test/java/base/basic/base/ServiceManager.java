@@ -12,6 +12,7 @@ import base.basic.media.base.MediaState;
 import org.junit.Assert;
 import state.StateManager;
 import state.basic.module.StateHandler;
+import state.basic.module.StateTaskManager;
 
 /**
  * @class public class ServiceManager
@@ -44,6 +45,8 @@ public class ServiceManager {
         StateHandler mediaStateHandler = stateManager.getStateHandler(MediaState.MEDIA_STATE_NAME);
         ////////////////////////////////////////////////////////////////////////////////
         // 1. CallBack 함수 정의
+        FailCallBack failCallBack = new FailCallBack("FailCallBack");
+
         CommonCallBack callStartCallBack = new CommonCallBack(CallEvent.CALL_START_EVENT);
         CommonCallBack callFailCallBack = new CommonCallBack(CallEvent.CALL_FAIL_EVENT);
 
@@ -75,68 +78,303 @@ public class ServiceManager {
 
         ////////////////////////////////////////////////////////////////////////////////
         // 2. 상태 정의
+
+        // 2-1) CallState
+        // 2-1-1) CallStartEvent : CallState.INIT > CallState.OFFER
         Assert.assertTrue(
                 callStateHandler.addState(
                         CallEvent.CALL_START_EVENT,
                         CallState.INIT, CallState.OFFER,
                         callStartCallBack,
-                        CallEvent.CALL_FAIL_EVENT,  1000, CallState.INIT
+                        failCallBack,
+                        0,
+                        CallEvent.CALL_FAIL_EVENT,  1000, 3, CallState.INIT
                 )
         );
 
-        Assert.assertTrue(callStateHandler.addState(CallEvent.CALL_FAIL_EVENT, CallState.OFFER, CallState.INIT, callFailCallBack, null, 0));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.OFFER_EARLY_NEGO_START_EVENT, CallState.OFFER, CallState.EARLY_NEGO_REQ, offerEarlyNegoCallBack, CallEvent.EARLY_NEGO_INACTIVE_START_EVENT, 1000, CallState.OFFER));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.OFFER_NEGO_START_EVENT, CallState.OFFER, CallState.NEGO_REQ, offerNegoCallBack, CallEvent.NEGO_INACTIVE_START_EVENT, 1000, CallState.OFFER));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.OFFER_STOP_EVENT, CallState.OFFER, CallState.HANGUP_REQ, callOfferStopCallBack, null, 0));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_MEDIA_START_EVENT, CallState.EARLY_NEGO_REQ, CallState.EARLY_MEDIA, earlyMediaStartCallBack, CallEvent.EARLY_MEDIA_STOP_EVENT, 1000, CallState.EARLY_NEGO_REQ));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_NEGO_INACTIVE_START_EVENT, CallState.EARLY_NEGO_REQ, CallState.INACTIVE, earlyNegoInactiveStartCallBack, null, 0));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_MEDIA_NEGO_START_EVENT, CallState.EARLY_MEDIA, CallState.NEGO_REQ, callEarlyNegoNegoStartCallBack, CallEvent.NEGO_INACTIVE_START_EVENT, 1000, CallState.EARLY_MEDIA));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.EARLY_MEDIA_STOP_EVENT, CallState.EARLY_MEDIA, CallState.HANGUP_REQ, earlyMediaStopCallBack, CallEvent.CALL_STOP_DONE_FAIL_EVENT, 1000, CallState.EARLY_MEDIA));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.ACTIVE_START_EVENT, CallState.NEGO_REQ, CallState.ACTIVE, activeStartCallBack, CallEvent.ACTIVE_STOP_EVENT, 1000, CallState.NEGO_REQ));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.NEGO_INACTIVE_START_EVENT, CallState.NEGO_REQ, CallState.INACTIVE, negoInactiveStartCallBack, null, 0));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.ACTIVE_STOP_EVENT, CallState.ACTIVE, CallState.HANGUP_REQ, activeStopCallBack, CallEvent.CALL_STOP_DONE_FAIL_EVENT, 1000, CallState.ACTIVE));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.INACTIVE_STOP_EVENT, CallState.INACTIVE, CallState.HANGUP_REQ, callInactiveStopCallBack, CallEvent.CALL_STOP_DONE_FAIL_EVENT, 1000, CallState.INACTIVE));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.CALL_STOP_DONE_SUCCESS_EVENT, CallState.HANGUP_REQ, CallState.INIT, callStopDoneSuccessCallBack, null, 0));
-        Assert.assertTrue(callStateHandler.addState(CallEvent.CALL_STOP_DONE_FAIL_EVENT, CallState.HANGUP_REQ, CallState.IDLE, callStopDoneFailCallBack, null, 0));
+        // 2-1-2) CallFailEvent : CallState.OFFER > CallState.INIT
+        Assert.assertTrue(
+                callStateHandler.addState(
+                        CallEvent.CALL_FAIL_EVENT,
+                        CallState.OFFER, CallState.INIT,
+                        callFailCallBack,
+                        null,
+                        0,
+                        null, 0, 0
+                )
+        );
 
-        Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_START_EVENT, MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST, mediaStartCallBack, MediaEvent.MEDIA_CREATE_FAIL_EVENT, 1000, MediaState.IDLE_STATE));
-        Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_CREATE_SUCCESS_EVENT, MediaState.ACTIVE_REQUEST, MediaState.ACTIVE_STATE, mediaCreateSuccessCallBack, MediaEvent.MEDIA_STOP_EVENT, 1000, MediaState.ACTIVE_REQUEST));
-        Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_CREATE_FAIL_EVENT, MediaState.ACTIVE_REQUEST, MediaState.IDLE_STATE, mediaCreateFailCallBack, null, 0));
-        Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_STOP_EVENT, MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST, mediaStopCallBack, MediaEvent.MEDIA_DELETE_FAIL_EVENT, 1000, MediaState.ACTIVE_STATE));
-        Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_DELETE_SUCCESS_EVENT, MediaState.IDLE_REQUEST, MediaState.IDLE_STATE, mediaDeleteSuccessCallBack, null, 0));
-        Assert.assertTrue(mediaStateHandler.addState(MediaEvent.MEDIA_DELETE_FAIL_EVENT, MediaState.IDLE_REQUEST, MediaState.ACTIVE_STATE, mediaDeleteFailCallBack, null, 0));
+        // 2-1-3) OfferEarlyNegoStartEvent : CallState.OFFER > CallState.EARLY_NEGO_REQ
+        Assert.assertTrue(
+                callStateHandler.addState(
+                        CallEvent.OFFER_EARLY_NEGO_START_EVENT,
+                        CallState.OFFER, CallState.EARLY_NEGO_REQ,
+                        offerEarlyNegoCallBack,
+                        null,
+                        0,
+                        CallEvent.EARLY_NEGO_INACTIVE_START_EVENT, 1000, 0, CallState.OFFER
+                )
+        );
+
+        // 2-1-4) OfferNegoStartEvent : CallState.OFFER > CallState.NEGO_REQ
+        Assert.assertTrue(
+                callStateHandler.addState(
+                        CallEvent.OFFER_NEGO_START_EVENT,
+                        CallState.OFFER, CallState.NEGO_REQ,
+                        offerNegoCallBack,
+                        null,
+                        0,
+                        CallEvent.NEGO_INACTIVE_START_EVENT,1000, 0, CallState.OFFER
+                )
+        );
+
+        // 2-1-5) OfferStopEvent : CallState.OFFER > CallState.HANGUP_REQ
+        Assert.assertTrue(
+                callStateHandler.addState(
+                        CallEvent.OFFER_STOP_EVENT,
+                        CallState.OFFER, CallState.HANGUP_REQ,
+                        callOfferStopCallBack,
+                        null,
+                        0,
+                        null, 0, 0
+                )
+        );
+
+        // 2-1-6) EarlyMediaStartEvent : CallState.EARLY_NEGO_REQ > CallState.EARLY_MEDIA
+        Assert.assertTrue(
+                callStateHandler.addState(
+                        CallEvent.EARLY_MEDIA_START_EVENT,
+                        CallState.EARLY_NEGO_REQ, CallState.EARLY_MEDIA,
+                        earlyMediaStartCallBack,
+                        null,
+                        0,
+                        CallEvent.EARLY_MEDIA_STOP_EVENT, 1000, 0, CallState.EARLY_NEGO_REQ
+                )
+        );
+
+        // 2-1-7) EarlyNegoInactiveStartEvent : CallState.EARLY_NEGO_REQ > CallState.INACTIVE
+        Assert.assertTrue(
+                callStateHandler.addState(
+                        CallEvent.EARLY_NEGO_INACTIVE_START_EVENT,
+                        CallState.EARLY_NEGO_REQ, CallState.INACTIVE,
+                        earlyNegoInactiveStartCallBack,
+                        null,
+                        0,
+                        null, 0, 0
+                )
+        );
+
+        // 2-1-8) EarlyMediaNegoStartEvent : CallState.EARLY_MEDIA > CallState.NEGO_REQ
+        Assert.assertTrue(
+                callStateHandler.addState(
+                        CallEvent.EARLY_MEDIA_NEGO_START_EVENT,
+                        CallState.EARLY_MEDIA, CallState.NEGO_REQ,
+                        callEarlyNegoNegoStartCallBack,
+                        null,
+                        0,
+                        CallEvent.NEGO_INACTIVE_START_EVENT, 1000, 0, CallState.EARLY_MEDIA
+                )
+        );
+
+        // 2-1-9) EarlyMediaStopEvent : CallState.EARLY_MEDIA > CallState.HANGUP_REQ
+        Assert.assertTrue(
+                callStateHandler.addState(
+                        CallEvent.EARLY_MEDIA_STOP_EVENT,
+                        CallState.EARLY_MEDIA, CallState.HANGUP_REQ,
+                        earlyMediaStopCallBack,
+                        null,
+                        0,
+                        CallEvent.CALL_STOP_DONE_FAIL_EVENT, 1000, 0, CallState.EARLY_MEDIA
+                )
+        );
+
+        // 2-1-10) ActiveStartEvent : CallState.NEGO_REQ > CallState.ACTIVE
+        Assert.assertTrue(
+                callStateHandler.addState(
+                        CallEvent.ACTIVE_START_EVENT,
+                        CallState.NEGO_REQ, CallState.ACTIVE,
+                        activeStartCallBack,
+                        null,
+                        0,
+                        CallEvent.ACTIVE_STOP_EVENT, 1000, 0, CallState.NEGO_REQ
+                )
+        );
+
+        // 2-1-11) NegoInactiveStartEvent : CallState.NEGO_REQ > CallState.INACTIVE
+        Assert.assertTrue(
+                callStateHandler.addState(
+                        CallEvent.NEGO_INACTIVE_START_EVENT,
+                        CallState.NEGO_REQ, CallState.INACTIVE,
+                        negoInactiveStartCallBack,
+                        null,
+                        0,
+                        null, 0, 0
+                )
+        );
+
+        // 2-1-12) ActiveStopEvent : CallState.ACTIVE > CallState.HANGUP_REQ
+        Assert.assertTrue(
+                callStateHandler.addState(
+                        CallEvent.ACTIVE_STOP_EVENT,
+                        CallState.ACTIVE, CallState.HANGUP_REQ,
+                        activeStopCallBack,
+                        null,
+                        0,
+                        CallEvent.CALL_STOP_DONE_FAIL_EVENT, 1000, 0, CallState.ACTIVE
+                )
+        );
+
+        // 2-1-13) InactiveStopEvent : CallState.INACTIVE > CallState.HANGUP_REQ
+        Assert.assertTrue(
+                callStateHandler.addState(
+                        CallEvent.INACTIVE_STOP_EVENT,
+                        CallState.INACTIVE, CallState.HANGUP_REQ,
+                        callInactiveStopCallBack,
+                        null,
+                        0,
+                        CallEvent.CALL_STOP_DONE_FAIL_EVENT, 1000, 0, CallState.INACTIVE
+                )
+        );
+
+        // 2-1-14) CallStopDoneSuccessEvent : CallState.HANGUP_REQ > CallState.INIT
+        Assert.assertTrue(
+                callStateHandler.addState(
+                        CallEvent.CALL_STOP_DONE_SUCCESS_EVENT,
+                        CallState.HANGUP_REQ, CallState.INIT,
+                        callStopDoneSuccessCallBack,
+                        null,
+                        0,
+                        null, 0, 0
+                )
+        );
+
+        // 2-1-15) CallStopDoneFailEvent : CallState.HANGUP_REQ > CallState.IDLE
+        Assert.assertTrue(
+                callStateHandler.addState(
+                        CallEvent.CALL_STOP_DONE_FAIL_EVENT,
+                        CallState.HANGUP_REQ, CallState.IDLE,
+                        callStopDoneFailCallBack,
+                        null,
+                        0,
+                        null, 0, 0
+                )
+        );
+
+        Assert.assertFalse(callStateHandler.getEventList().isEmpty());
+
+        // 2-2) MediaState
+        // 2-2-1) MediaStartEvent : MediaState.IDLE_STATE > MediaState.ACTIVE_REQUEST
+        Assert.assertTrue(
+                mediaStateHandler.addState(
+                        MediaEvent.MEDIA_START_EVENT,
+                        MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST,
+                        mediaStartCallBack,
+                        null,
+                        0,
+                        MediaEvent.MEDIA_CREATE_FAIL_EVENT, 1000, 0, MediaState.IDLE_STATE
+                )
+        );
+
+        // 2-2-2) MediaCreateSuccessEvent : MediaState.ACTIVE_REQUEST > MediaState.ACTIVE_STATE
+        Assert.assertTrue(
+                mediaStateHandler.addState(
+                        MediaEvent.MEDIA_CREATE_SUCCESS_EVENT,
+                        MediaState.ACTIVE_REQUEST, MediaState.ACTIVE_STATE,
+                        mediaCreateSuccessCallBack,
+                        null,
+                        0,
+                        MediaEvent.MEDIA_STOP_EVENT, 1000, 0, MediaState.ACTIVE_REQUEST
+                )
+        );
+
+        // 2-2-3) MediaCreateFailEvent : MediaState.ACTIVE_REQUEST > MediaState.IDLE_STATE
+        Assert.assertTrue(
+                mediaStateHandler.addState(
+                        MediaEvent.MEDIA_CREATE_FAIL_EVENT,
+                        MediaState.ACTIVE_REQUEST, MediaState.IDLE_STATE,
+                        mediaCreateFailCallBack,
+                        null,
+                        0,
+                        null, 0, 0
+                )
+        );
+
+        // 2-2-4) MediaStopEvent : MediaState.ACTIVE_STATE > MediaState.IDLE_REQUEST
+        Assert.assertTrue(
+                mediaStateHandler.addState(
+                        MediaEvent.MEDIA_STOP_EVENT,
+                        MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST,
+                        mediaStopCallBack,
+                        null,
+                        0,
+                        MediaEvent.MEDIA_DELETE_FAIL_EVENT, 1000, 0, MediaState.ACTIVE_STATE
+                )
+        );
+
+        // 2-2-5) MediaDeleteSuccessEvent : MediaState.IDLE_REQUEST > MediaState.IDLE_STATE
+        Assert.assertTrue(
+                mediaStateHandler.addState(
+                        MediaEvent.MEDIA_DELETE_SUCCESS_EVENT,
+                        MediaState.IDLE_REQUEST,
+                        MediaState.IDLE_STATE,
+                        mediaDeleteSuccessCallBack,
+                        null,
+                        0,
+                        null, 0, 0
+                )
+        );
+
+        // 2-2-6) MediaDeleteFailEvent : MediaState.IDLE_REQUEST > MediaState.ACTIVE_STATE
+        Assert.assertTrue(
+                mediaStateHandler.addState(
+                        MediaEvent.MEDIA_DELETE_FAIL_EVENT,
+                        MediaState.IDLE_REQUEST, MediaState.ACTIVE_STATE,
+                        mediaDeleteFailCallBack,
+                        null,
+                        0,
+                        null, 0, 0
+                )
+        );
 
         Assert.assertFalse(mediaStateHandler.getEventList().isEmpty());
 
         ////////////////////////////////////////////////////////////////////////////
 
+        // 2-3) CallStateHandler EventCondition
+        // 2-3-1) InactiveStopEventCondition : CallEvent.INACTIVE_STOP_EVENT
         callStateHandler.addEventCondition(
                 new InactiveStopEventCondition(
                         callStateHandler.getEvent(CallEvent.INACTIVE_STOP_EVENT)
                 )
         );
 
+        // 2-3-2) CallStopDoneSuccessEventCondition : CallEvent.CALL_STOP_DONE_SUCCESS_EVENT
         callStateHandler.addEventCondition(
                 new CallStopDoneSuccessEventCondition(
                         callStateHandler.getEvent(CallEvent.CALL_STOP_DONE_SUCCESS_EVENT)
                 )
         );
 
+        // 2-4) MediaStateHandler EventCondition
+        // 2-4-1) MediaDeleteSuccessEventCondition : MediaEvent.MEDIA_DELETE_SUCCESS_EVENT
         mediaStateHandler.addEventCondition(
                 new MediaDeleteSuccessEventCondition(
                         mediaStateHandler.getEvent(MediaEvent.MEDIA_DELETE_SUCCESS_EVENT)
                 )
         );
 
-        StateManager.getInstance().addStateScheduler(callStateHandler, 100);
-        StateManager.getInstance().addStateScheduler(mediaStateHandler, 100);
+        // 2-5) CallStateHandler StateScheduler
+        StateTaskManager.getInstance().addStateScheduler(callStateHandler, 100);
+
+        // 2-6) MediaStateHandler StateScheduler
+        StateTaskManager.getInstance().addStateScheduler(mediaStateHandler, 100);
     }
 
     public void stop () {
         StateManager stateManager = StateManager.getInstance();
 
-        StateManager.getInstance().removeStateScheduler(CallState.CALL_STATE_NAME);
-        StateManager.getInstance().removeStateScheduler(MediaState.MEDIA_STATE_NAME);
+        StateTaskManager.getInstance().removeStateScheduler(CallState.CALL_STATE_NAME);
+        StateTaskManager.getInstance().removeStateScheduler(MediaState.MEDIA_STATE_NAME);
 
         stateManager.removeStateHandler(CallState.CALL_STATE_NAME);
         stateManager.removeStateHandler(MediaState.MEDIA_STATE_NAME);

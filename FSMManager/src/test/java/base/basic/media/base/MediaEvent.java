@@ -1,8 +1,8 @@
 package base.basic.media.base;
 
 /**
- * @class
- * @brief
+ * @class public class MediaEvent
+ * @brief MediaEvent class
  */
 public class MediaEvent {
 

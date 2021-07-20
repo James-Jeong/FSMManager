@@ -24,13 +24,6 @@ public class OfferEarlyNegoCallBack extends CallBack {
 
     @Override
     public Object callBackFunc(Object... object) {
-        if (object.length == 0) {
-            return null;
-        }
-
-        /*CallInfo callInfo = (CallInfo) object[0];
-        if (callInfo == null) { return null; }*/
-
         StateUnit stateUnit = getCurStateUnit();
         if (stateUnit == null) { return null; }
 
@@ -46,6 +39,7 @@ public class OfferEarlyNegoCallBack extends CallBack {
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
+                false,
                 MediaState.ACTIVE_REQUEST
         );
     }
