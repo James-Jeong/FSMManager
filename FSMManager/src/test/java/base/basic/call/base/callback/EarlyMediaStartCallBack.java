@@ -39,7 +39,6 @@ public class EarlyMediaStartCallBack extends CallBack {
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_CREATE_SUCCESS_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                false,
                 MediaState.ACTIVE_STATE
         );
     }

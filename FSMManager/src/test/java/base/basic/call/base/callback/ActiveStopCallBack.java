@@ -39,7 +39,6 @@ public class ActiveStopCallBack extends CallBack {
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_STOP_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                false,
                 MediaState.IDLE_REQUEST
         );
     }

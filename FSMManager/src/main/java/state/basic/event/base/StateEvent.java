@@ -1,6 +1,7 @@
 package state.basic.event.base;
 
 import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * @class public class StateEvent
@@ -12,16 +13,13 @@ public class StateEvent {
     // Event name
     private final String name;
     // From state
-    private final String fromState;
+    private final HashSet<String> fromStateSet;
     // To state
     private final String toState;
     // Success CallBack
     private final CallBack successCallBack;
-
     // Fail CallBack
     private final CallBack failCallBack;
-    // Event Retry Count
-    private final int eventRetryCount;
 
     // Next event
     private final String nextEvent;
@@ -35,21 +33,19 @@ public class StateEvent {
     ////////////////////////////////////////////////////////////////////////////////
 
     public StateEvent(String name,
-                      String fromState,
+                      HashSet<String> fromStateSet,
                       String toState,
                       CallBack successCallBack,
                       CallBack failCallBack,
-                      int eventRetryCount,
                       String nextEvent,
                       int delay,
                       int nextEventRetryCount,
                       Object... nextEventCallBackParams) {
         this.name = name;
-        this.fromState = fromState;
+        this.fromStateSet = fromStateSet;
         this.toState = toState;
         this.successCallBack = successCallBack;
         this.failCallBack = failCallBack;
-        this.eventRetryCount = Math.max(eventRetryCount, 0);
         this.nextEvent = nextEvent;
         this.nextEventInterval = Math.max(delay, 0);
         this.nextEventRetryCount = Math.max(nextEventRetryCount, 0);
@@ -62,8 +58,8 @@ public class StateEvent {
         return name;
     }
 
-    public String getFromState() {
-        return fromState;
+    public HashSet<String> getFromStateSet() {
+        return fromStateSet;
     }
 
     public String getToState() {
@@ -76,10 +72,6 @@ public class StateEvent {
 
     public CallBack getFailCallBack() {
         return failCallBack;
-    }
-
-    public int getEventRetryCount() {
-        return eventRetryCount;
     }
 
     public String getNextEvent() {
@@ -102,7 +94,7 @@ public class StateEvent {
     public String toString() {
         return "StateEvent{" +
                 "name='" + name + '\'' +
-                ", fromState='" + fromState + '\'' +
+                ", fromStateSet='" + fromStateSet + '\'' +
                 ", toState='" + toState + '\'' +
                 ", nextEvent='" + nextEvent + '\'' +
                 ", nextEventInterval=" + nextEventInterval +

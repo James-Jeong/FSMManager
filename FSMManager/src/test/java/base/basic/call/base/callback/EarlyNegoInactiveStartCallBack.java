@@ -41,7 +41,6 @@ public class EarlyNegoInactiveStartCallBack extends CallBack {
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_CREATE_FAIL_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                false,
                 MediaState.IDLE_STATE
         );
     }

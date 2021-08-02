@@ -56,7 +56,6 @@ public class BasicMediaStateTest {
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                false,
                 MediaState.ACTIVE_REQUEST
         );
     }
@@ -68,7 +67,6 @@ public class BasicMediaStateTest {
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_STOP_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                false,
                 MediaState.IDLE_REQUEST
         );
     }
@@ -80,7 +78,6 @@ public class BasicMediaStateTest {
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_CREATE_SUCCESS_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                false,
                 MediaState.ACTIVE_STATE
         );
     }
@@ -92,7 +89,6 @@ public class BasicMediaStateTest {
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_CREATE_FAIL_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                false,
                 MediaState.IDLE_STATE
         );
     }
@@ -104,7 +100,6 @@ public class BasicMediaStateTest {
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_DELETE_SUCCESS_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                false,
                 MediaState.IDLE_STATE
         );
     }
@@ -116,7 +111,6 @@ public class BasicMediaStateTest {
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_DELETE_FAIL_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                false,
                 MediaState.ACTIVE_STATE
         );
     }

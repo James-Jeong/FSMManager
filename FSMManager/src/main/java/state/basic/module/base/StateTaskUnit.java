@@ -2,10 +2,10 @@ package state.basic.module.base;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import state.basic.event.retry.RetryManager;
+import state.basic.event.retry.base.RetryStatus;
 import state.basic.module.StateHandler;
 import state.basic.module.StateTaskManager;
-import state.basic.module.retry.RetryManager;
-import state.basic.module.retry.base.RetryStatus;
 import state.basic.unit.StateUnit;
 
 /**
@@ -56,10 +56,9 @@ public class StateTaskUnit extends AbstractStateTaskUnit {
         StateTaskManager stateTaskManager = StateTaskManager.getInstance();
 
         // 1) 지정한 이벤트 실행
-        stateHandler.fire(
+        stateHandler.retry(
                 event,
                 stateUnit,
-                true,
                 params
         );
 
@@ -67,7 +66,7 @@ public class StateTaskUnit extends AbstractStateTaskUnit {
 
         // 2) 재시도 진행 중이면, 동일한 StateTaskUnit 정보로 StateTaskUnit 을 스케줄링한다.
         RetryManager retryManager = stateTaskManager.getRetryManager();
-        RetryStatus retryStatus = retryManager.checkRetry(name);
+        RetryStatus retryStatus = retryManager.getRetryStatus(name);
 
         if (retryStatus == RetryStatus.ONGOING) {
             stateTaskManager.addStateTaskUnit(

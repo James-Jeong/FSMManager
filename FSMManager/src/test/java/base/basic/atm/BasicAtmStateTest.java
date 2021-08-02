@@ -54,7 +54,6 @@ public class BasicAtmStateTest {
                 AtmState.IDLE, AtmState.READY,
                 null,
                 null,
-                0,
                 AtmEvent.INSERT_CARD_FAIL, 1000, 0
         );
 
@@ -64,7 +63,6 @@ public class BasicAtmStateTest {
                 AtmState.ERROR, AtmState.IDLE,
                 null,
                 null,
-                0,
                 null, 0, 0
         );
 
@@ -74,7 +72,6 @@ public class BasicAtmStateTest {
                 AtmState.READY, AtmState.CARD_READ,
                 null,
                 null,
-                0,
                 AtmEvent.READ_CARD_FAIL, 1000, 0
         );
 
@@ -84,7 +81,6 @@ public class BasicAtmStateTest {
                 AtmState.READY , AtmState.IDLE,
                 null,
                 null,
-                0,
                 null, 0, 0
         );
 
@@ -94,7 +90,6 @@ public class BasicAtmStateTest {
                 AtmState.CARD_READ, AtmState.PIN_ENTRY,
                 null,
                 null,
-                0,
                 AtmEvent.INPUT_PIN_FAIL, 1000, 0
         );
 
@@ -104,7 +99,6 @@ public class BasicAtmStateTest {
                 AtmState.CARD_READ , AtmState.ERROR,
                 null,
                 null,
-                0,
                 null, 0, 0
         );
 
@@ -114,7 +108,6 @@ public class BasicAtmStateTest {
                 AtmState.PIN_ENTRY, AtmState.VERIFICATION,
                 new InputPinCallBack(InputPinCallBack.class.getSimpleName()),
                 null,
-                0,
                 AtmEvent.VERIFY_ACCOUNT_WRONG, 1000, 0
         );
 
@@ -124,7 +117,6 @@ public class BasicAtmStateTest {
                 AtmState.PIN_ENTRY , AtmState.ERROR,
                 null,
                 null,
-                0,
                 null, 0, 0
         );
 
@@ -134,7 +126,6 @@ public class BasicAtmStateTest {
                 AtmState.VERIFICATION, AtmState.SESSION,
                 null,
                 null,
-                0,
                 null, 0, 0
         );
 
@@ -144,7 +135,6 @@ public class BasicAtmStateTest {
                 AtmState.VERIFICATION , AtmState.PIN_ENTRY,
                 null,
                 null,
-                0,
                 null, 0, 0
         );
 
@@ -154,7 +144,6 @@ public class BasicAtmStateTest {
                 AtmState.VERIFICATION , AtmState.ERROR,
                 null,
                 null,
-                0,
                 null, 0, 0
         );
 
@@ -164,7 +153,6 @@ public class BasicAtmStateTest {
                 AtmState.SESSION , AtmState.IDLE,
                 null,
                 null,
-                0,
                 null, 0, 0
         );
 

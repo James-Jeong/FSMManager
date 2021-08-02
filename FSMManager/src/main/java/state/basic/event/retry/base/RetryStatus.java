@@ -1,4 +1,4 @@
-package state.basic.module.retry.base;
+package state.basic.event.retry.base;
 
 /**
  * @class public enum RetryStatus

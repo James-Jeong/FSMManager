@@ -39,7 +39,6 @@ public class OfferEarlyNegoCallBack extends CallBack {
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                false,
                 MediaState.ACTIVE_REQUEST
         );
     }

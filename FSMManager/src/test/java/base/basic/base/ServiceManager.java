@@ -87,7 +87,6 @@ public class ServiceManager {
                         CallState.INIT, CallState.OFFER,
                         callStartCallBack,
                         failCallBack,
-                        0,
                         CallEvent.CALL_FAIL_EVENT,  1000, 3, CallState.INIT
                 )
         );
@@ -99,7 +98,6 @@ public class ServiceManager {
                         CallState.OFFER, CallState.INIT,
                         callFailCallBack,
                         null,
-                        0,
                         null, 0, 0
                 )
         );
@@ -111,7 +109,6 @@ public class ServiceManager {
                         CallState.OFFER, CallState.EARLY_NEGO_REQ,
                         offerEarlyNegoCallBack,
                         null,
-                        0,
                         CallEvent.EARLY_NEGO_INACTIVE_START_EVENT, 1000, 0, CallState.OFFER
                 )
         );
@@ -123,7 +120,6 @@ public class ServiceManager {
                         CallState.OFFER, CallState.NEGO_REQ,
                         offerNegoCallBack,
                         null,
-                        0,
                         CallEvent.NEGO_INACTIVE_START_EVENT,1000, 0, CallState.OFFER
                 )
         );
@@ -135,7 +131,6 @@ public class ServiceManager {
                         CallState.OFFER, CallState.HANGUP_REQ,
                         callOfferStopCallBack,
                         null,
-                        0,
                         null, 0, 0
                 )
         );
@@ -147,7 +142,6 @@ public class ServiceManager {
                         CallState.EARLY_NEGO_REQ, CallState.EARLY_MEDIA,
                         earlyMediaStartCallBack,
                         null,
-                        0,
                         CallEvent.EARLY_MEDIA_STOP_EVENT, 1000, 0, CallState.EARLY_NEGO_REQ
                 )
         );
@@ -159,7 +153,6 @@ public class ServiceManager {
                         CallState.EARLY_NEGO_REQ, CallState.INACTIVE,
                         earlyNegoInactiveStartCallBack,
                         null,
-                        0,
                         null, 0, 0
                 )
         );
@@ -171,7 +164,6 @@ public class ServiceManager {
                         CallState.EARLY_MEDIA, CallState.NEGO_REQ,
                         callEarlyNegoNegoStartCallBack,
                         null,
-                        0,
                         CallEvent.NEGO_INACTIVE_START_EVENT, 1000, 0, CallState.EARLY_MEDIA
                 )
         );
@@ -183,7 +175,6 @@ public class ServiceManager {
                         CallState.EARLY_MEDIA, CallState.HANGUP_REQ,
                         earlyMediaStopCallBack,
                         null,
-                        0,
                         CallEvent.CALL_STOP_DONE_FAIL_EVENT, 1000, 0, CallState.EARLY_MEDIA
                 )
         );
@@ -195,7 +186,6 @@ public class ServiceManager {
                         CallState.NEGO_REQ, CallState.ACTIVE,
                         activeStartCallBack,
                         null,
-                        0,
                         CallEvent.ACTIVE_STOP_EVENT, 1000, 0, CallState.NEGO_REQ
                 )
         );
@@ -207,7 +197,6 @@ public class ServiceManager {
                         CallState.NEGO_REQ, CallState.INACTIVE,
                         negoInactiveStartCallBack,
                         null,
-                        0,
                         null, 0, 0
                 )
         );
@@ -219,7 +208,6 @@ public class ServiceManager {
                         CallState.ACTIVE, CallState.HANGUP_REQ,
                         activeStopCallBack,
                         null,
-                        0,
                         CallEvent.CALL_STOP_DONE_FAIL_EVENT, 1000, 0, CallState.ACTIVE
                 )
         );
@@ -231,7 +219,6 @@ public class ServiceManager {
                         CallState.INACTIVE, CallState.HANGUP_REQ,
                         callInactiveStopCallBack,
                         null,
-                        0,
                         CallEvent.CALL_STOP_DONE_FAIL_EVENT, 1000, 0, CallState.INACTIVE
                 )
         );
@@ -243,7 +230,6 @@ public class ServiceManager {
                         CallState.HANGUP_REQ, CallState.INIT,
                         callStopDoneSuccessCallBack,
                         null,
-                        0,
                         null, 0, 0
                 )
         );
@@ -255,7 +241,6 @@ public class ServiceManager {
                         CallState.HANGUP_REQ, CallState.IDLE,
                         callStopDoneFailCallBack,
                         null,
-                        0,
                         null, 0, 0
                 )
         );
@@ -270,7 +255,6 @@ public class ServiceManager {
                         MediaState.IDLE_STATE, MediaState.ACTIVE_REQUEST,
                         mediaStartCallBack,
                         null,
-                        0,
                         MediaEvent.MEDIA_CREATE_FAIL_EVENT, 1000, 0, MediaState.IDLE_STATE
                 )
         );
@@ -282,7 +266,6 @@ public class ServiceManager {
                         MediaState.ACTIVE_REQUEST, MediaState.ACTIVE_STATE,
                         mediaCreateSuccessCallBack,
                         null,
-                        0,
                         MediaEvent.MEDIA_STOP_EVENT, 1000, 0, MediaState.ACTIVE_REQUEST
                 )
         );
@@ -294,7 +277,6 @@ public class ServiceManager {
                         MediaState.ACTIVE_REQUEST, MediaState.IDLE_STATE,
                         mediaCreateFailCallBack,
                         null,
-                        0,
                         null, 0, 0
                 )
         );
@@ -306,7 +288,6 @@ public class ServiceManager {
                         MediaState.ACTIVE_STATE, MediaState.IDLE_REQUEST,
                         mediaStopCallBack,
                         null,
-                        0,
                         MediaEvent.MEDIA_DELETE_FAIL_EVENT, 1000, 0, MediaState.ACTIVE_STATE
                 )
         );
@@ -319,7 +300,6 @@ public class ServiceManager {
                         MediaState.IDLE_STATE,
                         mediaDeleteSuccessCallBack,
                         null,
-                        0,
                         null, 0, 0
                 )
         );
@@ -331,7 +311,6 @@ public class ServiceManager {
                         MediaState.IDLE_REQUEST, MediaState.ACTIVE_STATE,
                         mediaDeleteFailCallBack,
                         null,
-                        0,
                         null, 0, 0
                 )
         );

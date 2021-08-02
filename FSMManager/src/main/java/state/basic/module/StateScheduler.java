@@ -8,6 +8,7 @@ import state.basic.module.base.AbstractStateTaskUnit;
 import state.basic.module.base.EventCondition;
 import state.basic.unit.StateUnit;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +52,7 @@ public class StateScheduler extends AbstractStateTaskUnit {
 
                 StateEvent stateEvent = eventCondition.getStateEvent();
                 if (stateEvent == null) { continue; }
-                String fromState = stateEvent.getFromState();
+                HashSet<String> fromStateSet = stateEvent.getFromStateSet();
 
                 // 2) 현재 StateManager 에 등록된 StateUnit Map 을 가져온다.
                 Map<String, StateUnit> stateUnitMap = stateManager.cloneStateUnitMap();
@@ -64,15 +65,14 @@ public class StateScheduler extends AbstractStateTaskUnit {
                     if (!stateUnit.getHandlerName().equals(handlerName)) { continue; }
 
                     eventCondition.setCurStateUnit(stateUnit);
-                    if (stateUnit.getCurState().equals(fromState) && eventCondition.checkCondition()) {
+                    if (fromStateSet.contains(stateUnit.getCurState()) && eventCondition.checkCondition()) {
                         logger.info("({}) Event is triggered by scheduler. (event={}, stateUnit={})",
                                 handlerName, stateEvent, stateUnit
                         );
 
                         stateHandler.fire(
                                 stateEvent.getName(),
-                                stateUnit,
-                                false
+                                stateUnit
                         );
                     }
                 }

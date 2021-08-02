@@ -30,7 +30,7 @@ public class BasicCallStateTest {
     public void testStart () {
         SessionManager sessionManager = SessionManager.getInstance();
 
-/*        sessionManager.createCall("Call1", "01012345678", "01056781234");
+        sessionManager.createCall("Call1", "01012345678", "01056781234");
         CallInfo callInfo1 = sessionManager.getCall("Call1");
         normalTest(callInfo1);
 
@@ -40,15 +40,14 @@ public class BasicCallStateTest {
 
         sessionManager.createCall("Call3", "01056781234", "01012345678");
         CallInfo callInfo3 = sessionManager.getCall("Call3");
-        scheduleTest(callInfo3);*/
-
+        scheduleTest(callInfo3);
         sessionManager.createCall("Call4", "01056781234", "01012345678");
         CallInfo callInfo4 = sessionManager.getCall("Call4");
         duplicatedFireTest(callInfo4);
 
-        //sessionManager.removeCall("Call1");
-        //sessionManager.removeCall("Call2");
-        //sessionManager.removeCall("Call3");
+        sessionManager.removeCall("Call1");
+        sessionManager.removeCall("Call2");
+        sessionManager.removeCall("Call3");
         sessionManager.removeCall("Call4");
     }
 
@@ -61,7 +60,6 @@ public class BasicCallStateTest {
         return callStateHandler.fire(
                 CallEvent.CALL_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                false,
                 CallState.OFFER
         );
     }
@@ -73,7 +71,6 @@ public class BasicCallStateTest {
         return callStateHandler.fire(
                 CallEvent.OFFER_EARLY_NEGO_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                false,
                 callInfo
         );
     }
@@ -85,7 +82,6 @@ public class BasicCallStateTest {
         return callStateHandler.fire(
                 CallEvent.EARLY_MEDIA_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                false,
                 callInfo
         );
     }
@@ -97,7 +93,6 @@ public class BasicCallStateTest {
         return callStateHandler.fire(
                 CallEvent.ACTIVE_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                false,
                 callInfo
         );
     }
@@ -109,7 +104,6 @@ public class BasicCallStateTest {
         return callStateHandler.fire(
                 CallEvent.EARLY_NEGO_INACTIVE_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                false,
                 callInfo
         );
     }
@@ -121,7 +115,6 @@ public class BasicCallStateTest {
         return callStateHandler.fire(
                 CallEvent.NEGO_INACTIVE_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                false,
                 callInfo
         );
     }
@@ -133,7 +126,6 @@ public class BasicCallStateTest {
         return callStateHandler.fire(
                 CallEvent.OFFER_NEGO_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                false,
                 callInfo
         );
     }
@@ -145,7 +137,6 @@ public class BasicCallStateTest {
         return callStateHandler.fire(
                 CallEvent.EARLY_MEDIA_NEGO_START_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                false,
                 CallState.NEGO_REQ
         );
     }
@@ -157,7 +148,6 @@ public class BasicCallStateTest {
         return callStateHandler.fire(
                 CallEvent.OFFER_STOP_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                false,
                 CallState.HANGUP_REQ
         );
     }
@@ -169,7 +159,6 @@ public class BasicCallStateTest {
         return callStateHandler.fire(
                 CallEvent.EARLY_MEDIA_STOP_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                false,
                 callInfo
         );
     }
@@ -181,7 +170,6 @@ public class BasicCallStateTest {
         return callStateHandler.fire(
                 CallEvent.ACTIVE_STOP_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                false,
                 callInfo
         );
     }
@@ -193,7 +181,6 @@ public class BasicCallStateTest {
         return callStateHandler.fire(
                 CallEvent.CALL_STOP_DONE_SUCCESS_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                false,
                 callInfo
         );
     }
@@ -205,7 +192,6 @@ public class BasicCallStateTest {
         return callStateHandler.fire(
                 CallEvent.CALL_STOP_DONE_FAIL_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()),
-                false,
                 callInfo
         );
     }
@@ -278,7 +264,7 @@ public class BasicCallStateTest {
         Assert.assertEquals(CallState.OFFER, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCurState());
         Assert.assertEquals(CallState.OFFER, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getSuccessCallBackResult());
 
-        TestUtil.sleep(2000);
+        TestUtil.sleep(5000);
 
         Assert.assertEquals(CallState.OFFER, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getPrevState());
         Assert.assertEquals(CallState.INIT, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCurState());
@@ -339,15 +325,16 @@ public class BasicCallStateTest {
         // 1) OFFER > OFFER : Duplicated event is occurred!
         //Assert.assertEquals(CallState.OFFER, callStart(callInfo));
 
-        TestUtil.sleep(1500);
+        //TestUtil.sleep(10000);
+        TestUtil.sleep(5000);
 
         // 2) OFFER > EARLY_NEGO_REQ
-        Assert.assertEquals(CallState.EARLY_NEGO_REQ, offerEarlyNegoStart(callInfo));
-        Assert.assertEquals(CallState.OFFER, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getPrevState());
-        Assert.assertEquals(CallState.EARLY_NEGO_REQ, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCurState());
-        Assert.assertEquals(MediaState.ACTIVE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getSuccessCallBackResult());
+        //Assert.assertEquals(CallState.EARLY_NEGO_REQ, offerEarlyNegoStart(callInfo));
+        //Assert.assertEquals(CallState.OFFER, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getPrevState());
+        //Assert.assertEquals(CallState.EARLY_NEGO_REQ, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getCurState());
+        //Assert.assertEquals(MediaState.ACTIVE_REQUEST, StateManager.getInstance().getStateUnit(callInfo.getSipStateUnitName()).getSuccessCallBackResult());
 
-        TestUtil.sleep(1500);
+        //TestUtil.sleep(1500);
     }
 
 }

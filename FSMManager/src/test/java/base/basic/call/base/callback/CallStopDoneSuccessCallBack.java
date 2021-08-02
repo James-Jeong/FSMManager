@@ -39,7 +39,6 @@ public class CallStopDoneSuccessCallBack extends CallBack {
         return mediaStateHandler.fire(
                 MediaEvent.MEDIA_DELETE_SUCCESS_EVENT,
                 StateManager.getInstance().getStateUnit(callInfo.getMediaStateUnitName()),
-                false,
                 MediaState.IDLE_STATE
         );
     }

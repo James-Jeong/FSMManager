@@ -214,9 +214,9 @@ public class StateUnit {
     ////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @fn public Object getCallBackResult()
-     * @brief CallBack 실행 결과를 반환하는 함수
-     * @return CallBack 결과값
+     * @fn public Object setSuccessCallBackResult()
+     * @brief Success CallBack 실행 결과를 반환하는 함수
+     * @return Success CallBack 결과값
      */
     public Object getSuccessCallBackResult() {
         try {
@@ -228,9 +228,9 @@ public class StateUnit {
     }
 
     /**
-     * @fn public void setCallBackResult(Object result)
-     * @brief CallBack 실행 결과를 저장하는 함수
-     * @param result 저장할 CallBack 결과값
+     * @fn public void setSuccessCallBackResult(Object result)
+     * @brief Success CallBack 실행 결과를 저장하는 함수
+     * @param result 저장할 Success CallBack 결과값
      */
     public void setSuccessCallBackResult(Object result) {
         try {
