@@ -1,12 +1,12 @@
 package state.basic.module.base;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import state.basic.event.retry.RetryManager;
 import state.basic.event.retry.base.RetryStatus;
 import state.basic.module.StateHandler;
 import state.basic.module.StateTaskManager;
 import state.basic.unit.StateUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @class public class StateTaskUnit extends AbstractStateTaskUnit
@@ -19,47 +19,44 @@ public class StateTaskUnit extends AbstractStateTaskUnit {
 
     // Name
     private final String name;
+    // StateTaskManager
+    private final StateTaskManager stateTaskManager;
     // StateHandler
     private final StateHandler stateHandler;
     // Event
     private final String event;
     // StateUnit
     private final StateUnit stateUnit;
-    // Parameters for the event
-    private final Object[] params;
 
     ////////////////////////////////////////////////////////////////////////////////
 
     public StateTaskUnit(String name,
+                         StateTaskManager stateTaskManager,
                          StateHandler stateHandler,
                          String event,
                          StateUnit stateUnit,
-                         int interval,
-                         Object... params) {
+                         int interval) {
         super(interval);
 
         this.name = name;
+        this.stateTaskManager = stateTaskManager;
         this.stateHandler = stateHandler;
         this.event = event;
         this.stateUnit = stateUnit;
-        this.params = params;
     }
 
     ////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public void run() {
-        logger.info("({}) StateTaskUnit is started. (event={}, stateUnit={}, delay={})",
+        logger.debug("({}) StateTaskUnit is started. (event={}, stateUnit={}, delay={})",
                 stateHandler.getName(), event, stateUnit, getInterval()
         );
 
-        StateTaskManager stateTaskManager = StateTaskManager.getInstance();
-
         // 1) 지정한 이벤트 실행
-        stateHandler.retry(
+        stateHandler.handle(
                 event,
-                stateUnit,
-                params
+                stateUnit
         );
 
         stateTaskManager.removeStateTaskUnit(stateHandler.getName(), name);
@@ -74,11 +71,11 @@ public class StateTaskUnit extends AbstractStateTaskUnit {
                     name,
                     new StateTaskUnit(
                             name,
+                            stateTaskManager,
                             stateHandler,
                             event,
                             stateUnit,
-                            getInterval(),
-                            params
+                            getInterval()
                     ),
                     0
             );

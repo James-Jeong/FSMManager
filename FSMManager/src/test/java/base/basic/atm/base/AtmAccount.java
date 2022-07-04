@@ -21,6 +21,7 @@ public class AtmAccount {
 
     private final AtomicBoolean isVerified = new AtomicBoolean(false);
     private final AtomicInteger verificationWrongCount = new AtomicInteger(0);
+    private String pinString = null;
 
     public AtmAccount(String id, String name, String address, String phoneNumber) {
         this.id = id;
@@ -80,4 +81,11 @@ public class AtmAccount {
         return getVerificationWrongCount() >= MAX_VERIFICATION_WRONG_COUNT;
     }
 
+    public String getPinString() {
+        return pinString;
+    }
+
+    public void setPinString(String pinString) {
+        this.pinString = pinString;
+    }
 }

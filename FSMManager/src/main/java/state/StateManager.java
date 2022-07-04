@@ -29,6 +29,9 @@ public class StateManager {
     // Squirrel FSM Map
     private final HashMap<String, FsmContainer> fsmMap = new HashMap<>();
 
+    // StateTaskManager
+    private final StateTaskManager stateTaskManager;
+
     // StateHandler Map
     private final HashMap<String, StateHandler> stateHandlerMap = new HashMap<>();
 
@@ -46,8 +49,8 @@ public class StateManager {
      * @fn public StateManager()
      * @brief StateManager 생성자 함수
      */
-    public StateManager() {
-        // Nothing
+    private StateManager() {
+        stateTaskManager = new StateTaskManager(this, taskThreadMaxCount);
     }
 
     /**
@@ -72,7 +75,7 @@ public class StateManager {
     }
 
     public void stop () {
-        StateTaskManager.getInstance().stop();
+        stateTaskManager.stop();
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -398,7 +401,7 @@ public class StateManager {
     public void addStateHandler (String name) {
         synchronized (stateHandlerMap) {
             if (stateHandlerMap.get(name) != null) { return; }
-            stateHandlerMap.putIfAbsent(name, new StateHandler(name));
+            stateHandlerMap.putIfAbsent(name, new StateHandler(stateTaskManager, name));
         }
     }
 
@@ -437,7 +440,7 @@ public class StateManager {
             int totalSize = 0;
 
             for (StateHandler stateHandler : stateHandlerMap.values()) {
-                if (stateHandler == null) { continue; }
+                if (    stateHandler == null) { continue; }
                 totalSize += stateHandler.getTotalEventSize();
             }
 
@@ -446,6 +449,10 @@ public class StateManager {
     }
 
     ////////////////////////////////////////////////////////////////////////////////
+
+    public StateTaskManager getStateTaskManager() {
+        return stateTaskManager;
+    }
 
     public int getTaskThreadMaxCount() {
         return taskThreadMaxCount;

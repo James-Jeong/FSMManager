@@ -8,12 +8,13 @@ import base.basic.atm.base.callback.InputPinCallBack;
 import base.basic.atm.base.condition.RunFailEventCondition;
 import base.basic.atm.base.condition.VerificationFailEventCondition;
 import base.basic.atm.base.condition.VerificationWrongEventCondition;
-import org.junit.Assert;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import state.StateManager;
 import state.basic.module.StateHandler;
 import state.basic.module.StateTaskManager;
+import state.basic.unit.StateUnit;
+import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @class public class BasicProcessStateTest
@@ -43,7 +44,7 @@ public class BasicAtmStateTest {
     ////////////////////////////////////////////////////////////////////////////////
 
     public void init () {
-        stateManager.start(1000);
+        StateTaskManager stateTaskManager = stateManager.getStateTaskManager();
 
         stateManager.addStateHandler(AtmState.name);
         StateHandler atmStateHandler = stateManager.getStateHandler(AtmState.name);
@@ -106,7 +107,7 @@ public class BasicAtmStateTest {
         atmStateHandler.addState(
                 AtmEvent.INPUT_PIN,
                 AtmState.PIN_ENTRY, AtmState.VERIFICATION,
-                new InputPinCallBack(InputPinCallBack.class.getSimpleName()),
+                new InputPinCallBack(stateManager, InputPinCallBack.class.getSimpleName()),
                 null,
                 AtmEvent.VERIFY_ACCOUNT_WRONG, 1000, 0
         );
@@ -162,23 +163,24 @@ public class BasicAtmStateTest {
 
         atmStateHandler.addEventCondition(
                 new VerificationWrongEventCondition(
-                        atmStateHandler.getEvent(AtmEvent.VERIFY_ACCOUNT_WRONG)
-                )
+                        stateManager, atmStateHandler.getEvent(AtmEvent.VERIFY_ACCOUNT_WRONG)
+                ),
+                100
         );
 
         atmStateHandler.addEventCondition(
                 new VerificationFailEventCondition(
-                        atmStateHandler.getEvent(AtmEvent.VERIFY_ACCOUNT_FAIL)
-                )
+                        stateManager, atmStateHandler.getEvent(AtmEvent.VERIFY_ACCOUNT_FAIL)
+                ),
+                100
         );
 
         atmStateHandler.addEventCondition(
                 new RunFailEventCondition(
-                        atmStateHandler.getEvent(AtmEvent.RUN_FAIL)
-                )
+                        stateManager, atmStateHandler.getEvent(AtmEvent.RUN_FAIL)
+                ),
+                100
         );
-
-        StateTaskManager.getInstance().addStateScheduler(atmStateHandler, 100);
     }
 
     public void stop () {
@@ -197,33 +199,33 @@ public class BasicAtmStateTest {
 
         // 1) RUN
         Assert.assertEquals(AtmState.READY, runAtm(atmAccount));
-        Assert.assertEquals(AtmState.IDLE, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.READY, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.IDLE, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.READY, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         // 2) INSERT_CARD
         Assert.assertEquals(AtmState.CARD_READ, insertCard(atmAccount));
-        Assert.assertEquals(AtmState.READY, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.CARD_READ, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.READY, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.CARD_READ, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         // 3) READ_CARD
         Assert.assertEquals(AtmState.PIN_ENTRY, readCard(atmAccount));
-        Assert.assertEquals(AtmState.CARD_READ, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.PIN_ENTRY, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.CARD_READ, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.PIN_ENTRY, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         // 4) INPUT_PIN
         Assert.assertEquals(AtmState.VERIFICATION, inputPin(atmAccount, "1234"));
-        Assert.assertEquals(AtmState.PIN_ENTRY, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.VERIFICATION, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.PIN_ENTRY, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.VERIFICATION, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         // 5) VERIFY_ACCOUNT_SUCCESS
         Assert.assertEquals(AtmState.SESSION, verifyAccountSuccess(atmAccount));
-        Assert.assertEquals(AtmState.VERIFICATION, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.SESSION, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.VERIFICATION, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.SESSION, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         // 6) EXIT
         Assert.assertEquals(AtmState.IDLE, exit(atmAccount));
-        Assert.assertEquals(AtmState.SESSION, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.IDLE, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.SESSION, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.IDLE, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         /////////////////////////////////////////////////////////////
         stateManager.removeStateUnit(atmAccount.getAtmStateUnitId());
@@ -238,15 +240,15 @@ public class BasicAtmStateTest {
 
         // 1) RUN
         Assert.assertEquals(AtmState.READY, runAtm(atmAccount));
-        Assert.assertEquals(AtmState.IDLE, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.READY, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.IDLE, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.READY, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         TestUtil.sleep(2000);
 
         // 2) INSERT_CARD_FAIL
         //Assert.assertEquals(AtmState.CARD_READ, insertCard(atmAccount));
-        Assert.assertEquals(AtmState.READY, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.IDLE, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.READY, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.IDLE, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         /////////////////////////////////////////////////////////////
         stateManager.removeStateUnit(atmAccount.getAtmStateUnitId());
@@ -261,20 +263,19 @@ public class BasicAtmStateTest {
 
         // 1) RUN
         Assert.assertEquals(AtmState.READY, runAtm(atmAccount));
-        Assert.assertEquals(AtmState.IDLE, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.READY, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.IDLE, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.READY, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         // 2) INSERT_CARD
         Assert.assertEquals(AtmState.CARD_READ, insertCard(atmAccount));
-        Assert.assertEquals(AtmState.READY, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.CARD_READ, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.READY, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.CARD_READ, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         TestUtil.sleep(2000);
 
         // 3) READ_CARD_FAIL
-        //Assert.assertEquals(AtmState.PIN_ENTRY, readCard(atmAccount));
-        Assert.assertEquals(AtmState.ERROR, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.IDLE, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.ERROR, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.IDLE, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         /////////////////////////////////////////////////////////////
         stateManager.removeStateUnit(atmAccount.getAtmStateUnitId());
@@ -289,25 +290,25 @@ public class BasicAtmStateTest {
 
         // 1) RUN
         Assert.assertEquals(AtmState.READY, runAtm(atmAccount));
-        Assert.assertEquals(AtmState.IDLE, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.READY, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.IDLE, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.READY, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         // 2) INSERT_CARD
         Assert.assertEquals(AtmState.CARD_READ, insertCard(atmAccount));
-        Assert.assertEquals(AtmState.READY, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.CARD_READ, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.READY, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.CARD_READ, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         // 3) READ_CARD
         Assert.assertEquals(AtmState.PIN_ENTRY, readCard(atmAccount));
-        Assert.assertEquals(AtmState.CARD_READ, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.PIN_ENTRY, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.CARD_READ, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.PIN_ENTRY, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         TestUtil.sleep(2000);
 
         // 4) INPUT_PIN
         //Assert.assertEquals(AtmState.VERIFICATION, inputPin(atmAccount));
-        Assert.assertEquals(AtmState.ERROR, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.IDLE, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.ERROR, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.IDLE, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         /////////////////////////////////////////////////////////////
         stateManager.removeStateUnit(atmAccount.getAtmStateUnitId());
@@ -322,47 +323,47 @@ public class BasicAtmStateTest {
 
         // 1) RUN
         Assert.assertEquals(AtmState.READY, runAtm(atmAccount));
-        Assert.assertEquals(AtmState.IDLE, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.READY, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.IDLE, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.READY, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         // 2) INSERT_CARD
         Assert.assertEquals(AtmState.CARD_READ, insertCard(atmAccount));
-        Assert.assertEquals(AtmState.READY, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.CARD_READ, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.READY, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.CARD_READ, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         // 3) READ_CARD
         Assert.assertEquals(AtmState.PIN_ENTRY, readCard(atmAccount));
-        Assert.assertEquals(AtmState.CARD_READ, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.PIN_ENTRY, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.CARD_READ, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.PIN_ENTRY, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         // 4) INPUT_PIN for 5 times
         Assert.assertEquals(AtmState.VERIFICATION, inputPin(atmAccount, "4321"));
-        Assert.assertEquals(AtmState.PIN_ENTRY, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.VERIFICATION, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.PIN_ENTRY, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.VERIFICATION, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         TestUtil.sleep(500);
 
         Assert.assertEquals(AtmState.VERIFICATION, inputPin(atmAccount, "4321"));
-        Assert.assertEquals(AtmState.PIN_ENTRY, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.VERIFICATION, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.PIN_ENTRY, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.VERIFICATION, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         TestUtil.sleep(500);
 
         Assert.assertEquals(AtmState.VERIFICATION, inputPin(atmAccount, "4321"));
-        Assert.assertEquals(AtmState.PIN_ENTRY, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.VERIFICATION, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.PIN_ENTRY, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.VERIFICATION, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         TestUtil.sleep(500);
 
         Assert.assertEquals(AtmState.VERIFICATION, inputPin(atmAccount, "4321"));
-        Assert.assertEquals(AtmState.PIN_ENTRY, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.VERIFICATION, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.PIN_ENTRY, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.VERIFICATION, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         TestUtil.sleep(500);
 
         Assert.assertEquals(AtmState.VERIFICATION, inputPin(atmAccount, "4321"));
-        Assert.assertEquals(AtmState.PIN_ENTRY, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
-        Assert.assertEquals(AtmState.VERIFICATION, StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
+        Assert.assertEquals(AtmState.PIN_ENTRY, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getPrevState());
+        Assert.assertEquals(AtmState.VERIFICATION, stateManager.getStateUnit(atmAccount.getAtmStateUnitId()).getCurState());
 
         TestUtil.sleep(2000);
 
@@ -376,91 +377,85 @@ public class BasicAtmStateTest {
     ////////////////////////////////////////////////////////////////////////////////
 
     public String runAtm (AtmAccount atmAccount) {
-        logger.info("* ATM is started!");
+        logger.debug("* ATM is started!");
         StateHandler callStateHandler = stateManager.getStateHandler(AtmState.name);
 
         return callStateHandler.fire(
                 AtmEvent.RUN,
-                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()),
-                false
+                stateManager.getStateUnit(atmAccount.getAtmStateUnitId())
         );
     }
 
     public String insertCard (AtmAccount atmAccount) {
-        logger.info("* Insert card!");
+        logger.debug("* Insert card!");
         StateHandler callStateHandler = stateManager.getStateHandler(AtmState.name);
 
         return callStateHandler.fire(
                 AtmEvent.INSERT_CARD,
-                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()),
-                false
+                stateManager.getStateUnit(atmAccount.getAtmStateUnitId())
         );
     }
 
     public String readCard (AtmAccount atmAccount) {
-        logger.info("* Read card!");
+        logger.debug("* Read card!");
         StateHandler callStateHandler = stateManager.getStateHandler(AtmState.name);
 
         return callStateHandler.fire(
                 AtmEvent.READ_CARD,
-                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()),
-                false
+                stateManager.getStateUnit(atmAccount.getAtmStateUnitId())
         );
     }
 
     public String inputPin (AtmAccount atmAccount, String pinString) {
-        logger.info("* Input pin!");
+        logger.debug("* Input pin!");
         StateHandler callStateHandler = stateManager.getStateHandler(AtmState.name);
 
+        StateUnit stateUnit = stateManager.getStateUnit(atmAccount.getAtmStateUnitId());
+        atmAccount.setPinString(pinString);
+        stateUnit.setData(atmAccount);
         return callStateHandler.fire(
                 AtmEvent.INPUT_PIN,
-                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()),
-                false,
-                pinString
+                stateUnit
         );
     }
 
     public String verifyAccountSuccess (AtmAccount atmAccount) {
-        logger.info("* Success to verify the account!");
+        logger.debug("* Success to verify the account!");
         StateHandler callStateHandler = stateManager.getStateHandler(AtmState.name);
 
         return callStateHandler.fire(
                 AtmEvent.VERIFY_ACCOUNT_SUCCESS,
-                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()),
-                false
+                stateManager.getStateUnit(atmAccount.getAtmStateUnitId())
         );
     }
 
     public String verifyAccountWrong (AtmAccount atmAccount) {
-        logger.info("* Fail to verify the account! (Wrong)");
+        logger.debug("* Fail to verify the account! (Wrong)");
         StateHandler callStateHandler = stateManager.getStateHandler(AtmState.name);
 
         return callStateHandler.fire(
                 AtmEvent.VERIFY_ACCOUNT_WRONG,
-                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()),
-                false
+                stateManager.getStateUnit(atmAccount.getAtmStateUnitId())
         );
     }
 
     public String verifyAccountFail (AtmAccount atmAccount) {
-        logger.info("* Fail to verify the account!");
+        logger.debug("* Fail to verify the account!");
         StateHandler callStateHandler = stateManager.getStateHandler(AtmState.name);
 
         return callStateHandler.fire(
                 AtmEvent.VERIFY_ACCOUNT_FAIL,
-                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()),
-                false
+                stateManager.getStateUnit(atmAccount.getAtmStateUnitId())
         );
     }
 
     public String exit (AtmAccount atmAccount) {
-        logger.info("* Exit!");
+        logger.debug("* Exit!");
         StateHandler callStateHandler = stateManager.getStateHandler(AtmState.name);
 
         return callStateHandler.fire(
                 AtmEvent.EXIT,
-                StateManager.getInstance().getStateUnit(atmAccount.getAtmStateUnitId()),
-                false
+                stateManager.getStateUnit(atmAccount.getAtmStateUnitId())
         );
     }
 

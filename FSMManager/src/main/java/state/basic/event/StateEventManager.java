@@ -1,7 +1,5 @@
 package state.basic.event;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import state.basic.event.base.CallBack;
 import state.basic.event.base.StateEvent;
 import state.basic.event.retry.RetryManager;
@@ -11,9 +9,10 @@ import state.basic.module.StateHandler;
 import state.basic.module.StateTaskManager;
 import state.basic.module.base.StateTaskUnit;
 import state.basic.unit.StateUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @class public class StateEventManager
@@ -23,10 +22,10 @@ public class StateEventManager {
 
     private static final Logger logger = LoggerFactory.getLogger(StateEventManager.class);
 
+    private final StateTaskManager stateTaskManager;
+
     // Event Map
     private final HashMap<String, StateEvent> eventMap = new HashMap<>();
-
-    private final ReentrantLock stateLock = new ReentrantLock();
 
     ////////////////////////////////////////////////////////////////////////////////
 
@@ -34,8 +33,8 @@ public class StateEventManager {
      * @fn public StateEventManager()
      * @brief StateEventManager 생성자 함수
      */
-    public StateEventManager() {
-        // Nothing
+    public StateEventManager(StateTaskManager stateTaskManager) {
+        this.stateTaskManager = stateTaskManager;
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -55,7 +54,7 @@ public class StateEventManager {
      * @return 성공 시 true, 실패 시 false 반환
      */
     public boolean addEvent(String event,
-                            HashSet<String> fromStateSet,
+                            Set<String> fromStateSet,
                             String toState,
                             CallBack successCallBack,
                             CallBack failCallBack,
@@ -86,21 +85,21 @@ public class StateEventManager {
         }
 
         synchronized (eventMap) {
-            stateEvent = new StateEvent(
-                    event,
-                    fromStateSet,
-                    toState,
-                    successCallBack,
-                    failCallBack,
-                    nextEvent,
-                    delay,
-                    nextEventRetryCount,
-                    nextEventCallBackParams
-            );
+            stateEvent = new StateEventBuilder()
+                    .setName(event)
+                    .setFromStateSet(fromStateSet)
+                    .setToState(toState)
+                    .setSuccessCallBack(successCallBack)
+                    .setFailCallBack(failCallBack)
+                    .setNextEvent(nextEvent)
+                    .setNextEventInterval(delay)
+                    .setNextEventRetryCount(nextEventRetryCount)
+                    .setNextEventCallBackParams(nextEventCallBackParams)
+                    .build();
 
             boolean result = eventMap.putIfAbsent(event, stateEvent) == null;
             if (result) {
-                logger.info("[{}] Success to add state. (event={}, fromState={}, toState={})",
+                logger.trace("[{}] Success to add state. (event={}, fromState={}, toState={})",
                         ResultCode.SUCCESS_ADD_STATE, stateEvent, fromStateSet, toState
                 );
             } else {
@@ -134,11 +133,11 @@ public class StateEventManager {
         synchronized (eventMap) {
             boolean result = eventMap.remove(event) != null;
             if (result) {
-                logger.info("[{}] Success to remove the from state. (event={})",
+                logger.debug("[{}] Success to remove the from state. (event={})",
                         ResultCode.SUCCESS_REMOVE_STATE, event
                 );
             } else {
-                logger.info("[{}] Fail to remove the from state. (event={})",
+                logger.debug("[{}] Fail to remove the from state. (event={})",
                         ResultCode.FAIL_REMOVE_STATE, event
                 );
             }
@@ -189,10 +188,9 @@ public class StateEventManager {
      * @param event 이벤트 이름
      * @param stateUnit State unit
      * @param isScheduled 스케줄링되어 발생한 이벤트 여부
-     * @param params CallBack 가변 매개변수
      * @return 성공 시 천이 후 상태값 반환, 실패 시 null 또는 천이 전 상태값 반환
      */
-    public String nextState(StateHandler stateHandler, String event, StateUnit stateUnit, boolean isScheduled, Object... params) {
+    public String nextState(StateHandler stateHandler, String event, StateUnit stateUnit, boolean isScheduled) {
         StateEvent stateEvent = getStateEventByEvent(event);
         if (stateEvent == null) {
             logger.warn("[{}] ({}) Fail to find the event. Must define the event. (event={}, stateUnit={})",
@@ -213,48 +211,36 @@ public class StateEventManager {
             return null;
         }
 
-        try {
-            stateLock.lock();
+        String curFromState = null;
+        Set<String> fromStateSet = stateEvent.getFromStateSet();
+        String toState = stateEvent.getToState();
+        String nextEvent = stateEvent.getNextEvent();
+        boolean isRetryOngoing = false;
+        boolean isRetryTransitionCompleted = false;
 
-            HashSet<String> fromStateSet = stateEvent.getFromStateSet();
-            String curFromState = null;
-            String toState = stateEvent.getToState();
-            String nextEvent = stateEvent.getNextEvent();
-            boolean isRetryOngoing = false;
-            boolean isRetryTransitionCompleted = false;
+        try {
+            stateUnit.logicLock.lock();
+            logger.debug("[LOCK<] StateUnit=[{}], lockAddr=[{}]", stateUnit, stateUnit.logicLock);
 
             // From state 가 현재 상태와 같은지 확인
             if (fromStateSet.contains(stateUnit.getCurState())) {
                 curFromState = stateUnit.getCurState();
             }
 
-            // From state 가 현재 상태와 다르면 실패
-            if (curFromState == null) {
-                logger.warn("[{}] ({}) Fail to transit. From state is not matched. (event={}, fromState: cur={}, expected={})",
-                        ResultCode.FAIL_TRANSIT_STATE, stateHandler.getName(), event, stateUnit.getCurState(), fromStateSet
-                );
-
-                // Fail CallBack 실행
-                CallBack failCallBack = stateEvent.getFailCallBack();
-                if (failCallBack != null) {
-                    failCallBack.setCurStateUnit(stateUnit);
-                    stateUnit.setFailCallBackResult(
-                            failCallBack.callBackFunc()
-                    );
-                }
-            }
             // From state 가 현재 상태와 같으면 성공
-            else {
+            if (curFromState != null) {
                 // 1) 상태 천이
                 // 1-1) 현재 이벤트가 스케줄링되어 발생한 이벤트인지 확인
                 if (isScheduled) {
                     // 1-1-1) 재시도 제한 횟수가 0 초과이고, 재시도 진행 횟수가 재시도 제한 횟수와 같거나 크면 상태 천이 수행
-                    RetryManager retryManager = StateTaskManager.getInstance().getRetryManager();
+                    RetryManager retryManager = stateTaskManager.getRetryManager();
                     RetryStatus retryStatus = retryManager.checkRetry(stateUnit.getNextEventKey());
                     if (retryStatus != RetryStatus.ONGOING) {
                         // 마지막 재시도 이벤트인 경우 CallBack 실행하지 않고 상태 천이만 수행한다.
                         stateUnit.setState(curFromState, toState);
-                        isRetryTransitionCompleted = true;
+                        if (retryStatus == RetryStatus.IDLE) {
+                            isRetryTransitionCompleted = true;
+                        }
                     }
                     // 1-1-2) 앞의 경우에 해당되지 않으면, 상태 천이 수행하지 않는다.
                     else {
@@ -265,14 +251,24 @@ public class StateEventManager {
                 else {
                     stateUnit.setState(curFromState, toState);
                 }
+            }
+        } catch (Exception e) {
+            logger.warn("[{}] ({}) Fail to transit. StateEventManager.nextState.Exception (event={}, curState={})",
+                    ResultCode.FAIL_TRANSIT_STATE, stateHandler.getName(), event, stateUnit.getCurState(), e
+            );
+        } finally {
+            stateUnit.logicLock.unlock();
+            logger.debug("[>UNLOCK] StateUnit=[{}], lockAddr=[{}]", stateUnit, stateUnit.logicLock);
 
-                // 재시도 로직 수행 중에는 스케줄링 관련 로직은 수행되지 않는다.
+            // From state 가 현재 상태와 다르면 상태 천이 성공
+            if (curFromState != null) {
+                // 재시도 로직 수행 중이지 않으면 스케줄링 로직 수행
                 if (!isRetryOngoing) {
-                    // 2) Prev Event 취소
+                    // 2) Current Event 취소
                     // 만약 현재 상태가 기대되는 상태 천이의 현재 상태이면
-                    // 이전에 등록된 nextEvent 를 취소시킨다.
+                    // 이전에 등록된 nextEvent (지금 상태 천이된 이벤트) 를 취소시킨다.
                     if (stateUnit.getNextEventKey() != null) {
-                        StateTaskManager.getInstance().removeStateTaskUnit(
+                        stateTaskManager.removeStateTaskUnit(
                                 stateHandler.getName(),
                                 stateUnit.getNextEventKey()
                         );
@@ -283,44 +279,54 @@ public class StateEventManager {
                     // 3) Next Event 추가
                     // 다음 상태에 대해 기대되는 상태 천이(또는 이벤트)가
                     // 일정 시간 이후에 발생하지 않을 경우 지정한 다음 이벤트를 발생시킨다.
+                    // (현재 상태 천이 이벤트는 성공, 다음 상태 천이 이벤트에 대한 스케줄링 진행 (정의되어 있다면))
                     if (nextEvent != null) {
                         int nextEventInterval = stateEvent.getNextEventInterval();
                         int nextEventRetryCount = stateEvent.getNextEventRetryCount();
                         String stateTaskUnitName = stateUnit.setNextEventKey(toState);
 
-                        StateTaskManager.getInstance().addStateTaskUnit(
+                        stateTaskManager.addStateTaskUnit(
                                 stateHandler.getName(),
                                 stateTaskUnitName,
                                 new StateTaskUnit(
                                         stateTaskUnitName,
+                                        stateTaskManager,
                                         stateHandler,
                                         nextEvent,
                                         stateUnit,
-                                        nextEventInterval,
-                                        stateEvent.getNextEventCallBackParams()
+                                        nextEventInterval
                                 ),
                                 nextEventRetryCount
                         );
                     }
                 }
+            }
 
-                // 4) Success CallBack 실행
+            // 4) CallBack 실행
+            // From state 가 현재 상태와 다르면 상태 천이 실패
+            if (curFromState == null) {
+                logger.warn("[{}] ({}) Fail to transit. From state is not matched. (event={}, fromState: cur={}, expected={}, stateUnit={})",
+                        ResultCode.FAIL_TRANSIT_STATE, stateHandler.getName(), event, stateUnit.getCurState(), fromStateSet, stateUnit
+                );
+
+                // Fail CallBack 실행
+                CallBack failCallBack = stateEvent.getFailCallBack();
+                if (failCallBack != null) {
+                    stateUnit.setFailCallBackResult(
+                            failCallBack.callBackFunc(stateUnit)
+                    );
+                }
+            } else {
                 if (!isRetryTransitionCompleted) {
+                    // Success CallBack 실행
                     CallBack successCallBack = stateEvent.getSuccessCallBack();
                     if (successCallBack != null) {
-                        successCallBack.setCurStateUnit(stateUnit);
                         stateUnit.setSuccessCallBackResult(
-                                successCallBack.callBackFunc(params)
+                                successCallBack.callBackFunc(stateUnit)
                         );
                     }
                 }
             }
-        } catch (Exception e) {
-            logger.warn("[{}] ({}) Fail to transit. StateEventManager.nextState.Exception (event={}, curState={})",
-                    ResultCode.FAIL_TRANSIT_STATE, stateHandler.getName(), event, stateUnit.getCurState(), e
-            );
-        } finally {
-            stateLock.unlock();
         }
 
         return stateUnit.getCurState();

@@ -6,6 +6,7 @@ package state.basic.event.retry.base;
  */
 public enum RetryStatus {
 
+    NONE,
     IDLE,
     ONGOING
 

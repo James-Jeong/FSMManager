@@ -1,8 +1,8 @@
 package state.basic.unit;
 
+import state.basic.info.ResultCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import state.basic.info.ResultCode;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -20,32 +20,23 @@ public class StateUnit {
     private final String name;
     // StateHandler 이름
     private final String handlerName;
+    // StateUnit Logic lock
+    public final ReentrantLock logicLock = new ReentrantLock();
 
     private final AtomicBoolean isAlive = new AtomicBoolean(false);
 
     // 바로 이전 상태
     private String prevState = null;
-    private final ReentrantLock prevStateLock = new ReentrantLock();
-
     // 현재 상태
     private String curState;
-    private final ReentrantLock curStateLock = new ReentrantLock();
-
     // 천이 실패 시 실행될 이벤트 키
     private String nextEventKey = null;
-    private final ReentrantLock nextEventKeyLock = new ReentrantLock();
-
     // Success CallBack 결과값
     private Object successCallBackResult = null;
-    private final ReentrantLock successCallBackResultLock = new ReentrantLock();
-
     // Fail CallBack 결과값
     private Object failCallBackResult = null;
-    private final ReentrantLock failCallBackResultLock = new ReentrantLock();
-
     // Spare Data
     private Object data;
-    private final ReentrantLock dataLock = new ReentrantLock();
 
     ////////////////////////////////////////////////////////////////////////////////
 
@@ -54,6 +45,8 @@ public class StateUnit {
         this.handlerName = handlerName;
         this.curState = curState;
         this.data = data;
+
+        logger.debug("[NEW] StateUnit: name=[{}], lockAddr=[{}]", name, logicLock);
     }
 
     /**
@@ -80,12 +73,7 @@ public class StateUnit {
      * @return 기존에 설정된 nextEventKey
      */
     public String getNextEventKey() {
-        try {
-            nextEventKeyLock.lock();
-            return nextEventKey;
-        } finally {
-            nextEventKeyLock.unlock();
-        }
+        return nextEventKey;
     }
 
     /**
@@ -95,13 +83,8 @@ public class StateUnit {
      * @return 새로 설정된 nextEventKey
      */
     public String setNextEventKey(String curState) {
-        try {
-            nextEventKeyLock.lock();
-            this.nextEventKey = makeNextEventKey(curState);
-            return this.nextEventKey;
-        } finally {
-            nextEventKeyLock.unlock();
-        }
+        this.nextEventKey = makeNextEventKey(curState);
+        return this.nextEventKey;
     }
 
     /**
@@ -123,21 +106,12 @@ public class StateUnit {
      * @return data
      */
     public Object getData() {
-        try {
-            dataLock.lock();
-            return data;
-        } finally {
-            dataLock.unlock();
-        }
+        return data;
     }
 
     public void setData(Object data) {
-        try {
-            dataLock.lock();
-            this.data = data;
-        } finally {
-            dataLock.unlock();
-        }
+        this.data = data;
+        logger.debug("({}) StateUnit: data=[{}]", name, data);
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -153,12 +127,7 @@ public class StateUnit {
      * @return 현재 State 이름
      */
     public String getCurState() {
-        try {
-            curStateLock.lock();
-            return curState;
-        } finally {
-            curStateLock.unlock();
-        }
+        return curState;
     }
 
     /**
@@ -166,16 +135,11 @@ public class StateUnit {
      * @brief 현재 State 를 설정하는 함수
      * @param curState 현재 State 이름
      */
-    public void setCurState(String curState) {
-        try {
-            curStateLock.lock();
-            logger.info("[{}] ({}) Cur State is changed. ([{}] > [{}])",
-                    ResultCode.SUCCESS_TRANSIT_STATE, name, getCurState(), curState
-            );
-            this.curState = curState;
-        } finally {
-            curStateLock.unlock();
-        }
+    private void setCurState(String curState) {
+        logger.debug("[{}] ({}) Cur State is changed. ([{}] > [{}])",
+                ResultCode.SUCCESS_TRANSIT_STATE, name, getCurState(), curState
+        );
+        this.curState = curState;
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -186,12 +150,7 @@ public class StateUnit {
      * @return 이전 State 이름
      */
     public String getPrevState() {
-        try {
-            prevStateLock.lock();
-            return prevState;
-        } finally {
-            prevStateLock.unlock();
-        }
+        return prevState;
     }
 
     /**
@@ -199,16 +158,11 @@ public class StateUnit {
      * @brief 이전 State 를 설정하는 함수
      * @param prevState 이전 State 이름
      */
-    public void setPrevState(String prevState) {
-        try {
-            prevStateLock.lock();
-            logger.info("[{}] ({}) Prev State is changed. ([{}] > [{}])",
-                    ResultCode.SUCCESS_TRANSIT_STATE, name, getPrevState(), prevState
-            );
-            this.prevState = prevState;
-        } finally {
-            prevStateLock.unlock();
-        }
+    private void setPrevState(String prevState) {
+        logger.debug("[{}] ({}) Prev State is changed. ([{}] > [{}])",
+                ResultCode.SUCCESS_TRANSIT_STATE, name, getPrevState(), prevState
+        );
+        this.prevState = prevState;
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -219,12 +173,7 @@ public class StateUnit {
      * @return Success CallBack 결과값
      */
     public Object getSuccessCallBackResult() {
-        try {
-            successCallBackResultLock.lock();
-            return successCallBackResult;
-        } finally {
-            successCallBackResultLock.unlock();
-        }
+        return successCallBackResult;
     }
 
     /**
@@ -233,30 +182,15 @@ public class StateUnit {
      * @param result 저장할 Success CallBack 결과값
      */
     public void setSuccessCallBackResult(Object result) {
-        try {
-            successCallBackResultLock.lock();
-            this.successCallBackResult = result;
-        } finally {
-            successCallBackResultLock.unlock();
-        }
+        this.successCallBackResult = result;
     }
 
     public Object getFailCallBackResult() {
-        try {
-            failCallBackResultLock.lock();
-            return failCallBackResult;
-        } finally {
-            failCallBackResultLock.unlock();
-        }
+        return failCallBackResult;
     }
 
     public void setFailCallBackResult(Object failCallBackResult) {
-        try {
-            failCallBackResultLock.lock();
-            this.failCallBackResult = failCallBackResult;
-        } finally {
-            failCallBackResultLock.unlock();
-        }
+        this.failCallBackResult = failCallBackResult;
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -279,9 +213,6 @@ public class StateUnit {
                 ", prevState='" + prevState + '\'' +
                 ", curState='" + curState + '\'' +
                 ", nextEventKey='" + nextEventKey + '\'' +
-                ", successCallBackResult=" + successCallBackResult +
-                ", failCallBackResult=" + failCallBackResult +
-                ", data=" + data +
                 '}';
     }
 }

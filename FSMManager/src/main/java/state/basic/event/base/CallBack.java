@@ -1,5 +1,6 @@
 package state.basic.event.base;
 
+import state.StateManager;
 import state.basic.unit.StateUnit;
 
 /**
@@ -9,40 +10,35 @@ import state.basic.unit.StateUnit;
  */
 public abstract class CallBack {
 
+    private final StateManager stateManager;
     private final String name;
-    
-    private StateUnit curStateUnit = null;
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    protected CallBack(String name) {
+    protected CallBack(StateManager stateManager, String name) {
+        this.stateManager = stateManager;
         this.name = name;
     }
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    public Object callBackFunc(Object... params) {
+    public Object callBackFunc(StateUnit stateUnit) {
         // Must be implemented.
         return null;
+    }
+
+    public StateManager getStateManager() {
+        return stateManager;
     }
 
     public String getName() {
         return name;
     }
 
-    public StateUnit getCurStateUnit() {
-        return curStateUnit;
-    }
-
-    public void setCurStateUnit(StateUnit curStateUnit) {
-        this.curStateUnit = curStateUnit;
-    }
-
     @Override
     public String toString() {
         return "CallBack{" +
                 "name='" + name + '\'' +
-                ", curStateUnit=" + curStateUnit +
                 '}';
     }
 }

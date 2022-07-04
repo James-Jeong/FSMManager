@@ -3,6 +3,8 @@ package state.basic.event.retry.base;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * @class public class RetryUnit
  * @brief RetryUnit class
@@ -18,6 +20,8 @@ public class RetryUnit {
     private int curRetryCount;
     /* Retry Status */
     private RetryStatus retryStatus = RetryStatus.IDLE;
+    /* Retry Unit Lock */
+    private final ReentrantLock retryUnitLock = new ReentrantLock();
 
     ////////////////////////////////////////////////////////////////////////////////
 
@@ -50,12 +54,20 @@ public class RetryUnit {
     }
 
     public void setCurRetryCount(int curRetryCount) {
-        if (this.curRetryCount != curRetryCount) {
-            logger.info("RetryUnit({}): Retry Count is changed. ({} > {})",
-                    name, this.curRetryCount, curRetryCount
-            );
+        try {
+            retryUnitLock.lock();
+
+            if (this.curRetryCount != curRetryCount) {
+                logger.debug("RetryUnit({}): Retry Count is changed. ({} > {})",
+                        name, this.curRetryCount, curRetryCount
+                );
+            }
+            this.curRetryCount = curRetryCount;
+        } catch (Exception e) {
+            logger.warn("RetryUnit.setCurRetryCount.Exception", e);
+        } finally {
+            retryUnitLock.unlock();
         }
-        this.curRetryCount = curRetryCount;
     }
 
     public RetryStatus getRetryStatus() {
@@ -63,12 +75,20 @@ public class RetryUnit {
     }
 
     public void setRetryStatus(RetryStatus retryStatus) {
-        if (this.retryStatus != retryStatus) {
-            logger.info("RetryUnit({}): Retry Status is changed. ({} > {})",
-                    name, this.retryStatus.name(), retryStatus.name()
-            );
+        try {
+            retryUnitLock.lock();
+
+            if (this.retryStatus != retryStatus) {
+                logger.debug("RetryUnit({}): Retry Status is changed. ({} > {})",
+                        name, this.retryStatus.name(), retryStatus.name()
+                );
+            }
+            this.retryStatus = retryStatus;
+        } catch (Exception e) {
+            logger.warn("RetryUnit.setRetryStatus.Exception", e);
+        } finally {
+            retryUnitLock.unlock();
         }
-        this.retryStatus = retryStatus;
     }
 
     @Override

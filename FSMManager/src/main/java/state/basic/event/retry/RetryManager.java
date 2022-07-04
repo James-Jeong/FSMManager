@@ -1,10 +1,10 @@
 package state.basic.event.retry;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import state.basic.event.retry.base.RetryStatus;
 import state.basic.event.retry.base.RetryUnit;
 import state.basic.info.ResultCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,8 +23,6 @@ public class RetryManager {
     private final Map<String, RetryUnit> retryUnitMap = new HashMap<>();
     // Retry Count Map Lock
     private final ReentrantLock retryUnitMapLock = new ReentrantLock();
-    // Retry Unit Lock
-    private final ReentrantLock retryUnitLock = new ReentrantLock();
 
     ////////////////////////////////////////////////////////////////////////////////
 
@@ -50,17 +48,15 @@ public class RetryManager {
             logger.trace("[{}] RetryManager.checkRetry: Not found the RetryUnit. (key={})",
                     ResultCode.FAIL_GET_RETRY_UNIT, key
             );
-            return null;
+            return RetryStatus.NONE;
         } else if (retryUnit.getRetryCountLimit() <= 0) {
             logger.warn("[{}] RetryManager.checkRetry: Retry limit count is not positive. (key={})",
                     ResultCode.NOT_POSITIVE_INTEGER, key
             );
-            return null;
+            return RetryStatus.NONE;
         }
 
         try {
-            retryUnitLock.lock();
-
             int curRetryCount = retryUnit.getCurRetryCount();
             if (curRetryCount < retryUnit.getRetryCountLimit()) {
                 retryUnit.setRetryStatus(RetryStatus.ONGOING);
@@ -71,9 +67,7 @@ public class RetryManager {
 
             return retryUnit.getRetryStatus();
         } catch (Exception e) {
-            return null;
-        } finally {
-            retryUnitLock.unlock();
+            return RetryStatus.NONE;
         }
     }
 
@@ -87,13 +81,9 @@ public class RetryManager {
         }
 
         try {
-            retryUnitLock.lock();
-
             return retryUnit.getRetryStatus();
         } catch (Exception e) {
             return null;
-        } finally {
-            retryUnitLock.unlock();
         }
     }
 
@@ -112,7 +102,7 @@ public class RetryManager {
             retryUnitMapLock.lock();
 
             if (retryUnitMap.putIfAbsent(key, new RetryUnit(key, retryCountLimit, initialRetryCount)) == null) {
-                logger.info("[{}] RetryManager.checkRetry: Success to add a RetryUnit. ({})",
+                logger.debug("[{}] RetryManager.checkRetry: Success to add a RetryUnit. ({})",
                         ResultCode.SUCCESS_ADD_RETRY_UNIT, retryUnitMap.get(key)
                 );
             }
@@ -154,7 +144,7 @@ public class RetryManager {
 
             RetryUnit retryUnit = retryUnitMap.remove(key);
             if (retryUnit != null) {
-                logger.info("[{}] RetryManager.checkRetry: Success to remove the RetryUnit. ({})",
+                logger.debug("[{}] RetryManager.checkRetry: Success to remove the RetryUnit. ({})",
                         ResultCode.SUCCESS_REMOVE_RETRY_UNIT, retryUnit
                 );
                 retryUnit.setRetryStatus(RetryStatus.IDLE);

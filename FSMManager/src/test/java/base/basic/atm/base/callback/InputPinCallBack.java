@@ -3,6 +3,7 @@ package base.basic.atm.base.callback;
 import base.basic.atm.base.AtmAccount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import state.StateManager;
 import state.basic.event.base.CallBack;
 import state.basic.unit.StateUnit;
 
@@ -14,19 +15,18 @@ public class InputPinCallBack extends CallBack {
 
     private static final Logger logger = LoggerFactory.getLogger(InputPinCallBack.class);
 
-    public InputPinCallBack(String name) {
-        super(name);
+    public InputPinCallBack(StateManager stateManager, String name) {
+        super(stateManager, name);
     }
 
     @Override
-    public Object callBackFunc(Object... object) {
-        StateUnit stateUnit = getCurStateUnit();
+    public Object callBackFunc(StateUnit stateUnit) {
         if (stateUnit == null) { return null; }
 
         AtmAccount atmAccount = (AtmAccount) stateUnit.getData();
         if (atmAccount == null) { return null; }
 
-        String pinString = (String) object[0];
+        String pinString = atmAccount.getPinString();
         if (pinString == null) {
             logger.warn("InputPinCallBack: PinString is null.");
             return null;
@@ -43,7 +43,7 @@ public class InputPinCallBack extends CallBack {
             atmAccount.setVerified(true);
         }
 
-        logger.info("InputPinCallBack: id={}, name={}, isVerified={}, verificationWrongCount={}",
+        logger.debug("InputPinCallBack: id={}, name={}, isVerified={}, verificationWrongCount={}",
                 atmAccount.getId(), atmAccount.getName(), atmAccount.isVerified(), curVerificationWrongCount
         );
 

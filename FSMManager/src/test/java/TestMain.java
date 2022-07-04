@@ -1,5 +1,4 @@
-import base.basic.base.ServiceManager;
-import base.basic.call.BasicCallStateTest;
+import base.basic.atm.BasicAtmStateTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -20,22 +19,11 @@ public class TestMain {
         ////////////////////////////////////////////////////////////////////////////////
         // # basic
 
-        ServiceManager serviceManager = ServiceManager.getInstance();
-        serviceManager.start();
-
-        //BasicMediaStateTest basicMediaStateTest = new BasicMediaStateTest();
-        //basicMediaStateTest.testStart();
-
-        BasicCallStateTest basicCallStateTest = new BasicCallStateTest();
-        basicCallStateTest.testStart();
-
-        serviceManager.stop();
-
         ////////////////////////////////////////////////////////////////////////////////
         // # ATM state
 
-        //BasicAtmStateTest basicAtmStateTest = new BasicAtmStateTest();
-        //basicAtmStateTest.testStart();
+        BasicAtmStateTest basicAtmStateTest = new BasicAtmStateTest();
+        basicAtmStateTest.testStart();
 
         ////////////////////////////////////////////////////////////////////////////////
         // # Squirrel FSM

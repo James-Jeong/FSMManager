@@ -1,5 +1,7 @@
 package base.basic.atm.base.condition;
 
+
+import state.StateManager;
 import state.basic.event.base.StateEvent;
 import state.basic.module.base.EventCondition;
 
@@ -9,8 +11,8 @@ import state.basic.module.base.EventCondition;
  */
 public class RunFailEventCondition extends EventCondition {
 
-    public RunFailEventCondition(StateEvent stateEvent) {
-        super(stateEvent);
+    public RunFailEventCondition(StateManager stateManager, StateEvent stateEvent) {
+        super(stateManager, stateEvent);
     }
 
     @Override

@@ -6,7 +6,6 @@ import state.basic.event.base.StateEvent;
 import state.basic.module.base.EventCondition;
 import state.basic.unit.StateUnit;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -18,11 +17,11 @@ import java.util.Map;
  */
 public class StateHandler {
 
+    // StateTaskManager
+    private final StateTaskManager stateTaskManager;
+
     // StateEventManager
     private final StateEventManager stateEventManager;
-
-    // Scheduled event List
-    private final List<EventCondition> eventList = new ArrayList<>();
 
     // StateHandler 이름
     private final String name;
@@ -34,10 +33,11 @@ public class StateHandler {
      * @brief StateHandler 생성자 함수
      * @param name StateHandler 이름
      */
-    public StateHandler(String name) {
+    public StateHandler(StateTaskManager stateTaskManager, String name) {
+        this.stateTaskManager = stateTaskManager;
         this.name = name;
 
-        stateEventManager = new StateEventManager();
+        stateEventManager = new StateEventManager(stateTaskManager);
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -164,26 +164,14 @@ public class StateHandler {
     }
 
     /**
-     * @fn public String fire (String event, StateUnit stateUnit)
+     * @fn public String fire (String event, StateUnit stateUnit, Object... params)
      * @brief 정의된 State 천이를 위해 지정한 이벤트를 발생시키는 함수
      * @param event 발생할 이벤트 이름
      * @param stateUnit State unit
      * @return 성공 시 천이 후 상태값 반환, 실패 시 null 또는 천이 전 상태값 반환
      */
     public String fire (String event, StateUnit stateUnit) {
-        return stateEventManager.nextState(this, event, stateUnit, false, (Object) null);
-    }
-
-    /**
-     * @fn public String fire (String event, StateUnit stateUnit, Object... params)
-     * @brief 정의된 State 천이를 위해 지정한 이벤트를 발생시키는 함수
-     * @param event 발생할 이벤트 이름
-     * @param stateUnit State unit
-     * @param params CallBack 가변 매개변수
-     * @return 성공 시 천이 후 상태값 반환, 실패 시 null 또는 천이 전 상태값 반환
-     */
-    public String fire (String event, StateUnit stateUnit, Object... params) {
-        return stateEventManager.nextState(this, event, stateUnit, false, params);
+        return stateEventManager.nextState(this, event, stateUnit, false);
     }
 
     /**
@@ -191,11 +179,10 @@ public class StateHandler {
      * @brief 정의된 State 천이를 위해 지정한 이벤트를 다시 발생시키는 함수
      * @param event 발생할 이벤트 이름
      * @param stateUnit State unit
-     * @param params CallBack 가변 매개변수
      * @return 성공 시 천이 후 상태값 반환, 실패 시 null 또는 천이 전 상태값 반환
      */
-    public String retry(String event, StateUnit stateUnit, Object... params) {
-        return stateEventManager.nextState(this, event, stateUnit, true, params);
+    public String handle(String event, StateUnit stateUnit) {
+        return stateEventManager.nextState(this, event, stateUnit, true);
     }
 
     /**
@@ -210,14 +197,8 @@ public class StateHandler {
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    public void addEventCondition(EventCondition eventCondition) {
-        if (eventList.contains(eventCondition)) { return; }
-
-        eventList.add(eventCondition);
-    }
-
-    public List<EventCondition> getEventConditionList() {
-        return eventList;
+    public void addEventCondition(EventCondition eventCondition, int delay) {
+        stateTaskManager.addStateScheduler(this, eventCondition, delay);
     }
 
 }

@@ -1,16 +1,16 @@
 package state.basic.module;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import state.StateManager;
 import state.basic.event.base.StateEvent;
 import state.basic.module.base.AbstractStateTaskUnit;
 import state.basic.module.base.EventCondition;
 import state.basic.unit.StateUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @class public class StateScheduler
@@ -21,16 +21,21 @@ public class StateScheduler extends AbstractStateTaskUnit {
 
     private static final Logger logger = LoggerFactory.getLogger(StateScheduler.class);
 
+    private final StateManager stateManager;
     private final StateHandler stateHandler;
     private final String handlerName;
 
+    private final EventCondition eventCondition;
+
     ////////////////////////////////////////////////////////////////////////////////
 
-    protected StateScheduler(StateHandler stateHandler, int delay) {
+    protected StateScheduler(StateManager stateManager, StateHandler stateHandler, EventCondition eventCondition, int delay) {
         super(delay);
 
+        this.stateManager = stateManager;
         this.stateHandler = stateHandler;
         this.handlerName = stateHandler.getName();
+        this.eventCondition = eventCondition;
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -38,35 +43,31 @@ public class StateScheduler extends AbstractStateTaskUnit {
     @Override
     public void run() {
         try {
-            StateManager stateManager = StateManager.getInstance();
+            Thread.currentThread().setName(stateHandler.getName());
 
-            // 1) 개발자가 등록한 이벤트 리스트를 가져온다.
-            List<EventCondition> eventConditionList = stateHandler.getEventConditionList();
-            if (eventConditionList.isEmpty()) {
+            if (eventCondition == null) {
                 return;
             }
 
-            // 3) 등록한 각각의 이벤트의 From state 가 개별적인 StateUnit 의 From state 와 같으면, 등록한 이벤트를 실행한다.
-            for (EventCondition eventCondition : eventConditionList) {
-                if (eventCondition == null) { continue; }
+            StateEvent stateEvent = eventCondition.getStateEvent();
+            if (stateEvent == null) { return; }
 
-                StateEvent stateEvent = eventCondition.getStateEvent();
-                if (stateEvent == null) { continue; }
-                HashSet<String> fromStateSet = stateEvent.getFromStateSet();
+            Set<String> fromStateSet = stateEvent.getFromStateSet();
 
-                // 2) 현재 StateManager 에 등록된 StateUnit Map 을 가져온다.
-                Map<String, StateUnit> stateUnitMap = stateManager.cloneStateUnitMap();
-                if (stateUnitMap.isEmpty()) { continue; }
+            // 1) 현재 StateManager 에 등록된 StateUnit Map 을 가져온다.
+            Map<String, StateUnit> stateUnitMap = stateManager.cloneStateUnitMap();
+            if (stateUnitMap.isEmpty()) { return; }
 
-                for (StateUnit stateUnit : stateUnitMap.values()) {
-                    if (stateUnit == null || !stateUnit.getIsAlive()) { continue; }
+            for (StateUnit stateUnit : stateUnitMap.values()) {
+                if (stateUnit == null || !stateUnit.getIsAlive()) { continue; }
 
-                    // StateUnit 의 StateHandler 이름과 다르면 다른 StateUnit 검색
-                    if (!stateUnit.getHandlerName().equals(handlerName)) { continue; }
+                // 2) StateUnit 의 StateHandler 이름과 다르면 다른 StateUnit 검색
+                if (!stateUnit.getHandlerName().equals(handlerName)) { continue; }
 
-                    eventCondition.setCurStateUnit(stateUnit);
-                    if (fromStateSet.contains(stateUnit.getCurState()) && eventCondition.checkCondition()) {
-                        logger.info("({}) Event is triggered by scheduler. (event={}, stateUnit={})",
+                eventCondition.setCurStateUnit(stateUnit);
+                if (fromStateSet.contains(stateUnit.getCurState()) && eventCondition.checkCondition()) {
+                    new Thread(() -> {
+                        logger.debug("(StateScheduler-{}) Event is triggered by scheduler. (event={}, stateUnit={})",
                                 handlerName, stateEvent, stateUnit
                         );
 
@@ -74,7 +75,7 @@ public class StateScheduler extends AbstractStateTaskUnit {
                                 stateEvent.getName(),
                                 stateUnit
                         );
-                    }
+                    }).start();
                 }
             }
         } catch (Exception e) {

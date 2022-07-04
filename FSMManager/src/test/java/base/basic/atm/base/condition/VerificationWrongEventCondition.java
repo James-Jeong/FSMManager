@@ -1,6 +1,7 @@
 package base.basic.atm.base.condition;
 
 import base.basic.atm.base.AtmAccount;
+import state.StateManager;
 import state.basic.event.base.StateEvent;
 import state.basic.module.base.EventCondition;
 import state.basic.unit.StateUnit;
@@ -11,8 +12,8 @@ import state.basic.unit.StateUnit;
  */
 public class VerificationWrongEventCondition extends EventCondition {
 
-    public VerificationWrongEventCondition(StateEvent stateEvent) {
-        super(stateEvent);
+    public VerificationWrongEventCondition(StateManager stateManager, StateEvent stateEvent) {
+        super(stateManager, stateEvent);
     }
 
     @Override
